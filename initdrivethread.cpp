@@ -55,7 +55,7 @@ void InitDriveThread::run()
         emit error(tr("Error mounting system partition."));
         return;
     }
-
+/*
     dir.mkdir("/mnt/os");
     emit statusUpdate(tr("Editing cmdline.txt"));
 
@@ -63,7 +63,6 @@ void InitDriveThread::run()
     if (!QFile::exists(cmdlinefilename))
         cmdlinefilename = "/mnt/cmdline.txt";
 
-    /* Remove "runinstaller" from cmdline.txt */
     QFile f(cmdlinefilename);
     if (!f.open(f.ReadOnly))
     {
@@ -89,15 +88,12 @@ void InitDriveThread::run()
     }
 #endif
 
-    /* Finish writing */
     emit statusUpdate(tr("Unmounting boot partition"));
     umountSystemPartition();
 
     emit statusUpdate(tr("Finish writing to disk (sync)"));
     sync();
 
-    /* Perform a quick test to verify our changes were written
-     * Drop page cache to make sure we are reading from card, and not from cache */
     QFile dc("/proc/sys/vm/drop_caches");
     dc.open(f.WriteOnly);
     dc.write("3\n");
@@ -106,7 +102,7 @@ void InitDriveThread::run()
     emit statusUpdate(tr("Mounting boot partition again"));
     mountSystemPartition();
 
-    /* Verify that cmdline.txt was written correctly */
+    // Verify that cmdline.txt was written correctly
     f.open(f.ReadOnly);
     QByteArray cmdlineread = f.readAll();
     f.close();
@@ -117,7 +113,7 @@ void InitDriveThread::run()
         emit error(tr("SD card broken (writes do not persist)"));
         return;
     }
-
+*/
     emit completed();
 }
 
@@ -156,13 +152,13 @@ bool InitDriveThread::method_resizePartitions()
             emit statusUpdate(tr("Writing new MBR"));
             QProcess proc;
             proc.setProcessChannelMode(proc.MergedChannels);
-            proc.start("/usr/sbin/parted /dev/mmcblk0 --script -- mktable msdos mkpartfs primary fat32 8192s -1");
-            proc.waitForFinished(-1);
-            if (proc.exitCode() != 0)
+            //proc.start("/usr/sbin/parted /dev/mmcblk0 --script -- mktable msdos mkpartfs primary fat32 8192s -1");
+            //proc.waitForFinished(-1);
+            //if (proc.exitCode() != 0)
             {
                 // Warn user if we failed to create an MBR on their card
-                emit error(tr("Error creating MBR")+"\n"+proc.readAll());
-                return false;
+                //emit error(tr("Error creating MBR")+"\n"+proc.readAll());
+                //return false;
             }
             qDebug() << "Created missing MBR on SD card. parted output:" << proc.readAll();
 
@@ -202,13 +198,13 @@ bool InitDriveThread::method_resizePartitions()
     {
         newStartOfRescuePartition = PARTITION_ALIGNMENT; /* 4 MiB */
     }
-
+/*
     QString cmd = "/usr/sbin/parted --script /dev/mmcblk0 resize 1 "+QString::number(newStartOfRescuePartition)+"s "+QString::number(newSizeOfRescuePartition)+"M";
     qDebug() << "Executing" << cmd;
     QProcess p;
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    /* Suppress parted's big fat warning about its file system manipulation code not being robust.
-       It distracts from any real error messages that may follow it. */
+    // Suppress parted's big fat warning about its file system manipulation code not being robust.
+    //   It distracts from any real error messages that may follow it.
     env.insert("PARTED_SUPPRESS_FILE_SYSTEM_MANIPULATION_WARNING", "1");
     p.setProcessEnvironment(env);
     p.setProcessChannelMode(p.MergedChannels);
@@ -223,7 +219,7 @@ bool InitDriveThread::method_resizePartitions()
     }
     qDebug() << "parted done, output:" << p.readAll();
     QThread::msleep(500);
-
+*/
     emit statusUpdate(tr("Creating extended partition"));
 
     QByteArray partitionTable;
@@ -246,7 +242,7 @@ bool InitDriveThread::method_resizePartitions()
     qDebug() << "Writing partition table" << partitionTable;
 
     /* Let sfdisk write a proper partition table */
-    cmd = QString("/sbin/sfdisk -uS /dev/mmcblk0");
+    QString cmd = QString("/usr/sbin/sfdisk -uS /dev/mmcblk0");
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
     proc.start(cmd);
@@ -310,7 +306,7 @@ bool InitDriveThread::formatBootPartition()
 
 bool InitDriveThread::formatSettingsPartition()
 {
-    return QProcess::execute("/usr/sbin/mkfs.ext4 -L SETTINGS " SETTINGS_PARTITION) == 0;
+    return QProcess::execute("/sbin/mkfs.ext4 -L SETTINGS " SETTINGS_PARTITION) == 0;
 }
 
 bool InitDriveThread::zeroMbr()

@@ -144,7 +144,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
                                   QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
         {
             QProcess::execute("umount /settings");
-            if (QProcess::execute("/usr/sbin/mkfs.ext4 " SETTINGS_PARTITION) != 0
+            if (QProcess::execute("/sbin/mkfs.ext4 " SETTINGS_PARTITION) != 0
                 || QProcess::execute("mount " SETTINGS_PARTITION " /settings") != 0)
             {
                 QMessageBox::critical(this, tr("Reformat failed"), tr("SD card might be damaged"), QMessageBox::Close);
@@ -363,6 +363,7 @@ bool MainWindow::canInstallOs(const QString &name, const QVariantMap &values)
 {
     /* Can't simply pull "name" from "values" because in some JSON files it's "os_name" and in others it's "name" */
 
+    return true;
     /* If it's not bootable, it isn't really an OS, so is always installable */
     if (!canBootOs(name, values))
     {

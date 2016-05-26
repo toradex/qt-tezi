@@ -9,6 +9,9 @@ QT       += core gui network dbus
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = recovery
+target.files = recovery
+target.path = /var/volatile
+INSTALLS = target
 TEMPLATE = app
 LIBS += -lqjson
 
@@ -27,7 +30,6 @@ SOURCES += main.cpp\
     multiimagewritethread.cpp \
     util.cpp \
     twoiconsdelegate.cpp \
-    bootselectiondialog.cpp \
     wifisettingsdialog.cpp \
     wpa_supplicant/wpsinterface.cpp \
     wpa_supplicant/wpasupplicant.cpp \
@@ -53,7 +55,6 @@ HEADERS  += mainwindow.h \
     multiimagewritethread.h \
     util.h \
     twoiconsdelegate.h \
-    bootselectiondialog.h \
     wifisettingsdialog.h \
     wpa_supplicant/wpsinterface.h \
     wpa_supplicant/wpasupplicant.h \
@@ -69,7 +70,6 @@ FORMS    += mainwindow.ui \
     languagedialog.ui \
     progressslideshowdialog.ui \
     confeditdialog.ui \
-    bootselectiondialog.ui \
     wifisettingsdialog.ui
 
 RESOURCES += \

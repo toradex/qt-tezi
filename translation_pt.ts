@@ -1,45 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="pt" sourcelanguage="en">
-<context>
-    <name>BootSelectionDialog</name>
-    <message>
-        <location filename="bootselectiondialog.ui" line="+19"/>
-        <location filename="bootselectiondialog.cpp" line="+249"/>
-        <source>Select OS to boot</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="bootselectiondialog.cpp" line="-205"/>
-        <source>Cannot display boot menu</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+0"/>
-        <source>Error mounting settings partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+146"/>
-        <source>HDMI safe mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>composite PAL mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
-        <source>composite NTSC mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+56"/>
-        <source>Previously selected OS will boot in %1 seconds</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
+<TS version="2.0" language="pt" sourcelanguage="en">
 <context>
     <name>ConfEditDialog</name>
     <message>
@@ -77,7 +38,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+83"/>
+        <location line="+79"/>
         <source>Error unmounting system partition.</source>
         <translation>Erro desmontando a partição do sistema.</translation>
     </message>
@@ -108,12 +69,7 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
-        <source>Error creating MBR</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+8"/>
+        <location line="+16"/>
         <source>SD card has now been formatted ready for NOOBS installation. Please re-copy the NOOBS files onto the card and reboot</source>
         <translation type="unfinished"></translation>
     </message>
@@ -133,12 +89,7 @@ WARNING: This will erase all data on your SD card</source>
         <translation>Redimensionando partição FAT</translation>
     </message>
     <message>
-        <location line="+24"/>
-        <source>Error resizing existing FAT partition</source>
-        <translation>Erro ao redimensionar partição FAT existente</translation>
-    </message>
-    <message>
-        <location line="+6"/>
+        <location line="+30"/>
         <source>Creating extended partition</source>
         <translation>Criando partição extendida</translation>
     </message>
@@ -148,49 +99,9 @@ WARNING: This will erase all data on your SD card</source>
         <translation>Erro ao criar partição extendida</translation>
     </message>
     <message>
-        <location line="-203"/>
+        <location line="-199"/>
         <source>Error mounting system partition.</source>
         <translation>Erro ao montar partição de sistema.</translation>
-    </message>
-    <message>
-        <location line="+5"/>
-        <source>Editing cmdline.txt</source>
-        <translation>Editando cmdline.txt</translation>
-    </message>
-    <message>
-        <location line="+10"/>
-        <source>Error opening %1</source>
-        <translation>Erro ao abrir %1</translation>
-    </message>
-    <message>
-        <location line="+13"/>
-        <source>Writing RiscOS blob</source>
-        <translation>Gravando BLOB do RiscOS</translation>
-    </message>
-    <message>
-        <location line="+3"/>
-        <source>Error writing RiscOS blob</source>
-        <translation>Erro ao gravar BLOB do RiscOS</translation>
-    </message>
-    <message>
-        <location line="+7"/>
-        <source>Unmounting boot partition</source>
-        <translation>Desmontando partição de boot</translation>
-    </message>
-    <message>
-        <location line="+3"/>
-        <source>Finish writing to disk (sync)</source>
-        <translation>Finalizando a gravação para o disco (sync)</translation>
-    </message>
-    <message>
-        <location line="+10"/>
-        <source>Mounting boot partition again</source>
-        <translation>Montando partição de boot novamente</translation>
-    </message>
-    <message>
-        <location line="+11"/>
-        <source>SD card broken (writes do not persist)</source>
-        <translation>Cartão SD desfeituoso (gravações não persistem)</translation>
     </message>
 </context>
 <context>
@@ -274,7 +185,7 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+12"/>
+        <location line="+15"/>
         <source>Wifi networks (w)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -289,13 +200,13 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="+275"/>
-        <location line="+920"/>
+        <location filename="mainwindow.cpp" line="+282"/>
+        <location line="+903"/>
         <source>RECOMMENDED</source>
         <translation>RECOMENDADO</translation>
     </message>
     <message>
-        <location line="-650"/>
+        <location line="-662"/>
         <location line="+19"/>
         <source>Confirm</source>
         <translation>Confirmar</translation>
@@ -306,7 +217,7 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-559"/>
+        <location line="-536"/>
         <source>Setting up SD card</source>
         <translation>Configurando cartão SD</translation>
     </message>
@@ -331,24 +242,24 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+397"/>
+        <location line="+374"/>
         <source>Warning: this will install the selected Operating System(s). All existing data on the SD card will be overwritten, including any OSes that are already installed.</source>
         <oldsource>Warning: this will install the selected Operating System. All existing data on the SD card will be overwritten.</oldsource>
         <translation type="unfinished">Você tem certeza que deseja gravar a imagem? ISSO EXCLUIRÁ TODOS OS DADOS EXISTENTES!</translation>
     </message>
     <message>
         <location line="+93"/>
-        <location line="+455"/>
+        <location line="+468"/>
         <source>Error</source>
         <translation></translation>
     </message>
     <message>
-        <location line="-816"/>
+        <location line="-800"/>
         <source>INSTALLED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+478"/>
+        <location line="+449"/>
         <source>Display Mode Changed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -358,7 +269,7 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-571"/>
+        <location line="-548"/>
         <source>Waiting for SD card (settings partition)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -368,12 +279,12 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+63"/>
         <source>Please wait while NOOBS initialises</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+378"/>
+        <location line="+349"/>
         <source>Warning: incompatible Operating System(s) detected. The following OSes aren&apos;t supported on this revision of Raspberry Pi and may fail to boot or function correctly:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -416,7 +327,7 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+323"/>
+        <location line="+336"/>
         <location line="+339"/>
         <location line="+10"/>
         <source>Download error</source>
@@ -433,7 +344,7 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+216"/>
+        <location line="+218"/>
         <source>Needed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -443,7 +354,7 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+108"/>
+        <location line="+106"/>
         <source>Error downloading meta file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -463,14 +374,14 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-677"/>
-        <location line="+668"/>
+        <location line="-690"/>
+        <location line="+681"/>
         <location line="+8"/>
         <source>No network access</source>
         <translation>Sem acesso de rede</translation>
     </message>
     <message>
-        <location line="-675"/>
+        <location line="-688"/>
         <source>Wired network access is required for this feature. Please insert a network cable into the network port.</source>
         <translation>Acesso de rede cabeado é necessário para este recurso. Por favor, insira um cabo de rede.</translation>
     </message>
@@ -488,17 +399,17 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+59"/>
+        <location line="+65"/>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+120"/>
+        <location line="+122"/>
         <source>Finish writing (sync)</source>
         <translation type="unfinished">Finalizando a gravação</translation>
     </message>
     <message>
-        <location line="+129"/>
+        <location line="+122"/>
         <source>File &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -528,7 +439,7 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-355"/>
+        <location line="-356"/>
         <source>RISCOS cannot be installed. RISCOS offset value mismatch.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -544,11 +455,17 @@ Would you like to make this setting permanent?</source>
     </message>
     <message>
         <location line="+5"/>
-        <source>Operating system cannot require a system partition (1,2,5)</source>
+        <source>Operating system cannot require a system partition (1,5)</source>
+        <oldsource>Operating system cannot require a system partition (1,2,5)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+67"/>
+        <location line="+5"/>
+        <source>Operating system cannot claim both primary partitions 2 and 4</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+70"/>
         <source>Fixed partition offset too low</source>
         <translation type="unfinished"></translation>
     </message>
@@ -568,7 +485,7 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="+70"/>
         <source>Error creating partition table</source>
         <translation type="unfinished"></translation>
     </message>
@@ -614,12 +531,7 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+8"/>
-        <source>%1: Patching BCD file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location line="+4"/>
+        <location line="+5"/>
         <source>%1: Unmounting FAT partition</source>
         <oldsource>Unmounting FAT partition</oldsource>
         <translation type="unfinished"></translation>

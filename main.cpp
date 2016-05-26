@@ -7,7 +7,6 @@
 #include "longpresshandler.h"
 #include "json.h"
 #include "util.h"
-#include "bootselectiondialog.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/reboot.h>
@@ -42,10 +41,12 @@ void reboot_to_extended(const QString &defaultPartition, bool setDisplayMode)
     QWSServer::setBackground(Qt::white);
     QWSServer::setCursorVisible(true);
 #endif
+    /*
     BootSelectionDialog bsd(defaultPartition);
     if (setDisplayMode)
         bsd.setDisplayMode();
     bsd.exec();
+    */
 
     // Shut down networking
     QProcess::execute("ifdown -a");
@@ -53,7 +54,7 @@ void reboot_to_extended(const QString &defaultPartition, bool setDisplayMode)
     QProcess::execute("umount -ar");
     ::sync();
     // Reboot
-    ::reboot(RB_AUTOBOOT);
+    //::reboot(RB_AUTOBOOT);
 }
 
 bool hasInstalledOS()

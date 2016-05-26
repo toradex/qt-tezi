@@ -332,7 +332,7 @@ bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *>
     /* Let sfdisk write a proper partition table */
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
-    proc.start("/sbin/sfdisk -uS /dev/mmcblk0");
+    proc.start("/usr/sbin/sfdisk -uS /dev/mmcblk0");
     proc.write(partitionTable);
     proc.closeWriteChannel();
     proc.waitForFinished(-1);
@@ -588,7 +588,7 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
     }
     else if (fstype == "ext4")
     {
-        cmd = "/usr/sbin/mkfs.ext4 ";
+        cmd = "/sbin/mkfs.ext4 ";
         if (!label.isEmpty())
         {
             cmd += "-L "+label+" ";
