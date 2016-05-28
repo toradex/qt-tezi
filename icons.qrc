@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/raspberry_icon.png</file>
+        <file>icons/toradex_icon.png</file>
         <file>icons/backups.png</file>
         <file>icons/door_in.png</file>
         <file>icons/page_white_edit.png</file>

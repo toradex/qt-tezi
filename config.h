@@ -5,8 +5,7 @@
 #define VERSION_NUMBER "1.9"
 
 /* Color of the background */
-// #define BACKGROUND_COLOR  Qt::white
-#define BACKGROUND_COLOR  QColor(0xde, 0xde, 0xde)
+#define BACKGROUND_COLOR  Qt::black
 
 /* Highlight color of installed OS */
 #define INSTALLED_OS_BACKGROUND_COLOR  QColor(0xef,0xff,0xef)
