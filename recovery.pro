@@ -30,13 +30,6 @@ SOURCES += main.cpp\
     multiimagewritethread.cpp \
     util.cpp \
     twoiconsdelegate.cpp \
-    wifisettingsdialog.cpp \
-    wpa_supplicant/wpsinterface.cpp \
-    wpa_supplicant/wpasupplicant.cpp \
-    wpa_supplicant/wpafactory.cpp \
-    wpa_supplicant/network.cpp \
-    wpa_supplicant/interface.cpp \
-    wpa_supplicant/bss.cpp \
     osinfo.cpp \
     partitioninfo.cpp \
     longpresshandler.cpp
@@ -55,22 +48,11 @@ HEADERS  += mainwindow.h \
     multiimagewritethread.h \
     util.h \
     twoiconsdelegate.h \
-    wifisettingsdialog.h \
-    wpa_supplicant/wpsinterface.h \
-    wpa_supplicant/wpasupplicant.h \
-    wpa_supplicant/wpafactory.h \
-    wpa_supplicant/network.h \
-    wpa_supplicant/interface.h \
-    wpa_supplicant/bss.h \
     osinfo.h \
     partitioninfo.h \
     longpresshandler.h
 
-FORMS    += mainwindow.ui \
-    languagedialog.ui \
-    progressslideshowdialog.ui \
-    confeditdialog.ui \
-    wifisettingsdialog.ui
+FORMS    += mainwindow.ui
 
 RESOURCES += \
     icons.qrc

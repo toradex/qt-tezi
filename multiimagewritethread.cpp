@@ -53,7 +53,7 @@ void MultiImageWriteThread::run()
             return;
         }
 
-        if (nameMatchesRiscOS( image->folder() ))
+        if (false)//nameMatchesRiscOS( image->folder() ))
         {
             /* Check the riscos_offset in os.json matches what we're expecting.
                In theory we shouldn't hit either of these errors because the invalid RISC_OS

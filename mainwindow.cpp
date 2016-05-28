@@ -699,10 +699,7 @@ void MainWindow::displayMode(int modenr, bool silent)
     QTextStream stream(update);
     int xres = stream.readLine().toInt();
     int yres = stream.readLine().toInt();
-    int oTop = 0, oBottom = 0, oLeft = 0, oRight = 0;
-    getOverscan(oTop, oBottom, oLeft, oRight);
-    qDebug() << "Current overscan" << "top" << oTop << "bottom" << oBottom << "left" << oLeft << "right" << oRight;
-    QScreen::instance()->setMode(xres-oLeft-oRight, yres-oTop-oBottom, 16);
+    QScreen::instance()->setMode(xres, yres, 16);
 
     // Resize this window depending on screen resolution
     QRect s = QApplication::desktop()->screenGeometry();
@@ -1289,7 +1286,7 @@ void MainWindow::updateNeeded()
         QVariantMap entry = item->data(Qt::UserRole).toMap();
         _neededMB += entry.value("nominal_size").toInt();
 
-        if (nameMatchesRiscOS(entry.value("name").toString()))
+        if (false) //nameMatchesRiscOS(entry.value("name").toString()))
         {
             /* RiscOS needs to start at a predetermined sector, calculate the extra space needed for that */
             int startSector = getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()+getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong();
@@ -1552,14 +1549,14 @@ void MainWindow::hideDialogIfNoNetwork()
 void MainWindow::on_actionWifi_triggered()
 {
     bool wasAlreadyOnlineBefore = !_networkStatusPollTimer.isActive();
-
+/*
     WifiSettingsDialog wsd;
     if ( wsd.exec() == wsd.Accepted )
     {
         if (wasAlreadyOnlineBefore)
         {
-            /* Try to redownload list. Could have failed through previous access point */
             downloadLists();
         }
     }
+    */
 }

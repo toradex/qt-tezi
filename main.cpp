@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 #endif
 
     a.exec();
-    reboot_to_extended(defaultPartition, false);
+    //reboot_to_extended(defaultPartition, false);
 
     return 0;
 }
