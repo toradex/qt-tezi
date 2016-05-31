@@ -147,43 +147,11 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Setting up SD card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Waiting for SD card (settings partition)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Mounting settings partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error mounting settings partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Persistent settings partition seems corrupt. Reformat?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reformat failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SD card might be damaged</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Please wait while NOOBS initialises</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>RECOMMENDED</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>INSTALLED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -212,10 +180,6 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>NOOBS v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -285,6 +249,26 @@ Would you like to make this setting permanent?</source>
     </message>
     <message>
         <source>Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Waiting for USB mass storage device</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mounting external media</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error mounting external media (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tez-i v%1 - Built: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error mounting</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

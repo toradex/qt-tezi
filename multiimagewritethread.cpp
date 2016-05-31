@@ -708,7 +708,7 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
     }
     else if (imagePath.endsWith(".bz2"))
     {
-        cmd += "bzip2 -dc";
+        cmd += "bzcat";
     }
     else if (imagePath.endsWith(".lzo"))
     {

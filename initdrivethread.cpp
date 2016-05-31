@@ -320,11 +320,3 @@ bool InitDriveThread::zeroMbr()
     return QProcess::execute("/bin/dd conv=fsync count=1 bs=8192 if=/dev/zero of=/dev/mmcblk0") == 0
         && QProcess::execute("/bin/dd conv=fsync count=8 bs=512 if=/dev/zero seek="+QString::number(sizeofSDCardInBlocks()-8)+" of=/dev/mmcblk0") == 0;
 }
-
-#ifdef RISCOS_BLOB_FILENAME
-bool InitDriveThread::writeRiscOSblob()
-{
-    qDebug() << "writing RiscOS blob";
-    return QProcess::execute("/bin/dd conv=fsync bs=512 if=" RISCOS_BLOB_FILENAME " of=/dev/mmcblk0 seek="+QString::number(RISCOS_BLOB_SECTOR_OFFSET)) == 0;
-}
-#endif

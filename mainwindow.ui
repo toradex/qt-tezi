@@ -88,7 +88,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionWrite_image_to_disk"/>
+   <addaction name="actionInstall"/>
    <addaction name="actionEdit_config"/>
    <addaction name="actionWifi"/>
    <addaction name="actionBrowser"/>
@@ -111,7 +111,7 @@
     <bool>true</bool>
    </attribute>
   </widget>
-  <action name="actionWrite_image_to_disk">
+  <action name="actionInstall">
    <property name="enabled">
     <bool>false</bool>
    </property>

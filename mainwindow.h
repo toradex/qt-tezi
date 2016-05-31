@@ -65,7 +65,6 @@ protected:
     bool requireNetwork();
     bool isOnline();
     QStringList getFlavours(const QString &folder);
-    void rebuildInstalledList();
     QListWidgetItem *findItem(const QVariant &name);
     QList<QListWidgetItem *> selectedItems();
     void updateNeeded();
@@ -99,7 +98,7 @@ protected slots:
 
 private slots:
     /* UI events */
-    void on_actionWrite_image_to_disk_triggered();
+    void on_actionInstall_triggered();
     void on_actionCancel_triggered();
     void on_list_currentRowChanged();
     void on_actionAdvanced_triggered(bool checked);

@@ -89,10 +89,10 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
     QRect s = QApplication::desktop()->screenGeometry();
     if (s.height() < 500)
         resize(s.width()-10, s.height()-100);
-
+/*
     if (qApp->arguments().contains("-runinstaller") && !_partInited)
     {
-        /* Repartition SD card first */
+        // Repartition SD card first
         _partInited = true;
         setEnabled(false);
         _qpd = new QProgressDialog( tr("Setting up SD card"), QString(), 0, 0, this);
@@ -112,7 +112,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
         setEnabled(true);
     }
 
-    /* Make sure the SD card is ready, and partition table is read by Linux */
+    // Make sure the SD card is ready, and partition table is read by Linux
     if (!QFile::exists(SETTINGS_PARTITION))
     {
         _qpd = new QProgressDialog( tr("Waiting for SD card (settings partition)"), QString(), 0, 0, this);
@@ -157,7 +157,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
     _qpd->deleteLater();
     _qpd = NULL;
     QProcess::execute("mount -o ro -t vfat /dev/mmcblk0p1 /mnt");
-
+*/
     _model = getFileContents("/proc/device-tree/model");
     QString cmdline = getFileContents("/proc/cmdline");
     if (cmdline.contains("showall"))
@@ -205,9 +205,10 @@ void MainWindow::populate()
         _time.start();
     }
 
-    _settings = new QSettings("/settings/noobs.conf", QSettings::IniFormat, this);
+    //_settings = new QSettings("/settings/noobs.conf", QSettings::IniFormat, this);
 
     /* Restore saved display mode */
+    /*
     qDebug() << "Default display mode is " << _defaultDisplay;
     int mode = _settings->value("display_mode", _defaultDisplay).toInt();
     if (mode)
@@ -215,7 +216,7 @@ void MainWindow::populate()
         displayMode(mode, true);
     }
     _settings->setValue("display_mode", _defaultDisplay);
-    _settings->sync();
+    _settings->sync();*/
 
     // Fill in list of images
     repopulate();
@@ -241,7 +242,7 @@ void MainWindow::populate()
             qDebug() << "Performing silent installation";
             _silent = true;
             ui->list->item(0)->setCheckState(Qt::Checked);
-            on_actionWrite_image_to_disk_triggered();
+            on_actionInstall_triggered();
         }
     }
 
@@ -262,29 +263,19 @@ void MainWindow::repopulate()
     foreach (QVariant v, images.values())
     {
         QVariantMap m = v.toMap();
-        QString flavour = m.value("name").toString();
+        QString name = m.value("name").toString();
         QString description = m.value("description").toString();
         QString folder  = m.value("folder").toString();
         QString iconFilename = m.value("icon").toString();
-        bool installed = m.value("installed").toBool();
         bool recommended = m.value("recommended").toBool();
 
         if (!iconFilename.isEmpty() && !iconFilename.contains('/'))
             iconFilename = folder+"/"+iconFilename;
-        if (!QFile::exists(iconFilename))
-        {
-            iconFilename = folder+"/"+flavour+".png";
-            iconFilename.replace(' ', '_');
-        }
+        qDebug() << "iconFilename: " + iconFilename;
 
-        QString friendlyname = flavour;
+        QString friendlyname = name;
         if (recommended)
             friendlyname += " ["+tr("RECOMMENDED")+"]";
-        if (installed)
-        {
-            friendlyname += " ["+tr("INSTALLED")+"]";
-            _numInstalledOS++;
-        }
         if (!description.isEmpty())
             friendlyname += "\n"+description;
 
@@ -313,13 +304,7 @@ void MainWindow::repopulate()
         }
         QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
         item->setData(Qt::UserRole, m);
-        if (installed)
-        {
-            item->setData(Qt::BackgroundColorRole, INSTALLED_OS_BACKGROUND_COLOR);
-            item->setCheckState(Qt::Checked);
-        }
-        else
-            item->setCheckState(Qt::Unchecked);
+        item->setCheckState(Qt::Unchecked);
 
         if (m["source"] == SOURCE_INSTALLED_OS)
         {
@@ -354,8 +339,7 @@ void MainWindow::repopulate()
         }
     }
 
-    if (_numInstalledOS)
-        ui->actionCancel->setEnabled(true);
+    ui->actionCancel->setEnabled(true);
 }
 
 /* Whether this OS should be displayed in the list of installable OSes */
@@ -368,15 +352,6 @@ bool MainWindow::canInstallOs(const QString &name, const QVariantMap &values)
     if (!canBootOs(name, values))
     {
         return true;
-    }
-
-    /* RISC_OS needs a matching riscos_offset */
-    if (nameMatchesRiscOS(name))
-    {
-        if (!values.contains(RISCOS_OFFSET_KEY) || (values.value(RISCOS_OFFSET_KEY).toInt() != RISCOS_OFFSET))
-        {
-            return false;
-        }
     }
 
     /* Display OS in list if it is supported or "showall" is specified in recovery.cmdline */
@@ -395,6 +370,7 @@ bool MainWindow::isSupportedOs(const QString &name, const QVariantMap &values)
 {
     /* Can't simply pull "name" from "values" because in some JSON files it's "os_name" and in others it's "name" */
 
+    return true;
     /* If it's not bootable, it isn't really an OS, so is always supported */
     if (!canBootOs(name, values))
     {
@@ -425,10 +401,64 @@ QMap<QString, QVariantMap> MainWindow::listImages()
 {
     QMap<QString,QVariantMap> images;
 
-    /* Local image folders */
-    QDir dir("/mnt/os", "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList list = dir.entryList();
+    // List images from external media
 
+    // Make sure the SD card is ready, and partition table is read by Linux
+
+    _qpd->hide();
+    _qpd->deleteLater();
+    if (!QFile::exists("/dev/sda1"))
+    {
+        _qpd = new QProgressDialog( tr("Waiting for USB mass storage device"), QString(), 0, 0, this);
+        _qpd->setWindowModality(Qt::WindowModal);
+        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+        _qpd->show();
+
+        while (!QFile::exists("/dev/sda1"))
+        {
+            QApplication::processEvents(QEventLoop::WaitForMoreEvents, 250);
+        }
+        _qpd->hide();
+        _qpd->deleteLater();
+    }
+
+    _qpd = new QProgressDialog( tr("Mounting external media"), QString(), 0, 0, this);
+    _qpd->setWindowModality(Qt::WindowModal);
+    _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    _qpd->show();
+    QApplication::processEvents();
+
+    if (QProcess::execute("mount /dev/sda1 /mnt") != 0)
+    {
+        _qpd->hide();
+
+        QMessageBox::critical(this, tr("Error mounting"), tr("Error mounting external media (%1)").arg("/dev/sda1"), QMessageBox::Close);
+    }
+    _qpd->hide();
+    _qpd->deleteLater();
+    _qpd = NULL;
+
+
+    /* Local image folders */
+    QDir dir("/mnt/", "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList list = dir.entryList();
+    QString imagefolder = "/mnt/";
+
+    QVariantMap json = Json::loadFromFile(imagefolder + "/image_list.json").toMap();
+    QVariantList image_list = json.value("image_list").toList();
+    foreach (QVariant image, image_list)
+    {
+        QVariantMap imagemap = image.toMap();
+        QString basename = imagemap.value("name").toString();
+        imagemap["recommended"] = true;
+        imagemap["folder"] = imagefolder;
+        images[basename] = imagemap;
+        qDebug() << "Image: " + basename;
+    }
+
+    qDebug() << "Done...";
+
+    /*
     foreach (QString image,list)
     {
         QString imagefolder = "/mnt/os/"+image;
@@ -470,35 +500,13 @@ QMap<QString, QVariantMap> MainWindow::listImages()
             }
         }
     }
-
-    /* Also add information about files already installed */
-    if (_settings)
-    {
-        QVariantList i = Json::loadFromFile("/settings/installed_os.json").toList();
-        foreach (QVariant v, i)
-        {
-            QVariantMap m = v.toMap();
-            QString name = m.value("name").toString();
-            if (images.contains(name))
-            {
-                images[name]["partitions"] = m["partitions"];
-            }
-            else
-            {
-                images[name] = m;
-                if (name == RECOMMENDED_IMAGE)
-                    images[name]["recommended"] = true;
-                images[name]["source"] = SOURCE_INSTALLED_OS;
-            }
-            images[name]["installed"] = true;
-        }
-    }
-
+*/
+/*
     for (QMap<QString,QVariantMap>::iterator i = images.begin(); i != images.end(); i++)
     {
         if (!i.value().contains("nominal_size"))
         {
-            /* Calculate nominal_size based on information inside partitions.json */
+            // Calculate nominal_size based on information inside partitions.json
             int nominal_size = 0;
             QVariantMap pv = Json::loadFromFile(i.value().value("folder").toString()+"/partitions.json").toMap();
             QVariantList pvl = pv.value("partitions").toList();
@@ -507,17 +515,17 @@ QMap<QString, QVariantMap> MainWindow::listImages()
             {
                 QVariantMap pv = v.toMap();
                 nominal_size += pv.value("partition_size_nominal").toInt();
-                nominal_size += 1; /* Overhead per partition for EBR */
+                nominal_size += 1; // Overhead per partition for EBR
             }
 
             i.value().insert("nominal_size", nominal_size);
         }
     }
-
+*/
     return images;
 }
 
-void MainWindow::on_actionWrite_image_to_disk_triggered()
+void MainWindow::on_actionInstall_triggered()
 {
     if (_silent || QMessageBox::warning(this,
                                         tr("Confirm"),
@@ -631,7 +639,7 @@ void MainWindow::on_list_currentRowChanged()
 
 void MainWindow::update_window_title()
 {
-    setWindowTitle(QString(tr("NOOBS v%1 - Built: %2")).arg(VERSION_NUMBER, QString::fromLocal8Bit(__DATE__)));
+    setWindowTitle(QString(tr("Tez-i v%1 - Built: %2")).arg(VERSION_NUMBER, QString::fromLocal8Bit(__DATE__)));
 }
 
 void MainWindow::changeEvent(QEvent* event)
@@ -997,49 +1005,6 @@ void MainWindow::downloadLists()
     }
 }
 
-void MainWindow::rebuildInstalledList()
-{
-    /* Recovery procedure for damaged settings partitions
-     * Scan partitions for operating systems installed and regenerate a minimal
-     * installed_os.json so that boot menu can function.
-     */
-    QDir dir;
-    dir.mkdir("/mnt2");
-    QVariantList installedlist;
-
-    for (int i=5; i<=MAXIMUM_PARTITIONS; i++)
-    {
-        QString part = "/dev/mmcblk0p"+QString::number(i);
-
-        if (QFile::exists(part) && QProcess::execute("mount -t vfat "+part+" /mnt2") == 0)
-        {
-            qDebug() << "Scanning" << part;
-            if (QFile::exists("/mnt2/os_config.json"))
-            {
-                QVariantMap m = Json::loadFromFile("/mnt2/os_config.json").toMap();
-                QString f = m.value("flavour").toString();
-                if (!f.isEmpty())
-                {
-                    qDebug() << "OS found:" << f;
-                    QVariantMap osinfo;
-                    osinfo.insert("name", f);
-                    osinfo.insert("release_date", m.value("release_date"));
-                    osinfo.insert("partitions", m.value("partitions"));
-                    osinfo.insert("folder", m.value("imagefolder"));
-                    osinfo.insert("description", m.value("description"));
-                    installedlist.append(osinfo);
-                }
-            }
-            QProcess::execute("umount /mnt2");
-        }
-    }
-
-    if (!installedlist.isEmpty())
-    {
-        Json::saveToFile("/settings/installed_os.json", installedlist);
-    }
-}
-
 void MainWindow::downloadListComplete()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
@@ -1308,14 +1273,11 @@ void MainWindow::updateNeeded()
     }
     else
     {
-        if (_neededMB)
-        {
-            /* Enable OK button if a selection has been made that fits on the card */
-            enableOk = true;
-        }
+        /* Enable OK button if a selection has been made that fits on the card */
+        enableOk = true;
     }
 
-    ui->actionWrite_image_to_disk->setEnabled(enableOk);
+    ui->actionInstall->setEnabled(enableOk);
     QPalette p = ui->neededLabel->palette();
     if (p.color(QPalette::WindowText) != colorNeededLabel)
     {
