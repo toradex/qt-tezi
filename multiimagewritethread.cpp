@@ -2,7 +2,6 @@
 #include "config.h"
 #include "json.h"
 #include "util.h"
-#include "mbr.h"
 #include "osinfo.h"
 #include "partitioninfo.h"
 #include <QDir>
@@ -26,20 +25,19 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
         dir.mkdir("/mnt2");
 }
 
-void MultiImageWriteThread::addImage(const QString &folder, const QString &flavour)
+void MultiImageWriteThread::addImage(const QString &folder, const QString &infofile)
 {
-    _images.append(new OsInfo(folder, flavour, this));
-    //_images.insert(folder, flavour);
+    _images.append(new OsInfo(folder, infofile, this));
 }
 
 void MultiImageWriteThread::run()
 {
     /* Calculate space requirements, and check special requirements */
     int totalnominalsize = 0, totaluncompressedsize = 0, numparts = 0, numexpandparts = 0;
-    int startSector = getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()
-                    + getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong();
     int totalSectors = getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong();
-    int availableMB = (totalSectors-startSector)/2048;
+
+    /* We need PARTITION_ALIGNMENT sectors at the begining for MBR and general alignment (currently 4MiB) */
+    int availableMB = (totalSectors - PARTITION_ALIGNMENT) / 2048;
 
     /* key: partition number, value: partition information */
     QMap<int, PartitionInfo *> partitionMap;
@@ -49,39 +47,8 @@ void MultiImageWriteThread::run()
         QList<PartitionInfo *> *partitions = image->partitions();
         if (partitions->isEmpty())
         {
-            emit error(tr("partitions.json invalid"));
+            emit error(tr("partitions invalid"));
             return;
-        }
-
-        if (false)//nameMatchesRiscOS( image->folder() ))
-        {
-            /* Check the riscos_offset in os.json matches what we're expecting.
-               In theory we shouldn't hit either of these errors because the invalid RISC_OS
-               should have been filtered out already (not added to OS-list) in mainwindow.cpp */
-            if (image->riscosOffset())
-            {
-                if (image->riscosOffset() != RISCOS_OFFSET)
-                {
-                    emit error(tr("RISCOS cannot be installed. RISCOS offset value mismatch."));
-                    return;
-                }
-            }
-            else
-            {
-                emit error(tr("RISCOS cannot be installed. RISCOS offset value missing."));
-                return;
-            }
-            if (startSector > RISCOS_SECTOR_OFFSET-2048)
-            {
-                emit error(tr("RISCOS cannot be installed. Size of recovery partition too large."));
-                return;
-            }
-
-            totalnominalsize += (RISCOS_SECTOR_OFFSET - startSector)/2048;
-
-            partitions->first()->setRequiresPartitionNumber(6);
-            partitions->first()->setOffset(RISCOS_SECTOR_OFFSET);
-            partitions->last()->setRequiresPartitionNumber(7);
         }
 
         foreach (PartitionInfo *partition, *partitions)
@@ -101,16 +68,6 @@ void MultiImageWriteThread::run()
                 if (partitionMap.contains(reqPart))
                 {
                     emit error(tr("More than one operating system requires partition number %1").arg(reqPart));
-                    return;
-                }
-                if (reqPart == 1 || reqPart == 5)
-                {
-                    emit error(tr("Operating system cannot require a system partition (1,5)"));
-                    return;
-                }
-                if ((reqPart == 2 && partitionMap.contains(4)) || (reqPart == 4 && partitionMap.contains(2)))
-                {
-                    emit error(tr("Operating system cannot claim both primary partitions 2 and 4"));
                     return;
                 }
 
@@ -143,38 +100,27 @@ void MultiImageWriteThread::run()
     }
 
     /* Assign logical partition numbers to partitions that did not reserve a special number */
-    int pnr;
-    if (partitionMap.isEmpty())
-        pnr = 6;
-    else
-        pnr = qMax(partitionMap.keys().last(), 5)+1;
-
+    int pnr = 1;
     foreach (OsInfo *image, _images)
     {
         foreach (PartitionInfo *partition, *(image->partitions()))
         {
             if (!partition->requiresPartitionNumber())
             {
+                while (partitionMap.contains(pnr))
+                    pnr++;
+
                 partitionMap.insert(pnr, partition);
                 partition->setPartitionDevice("/dev/mmcblk0p"+QByteArray::number(pnr));
-                pnr++;
             }
         }
     }
 
-    /* Set partition starting sectors and sizes.
-     * First allocate space to all logical partitions, then to primary partitions */
-    QList<PartitionInfo *> log_before_prim = partitionMap.values();
-    if (!log_before_prim.isEmpty() && log_before_prim.first()->requiresPartitionNumber() == 2)
-        log_before_prim.push_back(log_before_prim.takeFirst());
-    if (!log_before_prim.isEmpty() && log_before_prim.first()->requiresPartitionNumber() == 3)
-        log_before_prim.push_back(log_before_prim.takeFirst());
-    if (!log_before_prim.isEmpty() && log_before_prim.first()->requiresPartitionNumber() == 4)
-        log_before_prim.push_back(log_before_prim.takeFirst());
+    /* Set partition starting sectors and sizes. */
 
-    int offset = startSector;
-
-    foreach (PartitionInfo *p, log_before_prim)
+    int offset = PARTITION_ALIGNMENT;
+    QList<PartitionInfo *> partitionList = partitionMap.values();
+    foreach (PartitionInfo *p, partitionList)
     {
         if (p->offset()) /* OS wants its partition at a fixed offset */
         {
@@ -203,7 +149,7 @@ void MultiImageWriteThread::run()
             partsizeMB += _extraSpacePerPartition;
         int partsizeSectors = partsizeMB * 2048;
 
-        if (p == log_before_prim.last())
+        if (p == partitionList.last())
         {
             /* Let last partition have any remaining space that we couldn't divide evenly */
             int spaceleft = totalSectors - offset - partsizeSectors;
@@ -235,12 +181,7 @@ void MultiImageWriteThread::run()
         p->setPartitionSizeSectors(partsizeSectors);
         offset += partsizeSectors;
     }
-
-    /* Delete information about previously installed operating systems */
-    QFile f("/settings/installed_os.json");
-    if (f.exists())
-        f.remove();
-
+    qDebug() << partitionMap;
     emit statusUpdate(tr("Writing partition table"));
     if (!writePartitionTable(partitionMap))
         return;
@@ -265,44 +206,10 @@ void MultiImageWriteThread::run()
     emit completed();
 }
 
-bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *> &pmap)
+bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *> &partitionMap)
 {
     /* Write partition table using sfdisk */
-
-    /* Fixed NOOBS partition */
-    int startP1 = getFileContents("/sys/class/block/mmcblk0p1/start").trimmed().toInt();
-    int sizeP1  = getFileContents("/sys/class/block/mmcblk0p1/size").trimmed().toInt();
-    /* Fixed start of extended partition. End is not fixed, as it depends on primary partition 3 & 4 */
-    int startExtended = startP1+sizeP1;
-    /* Fixed settings partition */
-    int startP5 = getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toInt();
-    int sizeP5  = getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toInt();
-
-    if (!startP1 || !sizeP1 || !startP5 || !sizeP5)
-    {
-        emit error(tr("Error reading existing partition table"));
-        return false;
-    }
-
-    /* Clone partition map, and add our system partitions to it */
-    QMap<int, PartitionInfo *> partitionMap(pmap);
-
-    partitionMap.insert(1, new PartitionInfo(1, startP1, sizeP1, "0E", this)); /* FAT boot partition */
-    partitionMap.insert(5, new PartitionInfo(5, startP5, sizeP5, "L", this)); /* Ext4 settings partition */
-
-    int sizeExtended = partitionMap.values().last()->endSector() - startExtended;
-    if (!partitionMap.contains(2))
-    {
-        partitionMap.insert(2, new PartitionInfo(2, startExtended, sizeExtended, "E", this));
-    }
-    else
-    {
-        /* If an OS already claimed primary partition 2, use out-of-order partitions, and store extended at partition 4 */
-        partitionMap.insert(4, new PartitionInfo(4, startExtended, sizeExtended, "E", this));
-    }
-
-    /* Add partitions */
-    qDebug() << "partition map:" << partitionMap;
+    qDebug() << "Partition map:" << partitionMap;
 
     QByteArray partitionTable;
     for (int i=1; i <= partitionMap.keys().last(); i++)
@@ -325,10 +232,6 @@ bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *>
     qDebug() << "New partition table:";
     qDebug() << partitionTable;
 
-    /* Unmount everything before modifying partition table */
-    QProcess::execute("umount /mnt");
-    QProcess::execute("umount /settings");
-
     /* Let sfdisk write a proper partition table */
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
@@ -344,13 +247,9 @@ bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *>
     QProcess::execute("/usr/sbin/partprobe");
     QThread::msleep(500);
 
-    /* Remount */
-    QProcess::execute("mount -o ro -t vfat /dev/mmcblk0p1 /mnt");
-    QProcess::execute("mount -t ext4 /dev/mmcblk0p5 /settings");
-
     if (proc.exitCode() != 0)
     {
-        emit error(tr("Error creating partition table")+"\n"+proc.readAll());
+        emit error(tr("Error probing partition table")+"\n"+proc.readAll());
         return false;
     }
 
@@ -442,7 +341,7 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
                 else
                     emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
 
-                bool result = untar(tarball);
+                bool result = untar(tarball, image->folder());
 
                 QProcess::execute("umount /mnt2");
 
@@ -460,35 +359,10 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
         emit error(tr("%1: Error mounting file system").arg(os_name));
         return false;
     }
-
-    emit statusUpdate(tr("%1: Creating os_config.json").arg(os_name));
-
-    QString description = getDescription(image->folder(), image->flavour());
-    QVariantList vpartitions;
-    foreach (PartitionInfo *p, *partitions)
-    {
-        vpartitions.append(p->partitionDevice());
-    }
-    QSettings settings("/settings/noobs.conf", QSettings::IniFormat);
-    int videomode = settings.value("display_mode", 0).toInt();
-    QString language = settings.value("language", "en").toString();
-    QString keyboard = settings.value("keyboard_layout", "gb").toString();
-
-    QVariantMap qm;
-    qm.insert("flavour", image->flavour());
-    qm.insert("release_date", image->releaseDate());
-    qm.insert("imagefolder", image->folder());
-    qm.insert("description", description);
-    qm.insert("videomode", videomode);
-    qm.insert("partitions", vpartitions);
-    qm.insert("language", language);
-    qm.insert("keyboard", keyboard);
-
-    Json::saveToFile("/mnt2/os_config.json", qm);
-
+/*
     emit statusUpdate(tr("%1: Saving display mode to config.txt").arg(os_name));
     patchConfigTxt();
-
+*/
     /* Partition setup script can either reside in the image folder
      * or inside the boot partition tarball */
     QString postInstallScript = image->folder()+"/partition_setup.sh";
@@ -553,24 +427,6 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
         emit error(tr("%1: Error unmounting").arg(os_name));
     }
 
-    /* Save information about installed operating systems in installed_os.json */
-    QVariantMap ventry;
-    ventry["name"]        = image->flavour();
-    ventry["description"] = description;
-    ventry["folder"]      = image->folder();
-    ventry["release_date"]= image->releaseDate();
-    ventry["partitions"]  = vpartitions;
-    ventry["bootable"]    = image->bootable();
-    QString iconfilename  = image->folder()+"/"+image->flavour()+".png";
-    iconfilename.replace(" ", "_");
-    if (QFile::exists(iconfilename))
-        ventry["icon"] = iconfilename;
-    else if (QFile::exists(image->folder()+"/icon.png"))
-        ventry["icon"] = image->folder()+"/icon.png";
-    installed_os.append(ventry);
-
-    Json::saveToFile("/settings/installed_os.json", installed_os);
-
     return true;
 }
 
@@ -584,6 +440,14 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
         if (!label.isEmpty())
         {
             cmd += "-n "+label+" ";
+        }
+    }
+    else if (fstype == "ext3")
+    {
+        cmd = "/sbin/mkfs.ext3 ";
+        if (!label.isEmpty())
+        {
+            cmd += "-L "+label+" ";
         }
     }
     else if (fstype == "ext4")
@@ -629,7 +493,7 @@ bool MultiImageWriteThread::isLabelAvailable(const QByteArray &label)
     return (QProcess::execute("/sbin/findfs LABEL="+label) != 0);
 }
 
-bool MultiImageWriteThread::untar(const QString &tarball)
+bool MultiImageWriteThread::untar(const QString &tarball, const QString &folder)
 {
     QString cmd = "sh -o pipefail -c \"";
 
@@ -646,7 +510,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     }
     else if (tarball.endsWith(".bz2"))
     {
-        cmd += "bzip2 -dc";
+        cmd += "bzcat";
     }
     else if (tarball.endsWith(".lzo"))
     {
@@ -664,7 +528,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     }
     if (!isURL(tarball))
     {
-        cmd += " "+tarball;
+        cmd += " " + tarball;
     }
     cmd += " | tar x -C /mnt2 ";
     cmd += "\"";
@@ -674,6 +538,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     qDebug() << "Executing:" << cmd;
 
     QProcess p;
+    p.setWorkingDirectory(folder);
     p.setProcessChannelMode(p.MergedChannels);
     p.start(cmd);
     p.closeWriteChannel();
@@ -767,7 +632,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
     }
     else if (imagePath.endsWith(".bz2"))
     {
-        cmd += "bzip2 -dc";
+        cmd += "bzcat";
     }
     else if (imagePath.endsWith(".lzo"))
     {

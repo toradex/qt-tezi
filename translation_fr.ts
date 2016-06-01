@@ -171,14 +171,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>OS(es) installed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>OS(es) Installed Successfully</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -271,35 +263,19 @@ Would you like to make this setting permanent?</source>
         <source>Error mounting</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Image Installed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image installed successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
     <message>
-        <source>partitions.json invalid</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RISCOS cannot be installed. RISCOS offset value mismatch.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RISCOS cannot be installed. RISCOS offset value missing.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RISCOS cannot be installed. Size of recovery partition too large.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>More than one operating system requires partition number %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Operating system cannot require a system partition (1,5)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Operating system cannot claim both primary partitions 2 and 4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -320,14 +296,6 @@ Would you like to make this setting permanent?</source>
     </message>
     <message>
         <source>Finish writing (sync)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error reading existing partition table</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error creating partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -363,14 +331,6 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1: Creating os_config.json</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Saving display mode to config.txt</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1: Running partition setup script</source>
         <translation type="unfinished"></translation>
     </message>
@@ -400,6 +360,14 @@ Would you like to make this setting permanent?</source>
     </message>
     <message>
         <source>Error downloading or writing OS to SD card</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>partitions invalid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error probing partition table</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

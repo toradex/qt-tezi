@@ -54,7 +54,7 @@ void reboot_to_extended(const QString &defaultPartition, bool setDisplayMode)
     QProcess::execute("umount -ar");
     ::sync();
     // Reboot
-    //::reboot(RB_AUTOBOOT);
+    ::reboot(RB_AUTOBOOT);
 }
 
 bool hasInstalledOS()
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 #endif
 
     a.exec();
-    //reboot_to_extended(defaultPartition, false);
+    reboot_to_extended(defaultPartition, false);
 
     return 0;
 }

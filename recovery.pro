@@ -40,7 +40,6 @@ HEADERS  += mainwindow.h \
     config.h \
     keydetection.h \
     gpioinput.h \
-    mbr.h \
     progressslideshowdialog.h \
     confeditdialog.h \
     rightbuttonfilter.h \

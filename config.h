@@ -48,14 +48,6 @@
 
 #define FAT_PARTITION_OF_IMAGE  "/dev/mmcblk0p6"
 
-/* RiscOS magic */
-#define RISCOS_OFFSET_KEY "riscos_offset"
-#define RISCOS_OFFSET (1760)
-#define RISCOS_SECTOR_OFFSET (RISCOS_OFFSET * 2048)
-
-#define RISCOS_BLOB_FILENAME  "/mnt/riscos-boot.bin"
-#define RISCOS_BLOB_SECTOR_OFFSET  (1)
-
 /* Maximum number of partitions */
 #define MAXIMUM_PARTITIONS  32
 

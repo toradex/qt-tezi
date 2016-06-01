@@ -58,6 +58,9 @@
  *
  */
 
+#define MEDIA_USB "/dev/sda1"
+#define MEDIA_SDCARD "/dev/mmcblk1p1"
+
 /* To keep track of where the different OSes get 'installed' from */
 #define SOURCE_SDCARD "sdcard"
 #define SOURCE_NETWORK "network"
@@ -164,15 +167,15 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
     {
         _showAll = true;
     }
+    /*
     if (cmdline.contains("silentinstall"))
     {
-        /* If silentinstall is specified, auto-install single image in /os */
         _allowSilent = true;
     }
     else
     {
         startNetworking();
-    }
+    }*/
 
     /* Disable online help buttons until network is functional */
     ui->actionBrowser->setEnabled(false);
@@ -202,7 +205,6 @@ void MainWindow::populate()
             timeout = 8000;
         }
         QTimer::singleShot(timeout, this, SLOT(hideDialogIfNoNetwork()));
-        _time.start();
     }
 
     //_settings = new QSettings("/settings/noobs.conf", QSettings::IniFormat, this);
@@ -269,9 +271,8 @@ void MainWindow::repopulate()
         QString iconFilename = m.value("icon").toString();
         bool recommended = m.value("recommended").toBool();
 
-        if (!iconFilename.isEmpty() && !iconFilename.contains('/'))
-            iconFilename = folder+"/"+iconFilename;
-        qDebug() << "iconFilename: " + iconFilename;
+        if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator()))
+            iconFilename = folder + QDir::separator() + iconFilename;
 
         QString friendlyname = name;
         if (recommended)
@@ -452,76 +453,34 @@ QMap<QString, QVariantMap> MainWindow::listImages()
         QString basename = imagemap.value("name").toString();
         imagemap["recommended"] = true;
         imagemap["folder"] = imagefolder;
+        imagemap["source"] = SOURCE_SDCARD;
         images[basename] = imagemap;
         qDebug() << "Image: " + basename;
     }
 
-    qDebug() << "Done...";
-
-    /*
-    foreach (QString image,list)
-    {
-        QString imagefolder = "/mnt/os/"+image;
-        if (!QFile::exists(imagefolder+"/os.json"))
-            continue;
-        QVariantMap osv = Json::loadFromFile(imagefolder+"/os.json").toMap();
-        osv["source"] = SOURCE_SDCARD;
-
-        QString basename = osv.value("name").toString();
-        if (canInstallOs(basename, osv))
-        {
-            if (QFile::exists(imagefolder+"/flavours.json"))
-            {
-                QVariantMap v = Json::loadFromFile(imagefolder+"/flavours.json").toMap();
-                QVariantList fl = v.value("flavours").toList();
-
-                foreach (QVariant f, fl)
-                {
-                    QVariantMap fm  = f.toMap();
-                    if (fm.contains("name"))
-                    {
-                        QString name = fm.value("name").toString();
-                        if (name == RECOMMENDED_IMAGE)
-                            fm["recommended"] = true;
-                        fm["folder"] = imagefolder;
-                        fm["release_date"] = osv.value("release_date");
-                        fm["source"] = osv.value("source");
-                        images[name] = fm;
-                    }
-                }
-            }
-            else
-            {
-                QString name = basename;
-                if (name == RECOMMENDED_IMAGE)
-                    osv["recommended"] = true;
-                osv["folder"] = imagefolder;
-                images[name] = osv;
-            }
-        }
-    }
-*/
-/*
     for (QMap<QString,QVariantMap>::iterator i = images.begin(); i != images.end(); i++)
     {
-        if (!i.value().contains("nominal_size"))
+        QVariantMap *image = &i.value();
+
+        if (image->contains("nominal_size"))
+            continue;
+
+        // Calculate nominal_size based on information inside image_info partitions
+        int nominal_size = 0;
+        QString image_info = image->value("folder").toString() + QDir::separator() + image->value("image_info").toString();
+        QVariantMap pv = Json::loadFromFile(image_info).toMap();
+        QVariantList pvl = pv.value("partitions").toList();
+
+        foreach (QVariant v, pvl)
         {
-            // Calculate nominal_size based on information inside partitions.json
-            int nominal_size = 0;
-            QVariantMap pv = Json::loadFromFile(i.value().value("folder").toString()+"/partitions.json").toMap();
-            QVariantList pvl = pv.value("partitions").toList();
-
-            foreach (QVariant v, pvl)
-            {
-                QVariantMap pv = v.toMap();
-                nominal_size += pv.value("partition_size_nominal").toInt();
-                nominal_size += 1; // Overhead per partition for EBR
-            }
-
-            i.value().insert("nominal_size", nominal_size);
+            QVariantMap pv = v.toMap();
+            nominal_size += pv.value("partition_size_nominal").toInt();
+            nominal_size += 1; // Overhead per partition for EBR
         }
+
+        image->insert("nominal_size", nominal_size);
     }
-*/
+
     return images;
 }
 
@@ -604,14 +563,11 @@ void MainWindow::on_actionCancel_triggered()
 void MainWindow::onCompleted()
 {
     _qpd->hide();
-    QSettings settings("/settings/noobs.conf", QSettings::IniFormat, this);
-    settings.setValue("default_partition_to_boot", "800");
-    settings.sync();
 
     if (!_silent)
         QMessageBox::information(this,
-                                 tr("OS(es) installed"),
-                                 tr("OS(es) Installed Successfully"), QMessageBox::Ok);
+                                 tr("Image Installed"),
+                                 tr("Image installed successfully"), QMessageBox::Ok);
     _qpd->deleteLater();
     _qpd = NULL;
     close();
@@ -920,6 +876,8 @@ void MainWindow::startNetworking()
     qDebug() << "Starting dhcpcd";
     proc->start("/sbin/dhcpcd --noarp -e wpa_supplicant_conf=/settings/wpa_supplicant.conf --denyinterfaces \"*_ap\"");
 
+    _time.start();
+
     if ( isOnline() )
     {
         onOnlineStateChanged(true);
@@ -966,6 +924,7 @@ void MainWindow::pollNetworkStatus()
 
 void MainWindow::onOnlineStateChanged(bool online)
 {
+    qDebug() << "onOnlineStateChanged";
     if (online)
     {
         qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
@@ -1250,16 +1209,6 @@ void MainWindow::updateNeeded()
     {
         QVariantMap entry = item->data(Qt::UserRole).toMap();
         _neededMB += entry.value("nominal_size").toInt();
-
-        if (false) //nameMatchesRiscOS(entry.value("name").toString()))
-        {
-            /* RiscOS needs to start at a predetermined sector, calculate the extra space needed for that */
-            int startSector = getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()+getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong();
-            if (RISCOS_SECTOR_OFFSET > startSector)
-            {
-                _neededMB += (RISCOS_SECTOR_OFFSET - startSector)/2048;
-            }
-        }
     }
 
     ui->neededLabel->setText(QString("%1: %2 MB").arg(tr("Needed"), QString::number(_neededMB)));
@@ -1454,7 +1403,7 @@ void MainWindow::startImageWrite()
         {
             slidesFolder = folder+"/slides_vga";
         }
-        imageWriteThread->addImage(folder, entry.value("name").toString());
+        imageWriteThread->addImage(folder, entry.value("image_info").toString());
         if (!slidesFolder.isEmpty())
             slidesFolders.append(slidesFolder);
     }

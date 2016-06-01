@@ -15,7 +15,7 @@ class MultiImageWriteThread : public QThread
     Q_OBJECT
 public:
     explicit MultiImageWriteThread(QObject *parent = 0);
-    void addImage(const QString &folder, const QString &flavour);
+    void addImage(const QString &folder, const QString &fileinfo);
 
 protected:
     virtual void run();
@@ -23,7 +23,7 @@ protected:
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool dd(const QString &imagePath, const QString &device);
     bool partclone_restore(const QString &imagePath, const QString &device);
-    bool untar(const QString &tarball);
+    bool untar(const QString &tarball, const QString &folder);
     bool isLabelAvailable(const QByteArray &label);
     QByteArray getLabel(const QString part);
     QByteArray getUUID(const QString part);

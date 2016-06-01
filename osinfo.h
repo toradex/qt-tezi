@@ -16,16 +16,16 @@ class OsInfo : public QObject
     Q_OBJECT
 public:
     /* Constructor parses the json files in <folder>, and stores information in local variables */
-    explicit OsInfo(const QString &folder, const QString &flavour = "", QObject *parent = 0);
+    explicit OsInfo(const QString &folder, const QString &infofile, QObject *parent = 0);
 
     inline QString folder()
     {
         return _folder;
     }
 
-    inline QString flavour()
+    inline QString infofile()
     {
-        return _flavour;
+        return _infofile;
     }
 
     inline QString name()
@@ -64,7 +64,7 @@ public:
     }
 
 protected:
-    QString _folder, _flavour, _name, _description, _version, _releaseDate;
+    QString _folder, _infofile, _name, _description, _version, _releaseDate;
     bool _bootable;
     QList<PartitionInfo *> _partitions;
     int _riscosOffset;
