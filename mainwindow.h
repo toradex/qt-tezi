@@ -18,6 +18,12 @@
 #include <QTimer>
 #include <QTime>
 
+enum ImageSource {
+    SOURCE_USB,
+    SOURCE_SDCARD,
+    SOURCE_NETWORK,
+};
+
 namespace Ui {
 class MainWindow;
 }
@@ -37,7 +43,7 @@ public:
 
 protected:
     Ui::MainWindow *ui;
-    QDialog *_qpd;
+    QProgressDialog *_qpd;
     QList <int> _kc;
     int _kcpos;
     const QString _defaultDisplay;
@@ -50,13 +56,16 @@ protected:
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numMetaFilesToDownload, _numIconsToDownload;
     QTimer _networkStatusPollTimer;
+    QTimer _mediaPollTimer;
     QTime _time;
     QString _model;
 
-    QMap<QString,QVariantMap> listImages();
+    QMap<QString,QVariantMap> listMediaImages(const QString &path, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
     void inputSequence();
-    void repopulate();
+    bool isMounted(const QString &path);
+    bool mountMedia(const QString &media, const QString &dst);
+    void addImages(QMap<QString,QVariantMap> images);
     void update_window_title();
     bool requireNetwork();
     bool isOnline();
@@ -76,6 +85,7 @@ protected slots:
     void populate();
     void startBrowser();
     void startNetworking();
+    void pollMedia();
     void pollNetworkStatus();
     void onOnlineStateChanged(bool online);
     void downloadListComplete();

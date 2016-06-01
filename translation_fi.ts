@@ -147,10 +147,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Please wait while NOOBS initialises</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>RECOMMENDED</source>
         <translation type="unfinished"></translation>
     </message>
@@ -219,14 +215,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Waiting for USB mass storage device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Mounting external media</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error mounting external media (%1)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -244,6 +232,14 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Image installed successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wait for external media or network...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reading images from USB mass storage device...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

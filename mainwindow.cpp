@@ -61,11 +61,6 @@
 #define MEDIA_USB "/dev/sda1"
 #define MEDIA_SDCARD "/dev/mmcblk1p1"
 
-/* To keep track of where the different OSes get 'installed' from */
-#define SOURCE_SDCARD "sdcard"
-#define SOURCE_NETWORK "network"
-#define SOURCE_INSTALLED_OS "installed_os"
-
 /* Flag to keep track wheter or not we already repartitioned. */
 bool MainWindow::_partInited = false;
 
@@ -183,7 +178,8 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
 
 MainWindow::~MainWindow()
 {
-    QProcess::execute("umount /mnt");
+    QProcess::execute("umount " MEDIA_USB);
+    QProcess::execute("umount " MEDIA_SDCARD);
     delete ui;
 }
 
@@ -193,33 +189,26 @@ void MainWindow::populate()
     /* Ask user to wait while list is populated */
     if (!_allowSilent)
     {
-        _qpd = new QProgressDialog(tr("Please wait while NOOBS initialises"), QString(), 0, 0, this);
+        _qpd = new QProgressDialog(tr("Wait for external media or network..."), QString(), 0, 0, this);
         _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
         _qpd->show();
-
+/*
         int timeout = 5000;
         if (getFileContents("/settings/wpa_supplicant.conf").contains("ssid="))
         {
-            /* Longer timeout if we have a wifi network configured */
+            // Longer timeout if we have a wifi network configured
             timeout = 8000;
         }
         QTimer::singleShot(timeout, this, SLOT(hideDialogIfNoNetwork()));
+        */
     }
 
-    //_settings = new QSettings("/settings/noobs.conf", QSettings::IniFormat, this);
+    connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
+    _mediaPollTimer.start(100);
 
-    /* Restore saved display mode */
-    /*
-    qDebug() << "Default display mode is " << _defaultDisplay;
-    int mode = _settings->value("display_mode", _defaultDisplay).toInt();
-    if (mode)
-    {
-        displayMode(mode, true);
-    }
-    _settings->setValue("display_mode", _defaultDisplay);
-    _settings->sync();*/
 
     // Fill in list of images
+    /*
     repopulate();
     _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong())/2048;
     updateNeeded();
@@ -247,14 +236,16 @@ void MainWindow::populate()
         }
     }
 
+    _qpd->hide();
+    _qpd->deleteLater();
+    _qpd = NULL;
+
     bool osInstalled = QFile::exists(FAT_PARTITION_OF_IMAGE);
-    ui->actionCancel->setEnabled(osInstalled);
+    ui->actionCancel->setEnabled(osInstalled);*/
 }
 
-void MainWindow::repopulate()
+void MainWindow::addImages(QMap<QString,QVariantMap> images)
 {
-    QMap<QString,QVariantMap> images = listImages();
-    ui->list->clear();
     bool haveicons = false;
     QSize currentsize = ui->list->iconSize();
     QIcon localIcon(":/icons/hdd.png");
@@ -305,17 +296,10 @@ void MainWindow::repopulate()
         item->setData(Qt::UserRole, m);
         item->setCheckState(Qt::Unchecked);
 
-        if (m["source"] == SOURCE_INSTALLED_OS)
-        {
-            item->setData(SecondIconRole, QIcon());
-        }
+        if (folder.startsWith(QDir::separator()))
+            item->setData(SecondIconRole, localIcon);
         else
-        {
-            if (folder.startsWith("/mnt"))
-                item->setData(SecondIconRole, localIcon);
-            else
-                item->setData(SecondIconRole, internetIcon);
-        }
+            item->setData(SecondIconRole, internetIcon);
 
         if (recommended)
             ui->list->insertItem(0, item);
@@ -339,6 +323,13 @@ void MainWindow::repopulate()
     }
 
     ui->actionCancel->setEnabled(true);
+
+    /* Hide progress dialog since we have images we could use now... */
+    if (_qpd && images.count()) {
+        _qpd->hide();
+        _qpd->deleteLater();
+        _qpd = NULL;
+    }
 }
 
 /* Whether this OS should be displayed in the list of installable OSes */
@@ -396,87 +387,95 @@ bool MainWindow::isSupportedOs(const QString &name, const QVariantMap &values)
     return true;
 }
 
-QMap<QString, QVariantMap> MainWindow::listImages()
+bool MainWindow::isMounted(const QString &path) {
+    QFile file("/proc/mounts");
+    qDebug() << path;
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
+
+    QTextStream in(&file);
+    QString line = in.readLine();
+    while (!line.isNull()) {
+        qDebug() << line;
+        if (line.contains(path))
+            return true;
+        line = in.readLine();
+    }
+
+    return false;
+}
+
+bool MainWindow::mountMedia(const QString &media, const QString &dst) {
+    QDir().mkdir(dst);
+    if (QProcess::execute("mount " + media + " " + dst) != 0)
+    {
+        qDebug() << "Error mounting external media" << media << "to" << dst;
+        QMessageBox::critical(this, tr("Error mounting"), tr("Error mounting external media (%1)").arg(media), QMessageBox::Close);
+        return false;
+    }
+
+    return true;
+}
+
+void MainWindow::pollMedia()
+{
+    static bool usbProcessed = false;
+    static bool sdProcessed = false;
+    qDebug() << "pollMedia";
+
+    if (!usbProcessed && QFile::exists(MEDIA_USB)) {
+        if (_qpd) {
+            _qpd->setLabelText(tr("Reading images from USB mass storage device..."));
+            QApplication::processEvents();
+        }
+
+        QString dst = "/usb";
+        if (!isMounted(MEDIA_USB)) {
+            mountMedia(MEDIA_USB, dst);
+        }
+
+        QMap<QString,QVariantMap> images = listMediaImages(dst, SOURCE_USB);
+        addImages(images);
+        usbProcessed = true;
+    }
+
+    /* After first poll, set intervall to 2s */
+    _mediaPollTimer.setInterval(2000);
+}
+
+QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum ImageSource source)
 {
     QMap<QString,QVariantMap> images;
 
-    // List images from external media
-
-    // Make sure the SD card is ready, and partition table is read by Linux
-
-    _qpd->hide();
-    _qpd->deleteLater();
-    if (!QFile::exists("/dev/sda1"))
-    {
-        _qpd = new QProgressDialog( tr("Waiting for USB mass storage device"), QString(), 0, 0, this);
-        _qpd->setWindowModality(Qt::WindowModal);
-        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-        _qpd->show();
-
-        while (!QFile::exists("/dev/sda1"))
-        {
-            QApplication::processEvents(QEventLoop::WaitForMoreEvents, 250);
-        }
-        _qpd->hide();
-        _qpd->deleteLater();
-    }
-
-    _qpd = new QProgressDialog( tr("Mounting external media"), QString(), 0, 0, this);
-    _qpd->setWindowModality(Qt::WindowModal);
-    _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    _qpd->show();
-    QApplication::processEvents();
-
-    if (QProcess::execute("mount /dev/sda1 /mnt") != 0)
-    {
-        _qpd->hide();
-
-        QMessageBox::critical(this, tr("Error mounting"), tr("Error mounting external media (%1)").arg("/dev/sda1"), QMessageBox::Close);
-    }
-    _qpd->hide();
-    _qpd->deleteLater();
-    _qpd = NULL;
-
-
     /* Local image folders */
-    QDir dir("/mnt/", "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
+    QDir dir(path, "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList list = dir.entryList();
-    QString imagefolder = "/mnt/";
 
-    QVariantMap json = Json::loadFromFile(imagefolder + "/image_list.json").toMap();
-    QVariantList image_list = json.value("image_list").toList();
-    foreach (QVariant image, image_list)
-    {
-        QVariantMap imagemap = image.toMap();
+    foreach(QString image, list) {
+        QString imagefolder = path + QDir::separator() + image;
+        qDebug() << imagefolder;
+        QVariantMap imagemap = Json::loadFromFile(imagefolder + QDir::separator() + "image.json").toMap();
+
         QString basename = imagemap.value("name").toString();
         imagemap["recommended"] = true;
         imagemap["folder"] = imagefolder;
-        imagemap["source"] = SOURCE_SDCARD;
-        images[basename] = imagemap;
-        qDebug() << "Image: " + basename;
-    }
+        imagemap["source"] = source;
 
-    for (QMap<QString,QVariantMap>::iterator i = images.begin(); i != images.end(); i++)
-    {
-        QVariantMap *image = &i.value();
+        if (!imagemap.contains("nominal_size")) {
+            // Calculate nominal_size based on information inside image_info partitions
+            int nominal_size = 0;
+            QVariantList pvl = imagemap.value("partitions").toList();
 
-        if (image->contains("nominal_size"))
-            continue;
-
-        // Calculate nominal_size based on information inside image_info partitions
-        int nominal_size = 0;
-        QString image_info = image->value("folder").toString() + QDir::separator() + image->value("image_info").toString();
-        QVariantMap pv = Json::loadFromFile(image_info).toMap();
-        QVariantList pvl = pv.value("partitions").toList();
-
-        foreach (QVariant v, pvl)
-        {
-            QVariantMap pv = v.toMap();
-            nominal_size += pv.value("partition_size_nominal").toInt();
-            nominal_size += 1; // Overhead per partition for EBR
+            foreach (QVariant v, pvl)
+            {
+                QVariantMap pv = v.toMap();
+                nominal_size += pv.value("partition_size_nominal").toInt();
+                nominal_size += 1; // Overhead per partition for EBR
+            }
+            imagemap["nominal_size"] = nominal_size;
         }
 
-        image->insert("nominal_size", nominal_size);
+        images[basename] = imagemap;
     }
 
     return images;
@@ -912,10 +911,11 @@ void MainWindow::processJsonOs(const QString &name, QVariantMap &new_details, QS
     if (witem)
     {
         QVariantMap existing_details = witem->data(Qt::UserRole).toMap();
-
-        if ((existing_details["release_date"].toString() < new_details["release_date"].toString()) || (existing_details["source"].toString() == SOURCE_INSTALLED_OS))
+/*
+        if ((existing_details["release_date"].toString() < new_details["release_date"].toString()) ||
+                (existing_details["source"].toString() == SOURCE_INSTALLED_OS))
         {
-            /* Local version is older (or unavailable). Replace info with newer Internet version */
+            // Local version is older (or unavailable). Replace info with newer Internet version
             new_details.insert("installed", existing_details.value("installed", false));
             if (existing_details.contains("partitions"))
             {
@@ -925,7 +925,7 @@ void MainWindow::processJsonOs(const QString &name, QVariantMap &new_details, QS
             witem->setData(SecondIconRole, internetIcon);
             ui->list->update();
         }
-
+*/
     }
     else
     {
@@ -1248,7 +1248,7 @@ void MainWindow::startImageWrite()
     if (slidesFolders.isEmpty())
         slidesFolder.append("/mnt/defaults/slides");
 
-    _qpd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
+    ProgressSlideshowDialog *dialog = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
     connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _qpd, SLOT(setMaximum(qint64)));
     connect(imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
     connect(imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
@@ -1257,7 +1257,7 @@ void MainWindow::startImageWrite()
     connect(imageWriteThread, SIGNAL(finishedMKFS()), _qpd , SLOT(resumeIOaccounting()), Qt::BlockingQueuedConnection);
     imageWriteThread->start();
     hide();
-    _qpd->exec();
+    dialog->exec();
 }
 
 void MainWindow::hideDialogIfNoNetwork()
