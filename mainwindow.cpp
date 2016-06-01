@@ -77,7 +77,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
     ui(new Ui::MainWindow),
     _qpd(NULL), _kcpos(0), _defaultDisplay(defaultDisplay),
     _silent(false), _allowSilent(false), _showAll(false), _splash(splash), _settings(NULL),
-    _hasWifi(false), _numInstalledOS(0), _netaccess(NULL), _displayModeBox(NULL)
+    _hasWifi(false), _netaccess(NULL)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
@@ -86,7 +86,6 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
     _kc << 0x01000013 << 0x01000013 << 0x01000015 << 0x01000015 << 0x01000012
         << 0x01000014 << 0x01000012 << 0x01000014 << 0x42 << 0x41;
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
-    ui->list->installEventFilter(this);
     ui->advToolBar->setVisible(false);
 
     QRect s = QApplication::desktop()->screenGeometry();
@@ -260,7 +259,6 @@ void MainWindow::repopulate()
     QSize currentsize = ui->list->iconSize();
     QIcon localIcon(":/icons/hdd.png");
     QIcon internetIcon(":/icons/download.png");
-    _numInstalledOS = 0;
 
     foreach (QVariant v, images.values())
     {
@@ -609,167 +607,6 @@ void MainWindow::changeEvent(QEvent* event)
     }
 
     QMainWindow::changeEvent(event);
-}
-
-void MainWindow::displayMode(int modenr, bool silent)
-{
-#ifdef Q_WS_QWS
-    QString cmd, mode;
-
-    if (!silent && _displayModeBox)
-    {
-        /* User pressed another mode selection key while the confirmation box is being displayed */
-        silent = true;
-        _displayModeBox->close();
-    }
-
-    switch (modenr)
-    {
-    case 0:
-        cmd  = "-p";
-        mode = tr("HDMI preferred mode");
-        break;
-    case 1:
-        cmd  = "-e \'DMT 4 DVI\'";
-        mode = tr("HDMI safe mode");
-        break;
-    case 2:
-        cmd  = "-c \'PAL 4:3\'";
-        mode = tr("composite PAL mode");
-        break;
-    case 3:
-        cmd  = "-c \'NTSC 4:3\'";
-        mode = tr("composite NTSC mode");
-        break;
-
-    default:
-        // unknown mode
-        return;
-    }
-    _currentMode = modenr;
-
-    // Trigger framebuffer resize
-    QProcess *presize = new QProcess(this);
-    presize->start(QString("sh -c \"tvservice -o; tvservice %1;\"").arg(cmd));
-    presize->waitForFinished(4000);
-
-    // Update screen resolution with current value (even if we didn't
-    // get what we thought we'd get)
-    QProcess *update = new QProcess(this);
-    update->start(QString("sh -c \"tvservice -s | cut -d , -f 2 | cut -d \' \' -f 2 | cut -d x -f 1;tvservice -s | cut -d , -f 2 | cut -d \' \' -f 2 | cut -d x -f 2\""));
-    update->waitForFinished(4000);
-    update->setProcessChannelMode(QProcess::MergedChannels);
-
-    QTextStream stream(update);
-    int xres = stream.readLine().toInt();
-    int yres = stream.readLine().toInt();
-    QScreen::instance()->setMode(xres, yres, 16);
-
-    // Resize this window depending on screen resolution
-    QRect s = QApplication::desktop()->screenGeometry();
-    if (s.height() < 500)
-        resize(s.width()-10, s.height()-100);
-    else
-        resize(575, 450);
-
-    // Update UI item locations
-    _splash->setPixmap(QPixmap(":/wallpaper.png"));
-    LanguageDialog *ld = LanguageDialog::instance("en", "gb");
-    ld->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignBottom, ld->size(), qApp->desktop()->availableGeometry()));
-    this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, this->size(), qApp->desktop()->availableGeometry()));
-
-    // Refresh screen
-    qApp->processEvents();
-    QWSServer::instance()->refresh();
-
-    // In case they can't see the message box, inform that mode change
-    // is occuring by turning on the LED during the change
-    QProcess *led_blink = new QProcess(this);
-    connect(led_blink, SIGNAL(finished(int)), led_blink, SLOT(deleteLater()));
-    led_blink->start("sh -c \"echo 1 > /sys/class/leds/led0/brightness; sleep 3; echo 0 > /sys/class/leds/led0/brightness\"");
-
-    // Inform user of resolution change with message box.
-    if (!silent && _settings)
-    {
-        _displayModeBox = new QMessageBox(QMessageBox::Question,
-                      tr("Display Mode Changed"),
-                      tr("Display mode changed to %1\nWould you like to make this setting permanent?").arg(mode),
-                      QMessageBox::Yes | QMessageBox::No);
-        _displayModeBox->installEventFilter(this);
-        _displayModeBox->exec();
-
-        if (_displayModeBox->standardButton(_displayModeBox->clickedButton()) == QMessageBox::Yes)
-        {
-            _settings->setValue("display_mode", modenr);
-            _settings->sync();
-            ::sync();
-        }
-        _displayModeBox = NULL;
-    }
-
-    /*
-    QMessageBox *mbox = new QMessageBox;
-    mbox->setWindowTitle(tr("Display Mode Changed"));
-    mbox->setText(QString(tr("Display mode changed to %1")).arg(mode));
-    mbox->setStandardButtons(0);
-    mbox->show();
-    QTimer::singleShot(2000, mbox, SLOT(hide()));
-    */
-
-#else
-    Q_UNUSED(modenr)
-    Q_UNUSED(silent)
-#endif
-}
-
-bool MainWindow::eventFilter(QObject *, QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-
-        // Let user find the best display mode for their display
-        // experimentally by using keys 1-4. NOOBS will default to using HDMI preferred mode.
-
-        // HDMI preferred mode
-        if (keyEvent->key() == Qt::Key_1 && _currentMode != 0)
-        {
-            displayMode(0);
-        }
-        // HDMI safe mode
-        if (keyEvent->key() == Qt::Key_2 && _currentMode != 1)
-        {
-            displayMode(1);
-        }
-        // Composite PAL
-        if (keyEvent->key() == Qt::Key_3 && _currentMode != 2)
-        {
-            displayMode(2);
-        }
-         // Composite NTSC
-        if (keyEvent->key() == Qt::Key_4 && _currentMode != 3)
-        {
-            displayMode(3);
-        }
-        // Catch Return key to trigger OS boot
-        if (keyEvent->key() == Qt::Key_Return)
-        {
-            on_list_doubleClicked(ui->list->currentIndex());
-        }
-        else if (_kc.at(_kcpos) == keyEvent->key())
-        {
-            _kcpos++;
-            if (_kcpos == _kc.size())
-            {
-                inputSequence();
-                _kcpos = 0;
-            }
-        }
-        else
-            _kcpos=0;
-    }
-
-    return false;
 }
 
 void MainWindow::inputSequence()

@@ -47,20 +47,16 @@ protected:
     QSplashScreen *_splash;
     QSettings *_settings;
     bool _hasWifi;
-    int _numInstalledOS;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numMetaFilesToDownload, _numIconsToDownload;
-    QMessageBox *_displayModeBox;
     QTimer _networkStatusPollTimer;
     QTime _time;
     QString _model;
 
     QMap<QString,QVariantMap> listImages();
     virtual void changeEvent(QEvent * event);
-    virtual bool eventFilter(QObject *obj, QEvent *event);
     void inputSequence();
     void repopulate();
-    void displayMode(int modenr, bool silent = false);
     void update_window_title();
     bool requireNetwork();
     bool isOnline();

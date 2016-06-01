@@ -175,31 +175,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>HDMI preferred mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>HDMI safe mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>composite PAL mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>composite NTSC mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Display Mode Changed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Display mode changed to %1
-Would you like to make this setting permanent?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>No network access</source>
         <translation type="unfinished"></translation>
     </message>
