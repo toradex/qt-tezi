@@ -351,10 +351,6 @@ Would you like to make this setting permanent?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error downloading or extracting tarball</source>
         <translation type="unfinished"></translation>
     </message>
@@ -368,6 +364,10 @@ Would you like to make this setting permanent?</source>
     </message>
     <message>
         <source>Error probing partition table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

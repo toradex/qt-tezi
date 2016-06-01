@@ -500,32 +500,12 @@ bool MultiImageWriteThread::untar(const QString &tarball, const QString &folder)
     if (isURL(tarball))
         cmd += "wget --no-verbose --tries=inf -O- "+tarball+" | ";
 
-    if (tarball.endsWith(".gz"))
-    {
-        cmd += "gzip -dc";
-    }
-    else if (tarball.endsWith(".xz"))
-    {
-        cmd += "xz -dc";
-    }
-    else if (tarball.endsWith(".bz2"))
-    {
-        cmd += "bzcat";
-    }
-    else if (tarball.endsWith(".lzo"))
-    {
-        cmd += "lzop -dc";
-    }
-    else if (tarball.endsWith(".zip"))
-    {
-        /* Note: the image must be the only file inside the .zip */
-        cmd += "unzip -p";
-    }
-    else
-    {
-        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
+    QString uncompresscmd = getUncompressCommand(tarball);
+    if (uncompresscmd == NULL)
         return false;
-    }
+
+    cmd += uncompresscmd;
+
     if (!isURL(tarball))
     {
         cmd += " " + tarball;
@@ -563,32 +543,11 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
     if (isURL(imagePath))
         cmd += "wget --no-verbose --tries=inf -O- "+imagePath+" | ";
 
-    if (imagePath.endsWith(".gz"))
-    {
-        cmd += "gzip -dc";
-    }
-    else if (imagePath.endsWith(".xz"))
-    {
-        cmd += "xz -dc";
-    }
-    else if (imagePath.endsWith(".bz2"))
-    {
-        cmd += "bzcat";
-    }
-    else if (imagePath.endsWith(".lzo"))
-    {
-        cmd += "lzop -dc";
-    }
-    else if (imagePath.endsWith(".zip"))
-    {
-        /* Note: the image must be the only file inside the .zip */
-        cmd += "unzip -p";
-    }
-    else
-    {
-        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
+    QString uncompresscmd = getUncompressCommand(imagePath);
+    if (uncompresscmd == NULL)
         return false;
-    }
+
+    cmd += uncompresscmd;
 
     if (!isURL(imagePath))
         cmd += " "+imagePath;
@@ -615,6 +574,36 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
     return true;
 }
 
+QString MultiImageWriteThread::getUncompressCommand(const QString &file)
+{
+    if (file.endsWith(".gz"))
+    {
+        return "gzip -dc";
+    }
+    else if (file.endsWith(".xz"))
+    {
+        return "xz -dc";
+    }
+    else if (file.endsWith(".bz2"))
+    {
+        return "bzcat";
+    }
+    else if (file.endsWith(".lzo"))
+    {
+        return "lzop -dc";
+    }
+    else if (file.endsWith(".zip"))
+    {
+        /* Note: the image must be the only file inside the .zip */
+        return "unzip -p";
+    }
+    else
+    {
+        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
+        return NULL;
+    }
+}
+
 bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QString &device)
 {
     QString cmd = "sh -o pipefail -c \"";
@@ -622,32 +611,6 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
     if (isURL(imagePath))
         cmd += "wget --no-verbose --tries=inf -O- "+imagePath+" | ";
 
-    if (imagePath.endsWith(".gz"))
-    {
-        cmd += "gzip -dc";
-    }
-    else if (imagePath.endsWith(".xz"))
-    {
-        cmd += "xz -dc";
-    }
-    else if (imagePath.endsWith(".bz2"))
-    {
-        cmd += "bzcat";
-    }
-    else if (imagePath.endsWith(".lzo"))
-    {
-        cmd += "lzop -dc";
-    }
-    else if (imagePath.endsWith(".zip"))
-    {
-        /* Note: the image must be the only file inside the .zip */
-        cmd += "unzip -p";
-    }
-    else
-    {
-        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
-        return false;
-    }
 
     if (!isURL(imagePath))
         cmd += " "+imagePath;

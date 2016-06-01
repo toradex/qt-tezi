@@ -29,6 +29,7 @@ protected:
     QByteArray getUUID(const QString part);
     void patchConfigTxt();
     QString getDescription(const QString &folder, const QString &flavour);
+    QString getUncompressCommand(const QString &file);
     bool writePartitionTable(const QMap<int, PartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
 
