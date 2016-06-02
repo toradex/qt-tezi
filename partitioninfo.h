@@ -3,10 +3,11 @@
 
 /*
  * Partition information model
- * Contains information about a single partition from partitions.json
+ * Contains information about a single partition
  * and runtime information like the partition device (/dev/mmcblk0pX) it was assigned
  */
 
+#include "filesysteminfo.h"
 #include <QObject>
 #include <QVariantMap>
 
@@ -39,24 +40,9 @@ public:
         return _requiresPartitionNumber;
     }
 
-    inline QByteArray fsType()
+    inline FileSystemInfo *content()
     {
-        return _fstype;
-    }
-
-    inline QByteArray mkfsOptions()
-    {
-        return _mkfsOptions;
-    }
-
-    inline QByteArray label()
-    {
-        return _label;
-    }
-
-    inline QString tarball()
-    {
-        return _tarball;
+        return _content;
     }
 
     inline int partitionSizeNominal()
@@ -115,8 +101,9 @@ public:
     }
 
 protected:
-    QByteArray _fstype, _mkfsOptions, _label, _partitionDevice, _partitionType;
+    QByteArray _partitionDevice, _partitionType;
     QString _tarball;
+    FileSystemInfo *_content;
     int _partitionSizeNominal, _requiresPartitionNumber, _offset, _uncompressedTarballSize, _partitionSizeSectors;
     bool _emptyFS, _wantMaximised, _active;
 };

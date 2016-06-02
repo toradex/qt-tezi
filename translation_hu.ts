@@ -298,26 +298,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1: Mounting FAT partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Running partition setup script</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Error executing partition setup script</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Unmounting FAT partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Error unmounting</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error creating file system</source>
         <translation type="unfinished"></translation>
     </message>

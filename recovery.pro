@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     twoiconsdelegate.cpp \
     osinfo.cpp \
     partitioninfo.cpp \
-    longpresshandler.cpp
+    longpresshandler.cpp \
+    filesysteminfo.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
     twoiconsdelegate.h \
     osinfo.h \
     partitioninfo.h \
-    longpresshandler.h
+    longpresshandler.h \
+    filesysteminfo.h
 
 FORMS    += mainwindow.ui
 

@@ -207,11 +207,12 @@ void MainWindow::populate()
     _mediaPollTimer.start(100);
 
 
+    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong())/2048;
+    updateNeeded();
+
     // Fill in list of images
     /*
     repopulate();
-    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong())/2048;
-    updateNeeded();
 
     if (ui->list->count() != 0)
     {

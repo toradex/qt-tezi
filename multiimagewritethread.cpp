@@ -58,10 +58,7 @@ void MultiImageWriteThread::run()
                 numexpandparts++;
             totalnominalsize += partition->partitionSizeNominal();
             totaluncompressedsize += partition->uncompressedTarballSize();
-            if (partition->fsType() == "ext4")
-            {
-                totaluncompressedsize += /*0.035*/ 0.01 * totalnominalsize; /* overhead for file system meta data */
-            }
+
             int reqPart = partition->requiresPartitionNumber();
             if (reqPart)
             {
@@ -162,7 +159,7 @@ void MultiImageWriteThread::run()
         else
         {
 #ifdef SHRINK_PARTITIONS_TO_MINIMIZE_GAPS
-            if (partsizeSectors % PARTITION_ALIGNMENT == 0 && p->fsType() != "raw")
+            if (partsizeSectors % PARTITION_ALIGNMENT == 0)
             {
                 /* Partition size is dividable by 4 MiB
                    Take off a couple sectors of the end of our partition to make room
@@ -271,10 +268,12 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
 
     foreach (PartitionInfo *p, *partitions)
     {
-        QByteArray fstype   = p->fsType();
-        QByteArray mkfsopt  = p->mkfsOptions();
-        QByteArray label = p->label();
-        QString tarball  = p->tarball();
+        FileSystemInfo *fs = p->content();
+
+        QByteArray fstype   = fs->fsType();
+        QByteArray mkfsopt  = fs->mkfsOptions();
+        QByteArray label = fs->label();
+        QString tarball  = fs->filename();
         bool emptyfs     = p->emptyFS();
 
         if (!emptyfs && tarball.isEmpty())
@@ -358,19 +357,17 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
 
         _part++;
     }
-
+/*
     emit statusUpdate(tr("%1: Mounting FAT partition").arg(os_name));
     if (QProcess::execute("mount "+partitions->first()->partitionDevice()+" /mnt2") != 0)
     {
         emit error(tr("%1: Error mounting file system").arg(os_name));
         return false;
     }
-/*
-    emit statusUpdate(tr("%1: Saving display mode to config.txt").arg(os_name));
-    patchConfigTxt();
-*/
+  */
     /* Partition setup script can either reside in the image folder
      * or inside the boot partition tarball */
+    /*
     QString postInstallScript = image->folder()+"/partition_setup.sh";
     if (!QFile::exists(postInstallScript))
         postInstallScript = "/mnt2/partition_setup.sh";
@@ -382,7 +379,7 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
         QProcessEnvironment env;
         QStringList args(postInstallScript);
         env.insert("PATH", "/bin:/usr/bin:/sbin:/usr/sbin");
-
+*/
         /* - Parameters to the partition-setup script are supplied both as
          *   command line parameters and set as environement variables
          * - Boot partition is mounted, working directory is set to its mnt folder
@@ -390,6 +387,7 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
          *  partition_setup.sh part1=/dev/mmcblk0p3 id1=LABEL=BOOT part2=/dev/mmcblk0p4
          *  id2=UUID=550e8400-e29b-41d4-a716-446655440000
          */
+    /*
         int pnr = 1;
         foreach (PartitionInfo *p, *partitions)
         {
@@ -431,7 +429,7 @@ bool MultiImageWriteThread::processImage(OsInfo *image)
     if (QProcess::execute("umount /mnt2") != 0)
     {
         emit error(tr("%1: Error unmounting").arg(os_name));
-    }
+    }*/
 
     return true;
 }
