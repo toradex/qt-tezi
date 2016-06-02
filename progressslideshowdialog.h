@@ -38,7 +38,7 @@ public slots:
 
 protected:
     QStringList _slides;
-    int _pos, _changeInterval, _sectorsStart, _maxSectors, _pausedAt;
+    int _pos, _changeInterval, _sectorsStart, _sectorsRestart, _maxSectors, _pausedAt;
     QTimer _timer, _iotimer;
     QTime _t1;
 

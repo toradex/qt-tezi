@@ -11,6 +11,7 @@
  */
 
 #include "languagedialog.h"
+#include "progressslideshowdialog.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -44,6 +45,7 @@ public:
 protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
+    ProgressSlideshowDialog *_psd;
     QList <int> _kc;
     int _kcpos;
     const QString _defaultDisplay;

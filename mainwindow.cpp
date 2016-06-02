@@ -396,7 +396,6 @@ bool MainWindow::isMounted(const QString &path) {
     QTextStream in(&file);
     QString line = in.readLine();
     while (!line.isNull()) {
-        qDebug() << line;
         if (line.contains(path))
             return true;
         line = in.readLine();
@@ -421,7 +420,6 @@ void MainWindow::pollMedia()
 {
     static bool usbProcessed = false;
     static bool sdProcessed = false;
-    qDebug() << "pollMedia";
 
     if (!usbProcessed && QFile::exists(MEDIA_USB)) {
         if (_qpd) {
@@ -462,7 +460,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
         imagemap["source"] = source;
 
         if (!imagemap.contains("nominal_size")) {
-            // Calculate nominal_size based on information inside image_info partitions
+            // Calculate nominal_size based on partition information
             int nominal_size = 0;
             QVariantList pvl = imagemap.value("partitions").toList();
 
@@ -475,6 +473,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
             imagemap["nominal_size"] = nominal_size;
         }
 
+        imagemap["image_info"] = "image.json";
         images[basename] = imagemap;
     }
 
@@ -559,14 +558,14 @@ void MainWindow::on_actionCancel_triggered()
 
 void MainWindow::onCompleted()
 {
-    _qpd->hide();
+    _psd->hide();
 
     if (!_silent)
         QMessageBox::information(this,
                                  tr("Image Installed"),
                                  tr("Image installed successfully"), QMessageBox::Ok);
-    _qpd->deleteLater();
-    _qpd = NULL;
+    _psd->deleteLater();
+    _psd = NULL;
     close();
 }
 
@@ -1191,6 +1190,9 @@ void MainWindow::startImageWrite()
     QString folder, slidesFolder;
     QStringList slidesFolders;
 
+    /* Stop media poller in case still running */
+    _mediaPollTimer.stop();
+
     QList<QListWidgetItem *> selected = selectedItems();
     foreach (QListWidgetItem *item, selected)
     {
@@ -1248,16 +1250,16 @@ void MainWindow::startImageWrite()
     if (slidesFolders.isEmpty())
         slidesFolder.append("/mnt/defaults/slides");
 
-    ProgressSlideshowDialog *dialog = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
-    connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _qpd, SLOT(setMaximum(qint64)));
+    _psd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
+    connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));
     connect(imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
     connect(imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
-    connect(imageWriteThread, SIGNAL(statusUpdate(QString)), _qpd, SLOT(setLabelText(QString)));
-    connect(imageWriteThread, SIGNAL(runningMKFS()), _qpd, SLOT(pauseIOaccounting()), Qt::BlockingQueuedConnection);
-    connect(imageWriteThread, SIGNAL(finishedMKFS()), _qpd , SLOT(resumeIOaccounting()), Qt::BlockingQueuedConnection);
+    connect(imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
+    connect(imageWriteThread, SIGNAL(runningMKFS()), _psd, SLOT(pauseIOaccounting()), Qt::BlockingQueuedConnection);
+    connect(imageWriteThread, SIGNAL(finishedMKFS()), _psd, SLOT(resumeIOaccounting()), Qt::BlockingQueuedConnection);
     imageWriteThread->start();
     hide();
-    dialog->exec();
+    _psd->exec();
 }
 
 void MainWindow::hideDialogIfNoNetwork()

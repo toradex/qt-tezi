@@ -341,15 +341,23 @@ WARNING: This will erase all data on your SD card</source>
         <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Error creating partition table</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProgressSlideshowDialog</name>
     <message>
-        <source>%1 MB of %2 MB written (%3 MB/sec)</source>
+        <source>%1 MB of %2 MB written</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1 MB written (%2 MB/sec)</source>
+        <source>%1 MB written</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(%3 MB/sec)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -98,7 +98,8 @@ void ProgressSlideshowDialog::nextSlide()
 
 void ProgressSlideshowDialog::enableIOaccounting()
 {
-    _sectorsStart = sectorsWritten();
+    qDebug() << "enableIOaccounting";
+    _sectorsStart = _sectorsRestart = sectorsWritten();
     _t1.start();
     _iotimer.start(1000);
 }
@@ -111,13 +112,17 @@ void ProgressSlideshowDialog::disableIOaccounting()
 
 void ProgressSlideshowDialog::pauseIOaccounting()
 {
-    _iotimer.stop();
+    qDebug() << "pauseIOaccounting";
     _pausedAt = sectorsWritten();
+    _iotimer.stop();
 }
 
 void ProgressSlideshowDialog::resumeIOaccounting()
 {
-    _sectorsStart += sectorsWritten()-_pausedAt;
+    qDebug() << "resumeIOaccounting";
+    _sectorsRestart = sectorsWritten();
+    _sectorsStart += _sectorsRestart-_pausedAt;
+    _t1.restart();
     _iotimer.start(1000);
 }
 
@@ -129,20 +134,32 @@ void ProgressSlideshowDialog::setMaximum(qint64 bytes)
 
 void ProgressSlideshowDialog::updateIOstats()
 {
-    int sectors = sectorsWritten()-_sectorsStart;
-    double sectorsPerSec = sectors * 1000.0 / _t1.elapsed();
+    int sectors = sectorsWritten();
+    int sectorsSinceStart = sectors - _sectorsStart;
+    int sectorsSinceRestart = sectors - _sectorsRestart;
+    double sectorsPerSec = sectorsSinceRestart * 1000.0 / _t1.elapsed();
+    QString progress;
+qDebug() << "Sectors: " << sectors;
     if (_maxSectors)
     {
-        sectors = qMin(_maxSectors, sectors);
+        progress = tr("%1 MB of %2 MB written")
+                .arg(QString::number(sectorsSinceStart/2048), QString::number(_maxSectors/2048));
+
+        sectors = qMin(_maxSectors, sectorsSinceStart);
         ui->progressBar->setValue(sectors);
-        ui->mbwrittenLabel->setText(tr("%1 MB of %2 MB written (%3 MB/sec)")
-                                    .arg(QString::number(sectors/2048), QString::number(_maxSectors/2048), QString::number(sectorsPerSec/2048.0, 'f', 1)));
     }
     else
     {
-        ui->mbwrittenLabel->setText(tr("%1 MB written (%2 MB/sec)")
-                                    .arg(QString::number(sectors/2048), QString::number(sectorsPerSec/2048.0, 'f', 1)));
+        progress = tr("%1 MB written")
+                .arg(QString::number(sectorsSinceStart/2048));
     }
+
+    if (_iotimer.isActive()) {
+        QString speed = tr("(%3 MB/sec)").arg(QString::number(sectorsPerSec/2048.0, 'f', 1));
+        progress += " " + speed;
+    }
+
+    ui->mbwrittenLabel->setText(progress);
 }
 
 int ProgressSlideshowDialog::sectorsWritten()

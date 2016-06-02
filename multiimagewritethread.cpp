@@ -241,6 +241,12 @@ bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *>
     proc.waitForFinished(-1);
 
     qDebug() << "sfdisk done, output:" << proc.readAll();
+    if (proc.exitCode() != 0)
+    {
+        emit error(tr("Error creating partition table")+"\n"+proc.readAll());
+        return false;
+    }
+
     ::sync();
     QThread::msleep(500);
 
