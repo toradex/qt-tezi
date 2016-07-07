@@ -1243,9 +1243,13 @@ void MainWindow::startImageWrite()
         {
             slidesFolder = folder+"/slides_vga";
         }
-        imageWriteThread->addImage(folder, entry.value("image_info").toString());
+        imageWriteThread->setImage(folder, entry.value("image_info").toString());
         if (!slidesFolder.isEmpty())
             slidesFolders.append(slidesFolder);
+
+
+        // TODO: We only support one image. Option list instead of checkboxes?
+        break;
     }
 
     if (slidesFolders.isEmpty())

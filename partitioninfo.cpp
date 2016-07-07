@@ -4,7 +4,6 @@ PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
     QObject(parent)
 {
     _wantMaximised = m.value("want_maximised", false).toBool();
-    _emptyFS       = m.value("empty_fs", false).toBool();
     _offset        = m.value("offset_in_sectors").toInt();
     _partitionSizeNominal = m.value("partition_size_nominal").toInt();
     _requiresPartitionNumber = m.value("requires_partition_number").toInt();

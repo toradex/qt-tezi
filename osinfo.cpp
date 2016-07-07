@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QDebug>
+#include "blockdevinfo.h"
 #include "osinfo.h"
 #include "partitioninfo.h"
 #include "json.h"
@@ -18,13 +19,7 @@ OsInfo::OsInfo(const QString &folder, const QString &infofile, QObject *parent) 
     foreach (QVariant bd, blockdevs)
     {
         QVariantMap blockdev = bd.toMap();
-        if (blockdev.contains("partitions"))
-        {
-            QVariantList parts = blockdev.value("partitions").toList();
-            foreach (QVariant pv, parts)
-            {
-                _partitions.append(new PartitionInfo(pv.toMap(), this));
-            }
-        }
+
+        _blockdevs.append(new BlockDevInfo(blockdev, this));
     }
 }

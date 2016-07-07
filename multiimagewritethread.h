@@ -8,33 +8,36 @@
 #include <QList>
 
 class OsInfo;
+class BlockDevInfo;
 class PartitionInfo;
+class FileSystemInfo;
 
 class MultiImageWriteThread : public QThread
 {
     Q_OBJECT
 public:
     explicit MultiImageWriteThread(QObject *parent = 0);
-    void addImage(const QString &folder, const QString &fileinfo);
+    void setImage(const QString &folder, const QString &fileinfo);
 
 protected:
     virtual void run();
-    bool processImage(OsInfo *image);
+    bool processBlockDev(BlockDevInfo *blockdev);
+    bool processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions);
+    bool processContent(FileSystemInfo *fs, QByteArray partdevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool dd(const QString &imagePath, const QString &device);
     bool partclone_restore(const QString &imagePath, const QString &device);
-    bool untar(const QString &tarball, const QString &folder);
+    bool untar(const QString &tarball);
     bool isLabelAvailable(const QByteArray &label);
     QByteArray getLabel(const QString part);
     QByteArray getUUID(const QString part);
     void patchConfigTxt();
     QString getDescription(const QString &folder, const QString &flavour);
     QString getUncompressCommand(const QString &file);
-    bool writePartitionTable(const QMap<int, PartitionInfo *> &partitionMap);
+    bool writePartitionTable(QByteArray blockdevpath, const QMap<int, PartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
 
-    /* key: folder, value: flavour */
-    QList<OsInfo *> _images;
+    OsInfo *_image;
 
     int _extraSpacePerPartition, _sectorOffset, _part;
     QVariantList installed_os;

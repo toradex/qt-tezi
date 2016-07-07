@@ -1,4 +1,5 @@
 #include "multiimagewritethread.h"
+#include "blockdevinfo.h"
 #include "config.h"
 #include "json.h"
 #include "util.h"
@@ -25,16 +26,61 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
         dir.mkdir("/mnt2");
 }
 
-void MultiImageWriteThread::addImage(const QString &folder, const QString &infofile)
+void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile)
 {
-    _images.append(new OsInfo(folder, infofile, this));
+    _image = new OsInfo(folder, infofile, this);
 }
 
 void MultiImageWriteThread::run()
 {
-    /* Calculate space requirements, and check special requirements */
+    QList<BlockDevInfo *> *blockdevs = _image->blockdevs();
+    qDebug() << "Processing OS:" << _image->name();
+
+    foreach (BlockDevInfo *blockdev, *blockdevs) {
+        qDebug() << "Processing blockdev: " << blockdev->name();
+
+        QByteArray blockDevice = "/dev/" + blockdev->name().toAscii();
+        if (!QFile::exists(blockDevice)) {
+            emit error(tr("Block device '%1' does not exist").arg(QString(blockDevice)));
+            return;
+        }
+        blockdev->setBlockDevice(blockDevice);
+
+        if (!processBlockDev(blockdev))
+            return;
+    }
+
+    emit completed();
+}
+
+bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
+{
+    QList<PartitionInfo *> *partitions = blockdev->partitions();
+    if (!partitions->isEmpty())
+    {
+        /* Writing partition table to this blockdev */
+        if (!processPartitions(blockdev, partitions))
+            return false;
+    } else {
+        /* Writing content without a parition table to this blockdev */
+        FileSystemInfo *fs = blockdev->content();
+        QByteArray device = blockdev->blockDevice();
+        if (!processContent(fs, device))
+            return false;
+    }
+
+    emit statusUpdate(tr("Finish writing (syncing)"));
+    sync();
+
+    return true;
+}
+
+bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions)
+{
     int totalnominalsize = 0, totaluncompressedsize = 0, numparts = 0, numexpandparts = 0;
-    int totalSectors = getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong();
+
+    /* Calculate space requirements, and check special requirements */
+    int totalSectors = getFileContents("/sys/class/block/" + blockdev->name() + "/size").trimmed().toULongLong();
 
     /* We need PARTITION_ALIGNMENT sectors at the begining for MBR and general alignment (currently 4MiB) */
     int availableMB = (totalSectors - PARTITION_ALIGNMENT) / 2048;
@@ -42,44 +88,35 @@ void MultiImageWriteThread::run()
     /* key: partition number, value: partition information */
     QMap<int, PartitionInfo *> partitionMap;
 
-    foreach (OsInfo *image, _images)
+    foreach (PartitionInfo *partition, *partitions)
     {
-        QList<PartitionInfo *> *partitions = image->partitions();
-        if (partitions->isEmpty())
-        {
-            emit error(tr("partitions invalid"));
-            return;
-        }
+        qDebug() << numparts << partition->partitionType();
+        numparts++;
+        if ( partition->wantMaximised() )
+            numexpandparts++;
+        totalnominalsize += partition->partitionSizeNominal();
+        totaluncompressedsize += partition->uncompressedTarballSize();
 
-        foreach (PartitionInfo *partition, *partitions)
+        int reqPart = partition->requiresPartitionNumber();
+        if (reqPart)
         {
-            numparts++;
-            if ( partition->wantMaximised() )
-                numexpandparts++;
-            totalnominalsize += partition->partitionSizeNominal();
-            totaluncompressedsize += partition->uncompressedTarballSize();
-
-            int reqPart = partition->requiresPartitionNumber();
-            if (reqPart)
+            if (partitionMap.contains(reqPart))
             {
-                if (partitionMap.contains(reqPart))
-                {
-                    emit error(tr("More than one operating system requires partition number %1").arg(reqPart));
-                    return;
-                }
-
-                partition->setPartitionDevice("/dev/mmcblk0p"+QByteArray::number(reqPart));
-                partitionMap.insert(reqPart, partition);
+                emit error(tr("More than one content requires partition number %1").arg(reqPart));
+                return false;
             }
 
-            /* Maximum overhead per partition for alignment */
-#ifdef SHRINK_PARTITIONS_TO_MINIMIZE_GAPS
-            if (partition->wantMaximised() || (partition->partitionSizeNominal()*2048) % PARTITION_ALIGNMENT != 0)
-                totalnominalsize += PARTITION_ALIGNMENT/2048;
-#else
-            totalnominalsize += PARTITION_ALIGNMENT/2048;
-#endif
+            partition->setPartitionDevice(blockdev->blockDevice() + "p" + QByteArray::number(reqPart));
+            partitionMap.insert(reqPart, partition);
         }
+
+        /* Maximum overhead per partition for alignment */
+#ifdef SHRINK_PARTITIONS_TO_MINIMIZE_GAPS
+        if (partition->wantMaximised() || (partition->partitionSizeNominal()*2048) % PARTITION_ALIGNMENT != 0)
+            totalnominalsize += PARTITION_ALIGNMENT/2048;
+#else
+        totalnominalsize += PARTITION_ALIGNMENT/2048;
+#endif
     }
 
     if (numexpandparts)
@@ -93,28 +130,24 @@ void MultiImageWriteThread::run()
     if (totalnominalsize > availableMB)
     {
         emit error(tr("Not enough disk space. Need %1 MB, got %2 MB").arg(QString::number(totalnominalsize), QString::number(availableMB)));
-        return;
+        return false;
     }
 
     /* Assign logical partition numbers to partitions that did not reserve a special number */
     int pnr = 1;
-    foreach (OsInfo *image, _images)
+    foreach (PartitionInfo *partition, *(blockdev->partitions()))
     {
-        foreach (PartitionInfo *partition, *(image->partitions()))
+        if (!partition->requiresPartitionNumber())
         {
-            if (!partition->requiresPartitionNumber())
-            {
-                while (partitionMap.contains(pnr))
-                    pnr++;
+            while (partitionMap.contains(pnr))
+                pnr++;
 
-                partitionMap.insert(pnr, partition);
-                partition->setPartitionDevice("/dev/mmcblk0p"+QByteArray::number(pnr));
-            }
+            partitionMap.insert(pnr, partition);
+            partition->setPartitionDevice(blockdev->blockDevice() + "p" + QByteArray::number(pnr));
         }
     }
 
     /* Set partition starting sectors and sizes. */
-
     int offset = PARTITION_ALIGNMENT;
     QList<PartitionInfo *> partitionList = partitionMap.values();
     foreach (PartitionInfo *p, partitionList)
@@ -124,7 +157,7 @@ void MultiImageWriteThread::run()
             if (p->offset() <= offset)
             {
                 emit error(tr("Fixed partition offset too low"));
-                return;
+                return false;
             }
 
             offset = p->offset();
@@ -159,7 +192,7 @@ void MultiImageWriteThread::run()
         else
         {
 #ifdef SHRINK_PARTITIONS_TO_MINIMIZE_GAPS
-            if (partsizeSectors % PARTITION_ALIGNMENT == 0)
+            if (partsizeSectors % PARTITION_ALIGNMENT == 0 && p->content()->fsType() != "raw")
             {
                 /* Partition size is dividable by 4 MiB
                    Take off a couple sectors of the end of our partition to make room
@@ -178,10 +211,11 @@ void MultiImageWriteThread::run()
         p->setPartitionSizeSectors(partsizeSectors);
         offset += partsizeSectors;
     }
+
     qDebug() << partitionMap;
     emit statusUpdate(tr("Writing partition table"));
-    if (!writePartitionTable(partitionMap))
-        return;
+    if (!writePartitionTable(blockdev->blockDevice(), partitionMap))
+        return false;
 
     /* Zero out first sector of partitions, to make sure to get rid of previous file system (label) */
     emit statusUpdate(tr("Zero'ing start of each partition"));
@@ -191,19 +225,20 @@ void MultiImageWriteThread::run()
             QProcess::execute("/bin/dd count=1 bs=512 if=/dev/zero of="+p->partitionDevice());
     }
 
-    /* Install each operating system */
-    foreach (OsInfo *image, _images)
+    /* Install each partition */
+    foreach (PartitionInfo *p, *partitions)
     {
-        if (!processImage(image))
-            return;
+        FileSystemInfo *fs = p->content();
+        QByteArray partdevice = p->partitionDevice();
+        if (!processContent(fs, partdevice))
+            return false;
     }
 
-    emit statusUpdate(tr("Finish writing (sync)"));
-    sync();
-    emit completed();
+    return true;
 }
 
-bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *> &partitionMap)
+
+bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const QMap<int, PartitionInfo *> &partitionMap)
 {
     /* Write partition table using sfdisk */
     qDebug() << "Partition map:" << partitionMap;
@@ -232,7 +267,7 @@ bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *>
     /* Let sfdisk write a proper partition table */
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
-    proc.start("/usr/sbin/sfdisk -uS /dev/mmcblk0");
+    proc.start("/usr/sbin/sfdisk -uS " + blockdevpath);
     proc.write(partitionTable);
     proc.closeWriteChannel();
     proc.waitForFinished(-1);
@@ -259,104 +294,95 @@ bool MultiImageWriteThread::writePartitionTable(const QMap<int, PartitionInfo *>
     return true;
 }
 
-bool MultiImageWriteThread::processImage(OsInfo *image)
+bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partdevice)
 {
-    QString os_name = image->name();
-    qDebug() << "Processing OS:" << os_name;
+    QString os_name = _image->name();
+    QByteArray fstype   = fs->fsType();
+    QByteArray mkfsopt  = fs->mkfsOptions();
+    QByteArray label = fs->label();
+    QString tarball  = fs->filename();
+    bool emptyfs     = fs->emptyFS();
 
-    QList<PartitionInfo *> *partitions = image->partitions();
-
-    foreach (PartitionInfo *p, *partitions)
+    if (!emptyfs && tarball.isEmpty())
     {
-        FileSystemInfo *fs = p->content();
+        /* If no tarball URL is specified, we expect the tarball to reside in the folder and be named <label.tar.xz> */
+        if (fstype == "raw" || fstype.startsWith("partclone"))
+            tarball = _image->folder()+"/"+label+".xz";
+        else
+            tarball = _image->folder()+"/"+label+".tar.xz";
 
-        QByteArray fstype   = fs->fsType();
-        QByteArray mkfsopt  = fs->mkfsOptions();
-        QByteArray label = fs->label();
-        QString tarball  = fs->filename();
-        bool emptyfs     = p->emptyFS();
-
-        if (!emptyfs && tarball.isEmpty())
+        if (!QFile::exists(tarball))
         {
-            /* If no tarball URL is specified, we expect the tarball to reside in the folder and be named <label.tar.xz> */
-            if (fstype == "raw" || fstype.startsWith("partclone"))
-                tarball = image->folder()+"/"+label+".xz";
-            else
-                tarball = image->folder()+"/"+label+".tar.xz";
-
-            if (!QFile::exists(tarball))
-            {
-                emit error(tr("File '%1' does not exist").arg(tarball));
-                return false;
-            }
+            emit error(tr("File '%1' does not exist").arg(tarball));
+            return false;
         }
-        if (label.size() > 15)
-        {
-            label.clear();
-        }
-        else if (!isLabelAvailable(label))
-        {
-            for (int i=0; i<10; i++)
-            {
-                if (isLabelAvailable(label+QByteArray::number(i)))
-                {
-                    label = label+QByteArray::number(i);
-                    break;
-                }
-            }
-        }
-        QByteArray partdevice = p->partitionDevice();
-
-        if (fstype == "raw")
-        {
-            emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
-            if (!dd(tarball, partdevice))
-                return false;
-        }
-        else if (fstype.startsWith("partclone"))
-        {
-            emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
-            if (!partclone_restore(tarball, partdevice))
-                return false;
-        }
-        else if (fstype != "unformatted")
-        {
-            emit runningMKFS();
-            emit statusUpdate(tr("%1: Creating filesystem (%2)").arg(os_name, QString(fstype)));
-            if (!mkfs(partdevice, fstype, label, mkfsopt))
-                return false;
-            emit finishedMKFS();
-
-            if (!emptyfs)
-            {
-                emit statusUpdate(tr("%1: Mounting file system").arg(os_name));
-                QString mountcmd;
-                if (fstype == "ntfs")
-                    mountcmd = "/sbin/mount.ntfs-3g ";
-                else
-                    mountcmd = "mount ";
-                if (QProcess::execute(mountcmd+partdevice+" /mnt2") != 0)
-                {
-                    emit error(tr("%1: Error mounting file system").arg(os_name));
-                    return false;
-                }
-
-                if (tarball.startsWith("http"))
-                    emit statusUpdate(tr("%1: Downloading and extracting filesystem").arg(os_name));
-                else
-                    emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
-
-                bool result = untar(tarball, image->folder());
-
-                QProcess::execute("umount /mnt2");
-
-                if (!result)
-                    return false;
-            }
-        }
-
-        _part++;
     }
+    if (label.size() > 15)
+    {
+        label.clear();
+    }
+    else if (!isLabelAvailable(label))
+    {
+        for (int i=0; i<10; i++)
+        {
+            if (isLabelAvailable(label+QByteArray::number(i)))
+            {
+                label = label+QByteArray::number(i);
+                break;
+            }
+        }
+    }
+
+    if (fstype == "raw")
+    {
+        emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
+        if (!dd(tarball, partdevice))
+            return false;
+    }
+    else if (fstype.startsWith("partclone"))
+    {
+        emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
+        if (!partclone_restore(tarball, partdevice))
+            return false;
+    }
+    else if (fstype != "unformatted")
+    {
+        emit runningMKFS();
+        emit statusUpdate(tr("%1: Creating filesystem (%2)").arg(os_name, QString(fstype)));
+        if (!mkfs(partdevice, fstype, label, mkfsopt))
+            return false;
+        emit finishedMKFS();
+
+        if (!emptyfs)
+        {
+            emit statusUpdate(tr("%1: Mounting file system").arg(os_name));
+            QString mountcmd;
+            if (fstype == "ntfs")
+                mountcmd = "/sbin/mount.ntfs-3g ";
+            else
+                mountcmd = "mount ";
+            if (QProcess::execute(mountcmd+partdevice+" /mnt2") != 0)
+            {
+                emit error(tr("%1: Error mounting file system").arg(os_name));
+                return false;
+            }
+
+            if (tarball.startsWith("http"))
+                emit statusUpdate(tr("%1: Downloading and extracting filesystem").arg(os_name));
+            else
+                emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
+
+            bool result = untar(tarball);
+
+            QProcess::execute("umount /mnt2");
+
+            if (!result)
+                return false;
+        }
+    }
+
+    _part++;
+
 /*
     emit statusUpdate(tr("%1: Mounting FAT partition").arg(os_name));
     if (QProcess::execute("mount "+partitions->first()->partitionDevice()+" /mnt2") != 0)
@@ -497,7 +523,7 @@ bool MultiImageWriteThread::isLabelAvailable(const QByteArray &label)
     return (QProcess::execute("/sbin/findfs LABEL="+label) != 0);
 }
 
-bool MultiImageWriteThread::untar(const QString &tarball, const QString &folder)
+bool MultiImageWriteThread::untar(const QString &tarball)
 {
     QString cmd = "sh -o pipefail -c \"";
 
@@ -505,8 +531,10 @@ bool MultiImageWriteThread::untar(const QString &tarball, const QString &folder)
         cmd += "wget --no-verbose --tries=inf -O- "+tarball+" | ";
 
     QString uncompresscmd = getUncompressCommand(tarball);
-    if (uncompresscmd == NULL)
+    if (uncompresscmd == NULL) {
+        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
         return false;
+    }
 
     cmd += uncompresscmd;
 
@@ -522,7 +550,8 @@ bool MultiImageWriteThread::untar(const QString &tarball, const QString &folder)
     qDebug() << "Executing:" << cmd;
 
     QProcess p;
-    p.setWorkingDirectory(folder);
+    if (!isURL(tarball))
+        p.setWorkingDirectory(_image->folder());
     p.setProcessChannelMode(p.MergedChannels);
     p.start(cmd);
     p.closeWriteChannel();
@@ -547,22 +576,23 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
     if (isURL(imagePath))
         cmd += "wget --no-verbose --tries=inf -O- "+imagePath+" | ";
 
+    /* For dd images compression is optional */
     QString uncompresscmd = getUncompressCommand(imagePath);
-    if (uncompresscmd == NULL)
-        return false;
-
-    cmd += uncompresscmd;
+    if (uncompresscmd != NULL)
+        cmd += uncompresscmd;
 
     if (!isURL(imagePath))
         cmd += " "+imagePath;
 
-    cmd += " | dd of="+device+" conv=fsync obs=4M\"";
+    cmd += " | dd of="+device; // BusyBox can't do this: +" conv=fsync obs=4M\"";
 
     QTime t1;
     t1.start();
     qDebug() << "Executing:" << cmd;
 
     QProcess p;
+    if (!isURL(imagePath))
+        p.setWorkingDirectory(_image->folder());
     p.setProcessChannelMode(p.MergedChannels);
     p.start(cmd);
     p.closeWriteChannel();
@@ -570,7 +600,7 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
 
     if (p.exitCode() != 0)
     {
-        emit error(tr("Error downloading or writing OS to SD card")+"\n"+p.readAll());
+        emit error(tr("Error downloading or writing image")+"\n"+p.readAll());
         return false;
     }
     qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";
@@ -603,8 +633,7 @@ QString MultiImageWriteThread::getUncompressCommand(const QString &file)
     }
     else
     {
-        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
-        return NULL;
+        return "cat";
     }
 }
 

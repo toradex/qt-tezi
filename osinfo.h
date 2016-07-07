@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QList>
 
-class PartitionInfo;
+class BlockDevInfo;
 
 class OsInfo : public QObject
 {
@@ -53,9 +53,9 @@ public:
         return _bootable;
     }
 
-    inline QList<PartitionInfo *> *partitions()
+    inline QList<BlockDevInfo *> *blockdevs()
     {
-        return &_partitions;
+        return &_blockdevs;
     }
 
     inline int riscosOffset()
@@ -66,7 +66,7 @@ public:
 protected:
     QString _folder, _infofile, _name, _description, _version, _releaseDate;
     bool _bootable;
-    QList<PartitionInfo *> _partitions;
+    QList<BlockDevInfo *> _blockdevs;
     int _riscosOffset;
 
 };

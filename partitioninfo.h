@@ -50,11 +50,6 @@ public:
         return _partitionSizeNominal;
     }
 
-    inline bool emptyFS()
-    {
-        return _emptyFS;
-    }
-
     inline bool wantMaximised()
     {
         return _wantMaximised;
@@ -105,7 +100,7 @@ protected:
     QString _tarball;
     FileSystemInfo *_content;
     int _partitionSizeNominal, _requiresPartitionNumber, _offset, _uncompressedTarballSize, _partitionSizeSectors;
-    bool _emptyFS, _wantMaximised, _active;
+    bool _wantMaximised, _active;
 };
 
 #endif // PARTITIONINFO_H

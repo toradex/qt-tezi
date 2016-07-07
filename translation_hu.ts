@@ -246,10 +246,6 @@ WARNING: This will erase all data on your SD card</source>
 <context>
     <name>MultiImageWriteThread</name>
     <message>
-        <source>More than one operating system requires partition number %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -263,10 +259,6 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Zero&apos;ing start of each partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Finish writing (sync)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -310,10 +302,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>partitions invalid</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error probing partition table</source>
         <translation type="unfinished"></translation>
     </message>
@@ -323,6 +311,22 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Error creating partition table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More than one content requires partition number %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Finish writing (syncing)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Block device &apos;%1&apos; does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
