@@ -25,7 +25,7 @@ protected:
     bool processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions);
     bool processContent(FileSystemInfo *fs, QByteArray partdevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
-    bool dd(const QString &imagePath, const QString &device);
+    bool dd(const QString &imagePath, const QString &device, const QByteArray &dd_options);
     bool partclone_restore(const QString &imagePath, const QString &device);
     bool untar(const QString &tarball);
     bool isLabelAvailable(const QByteArray &label);

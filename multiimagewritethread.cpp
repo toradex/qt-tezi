@@ -55,6 +55,12 @@ void MultiImageWriteThread::run()
 
 bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
 {
+    /* Make sure block device is writeable */
+    QFile f("/sys/block/" + blockdev->name() + "/force_ro");
+    f.open(f.WriteOnly);
+    f.write("0", 1);
+    f.close();
+
     QList<PartitionInfo *> *partitions = blockdev->partitions();
     if (!partitions->isEmpty())
     {
@@ -299,6 +305,7 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     QString os_name = _image->name();
     QByteArray fstype   = fs->fsType();
     QByteArray mkfsopt  = fs->mkfsOptions();
+    QByteArray ddopt    = fs->ddOptions();
     QByteArray label = fs->label();
     QString tarball  = fs->filename();
     bool emptyfs     = fs->emptyFS();
@@ -336,7 +343,7 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     if (fstype == "raw")
     {
         emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
-        if (!dd(tarball, partdevice))
+        if (!dd(tarball, partdevice, ddopt))
             return false;
     }
     else if (fstype.startsWith("partclone"))
@@ -569,7 +576,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     return true;
 }
 
-bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
+bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device, const QByteArray &dd_options)
 {
     QString cmd = "sh -o pipefail -c \"";
 
@@ -584,7 +591,7 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device)
     if (!isURL(imagePath))
         cmd += " "+imagePath;
 
-    cmd += " | dd of="+device; // BusyBox can't do this: +" conv=fsync obs=4M\"";
+    cmd += " | dd of=" + device + " " + dd_options; // BusyBox can't do this: +" conv=fsync obs=4M\"";
 
     QTime t1;
     t1.start();

@@ -246,6 +246,18 @@ WARNING: This will erase all data on your SD card</source>
 <context>
     <name>MultiImageWriteThread</name>
     <message>
+        <source>Finish writing (syncing)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Block device &apos;%1&apos; does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>More than one content requires partition number %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
@@ -259,6 +271,14 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Zero&apos;ing start of each partition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error creating partition table</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error probing partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -294,39 +314,19 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error downloading or extracting tarball</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error downloading or writing OS to SD card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error probing partition table</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error creating partition table</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>More than one content requires partition number %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Finish writing (syncing)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Block device &apos;%1&apos; does not exist</source>
+        <source>Error downloading or extracting tarball</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Error downloading or writing image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading or writing OS to SD card</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

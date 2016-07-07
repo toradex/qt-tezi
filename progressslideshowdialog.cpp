@@ -139,7 +139,8 @@ void ProgressSlideshowDialog::updateIOstats()
     int sectorsSinceRestart = sectors - _sectorsRestart;
     double sectorsPerSec = sectorsSinceRestart * 1000.0 / _t1.elapsed();
     QString progress;
-qDebug() << "Sectors: " << sectors;
+    //qDebug() << "Sectors: " << sectors;
+
     if (_maxSectors)
     {
         progress = tr("%1 MB of %2 MB written")

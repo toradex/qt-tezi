@@ -10,20 +10,26 @@ PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
     _uncompressedTarballSize = m.value("uncompressed_tarball_size").toInt();
     _active        = m.value("active", false).toBool();
 
-    QVariantMap contentm = m.value("content").toMap();
-    _content = new FileSystemInfo(contentm, this);
-
-    /* Get partiton type from filesystem type of content */
     QByteArray defaultPartType;
-    QByteArray fstype = _content->fsType();
-    if (fstype.contains("fat"))
-        defaultPartType = "0c"; /* FAT32 LBA */
-    else if (fstype == "swap")
-        defaultPartType = "82";
-    else if (fstype.contains("ntfs"))
-        defaultPartType = "07";
-    else
-        defaultPartType = "83"; /* Linux native */
+    if (m.contains("content")) {
+        QVariantMap contentm = m.value("content").toMap();
+        _content = new FileSystemInfo(contentm, this);
+
+        /* Get partiton type from filesystem type of content */
+        QByteArray fstype = _content->fsType();
+        if (fstype.contains("fat"))
+            defaultPartType = "0c"; /* FAT32 LBA */
+        else if (fstype == "swap")
+            defaultPartType = "82";
+        else if (fstype.contains("ntfs"))
+            defaultPartType = "07";
+        else if (fstype.contains("raw"))
+            defaultPartType = "00";
+        else
+            defaultPartType = "83"; /* Linux native */
+    } else {
+        defaultPartType = "00";
+    }
 
     _partitionType = m.value("partition_type", defaultPartType).toByteArray();
 }

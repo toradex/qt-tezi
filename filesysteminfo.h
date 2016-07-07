@@ -35,6 +35,11 @@ public:
         return _mkfsOptions;
     }
 
+    inline QByteArray ddOptions()
+    {
+        return _ddOptions;
+    }
+
     inline QByteArray label()
     {
         return _label;
@@ -50,7 +55,7 @@ signals:
 public slots:
 
 protected:
-    QByteArray _fstype, _mkfsOptions, _label;
+    QByteArray _fstype, _mkfsOptions, _ddOptions, _label;
     QString _filename;
     bool _emptyFS;
     int _uncompressedTarballSize;
