@@ -57,19 +57,6 @@ void reboot_to_extended(const QString &defaultPartition, bool setDisplayMode)
     ::reboot(RB_AUTOBOOT);
 }
 
-bool hasInstalledOS()
-{
-    bool installedOsFileExists = false;
-
-    if (QProcess::execute("mount -o ro " SETTINGS_PARTITION " /settings") == 0)
-    {
-        installedOsFileExists = QFile::exists("/settings/installed_os.json");
-        QProcess::execute("umount /settings");
-    }
-
-    return installedOsFileExists;
-}
-
 int main(int argc, char *argv[])
 {
     bool hasTouchScreen = QFile::exists("/sys/devices/platform/rpi_ft5406");
@@ -174,8 +161,7 @@ int main(int argc, char *argv[])
     // or no OS is installed (/settings/installed_os.json does not exist)
     bool bailout = !runinstaller
         && !force_trigger
-        && !(gpio_trigger && (gpio.value() == 0 ))
-        && hasInstalledOS();
+        && !(gpio_trigger && (gpio.value() == 0 ));
 
     if (bailout && keyboard_trigger)
     {
@@ -199,6 +185,8 @@ int main(int argc, char *argv[])
             }
         }
     }
+    bailout = false;
+
 
     if (bailout)
     {
@@ -223,7 +211,8 @@ int main(int argc, char *argv[])
 #endif
 
     a.exec();
-    reboot_to_extended(defaultPartition, false);
+    //reboot_to_extended(defaultPartition, false);
+    qDebug() << "Exited successful, would reboot";
 
     return 0;
 }

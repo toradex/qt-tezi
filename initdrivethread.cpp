@@ -8,7 +8,6 @@
  */
 
 #include "initdrivethread.h"
-#include "mbr.h"
 #include "util.h"
 #include "config.h"
 #include <QProcess>
@@ -220,6 +219,7 @@ bool InitDriveThread::method_resizePartitions()
     qDebug() << "parted done, output:" << p.readAll();
     QThread::msleep(500);
 */
+    /*
     emit statusUpdate(tr("Creating extended partition"));
 
     QByteArray partitionTable;
@@ -228,20 +228,24 @@ bool InitDriveThread::method_resizePartitions()
     int startOfExtended = startOfOurPartition+sizeOfOurPartition;
 
     // Align start of settings partition on 4 MiB boundary
-    int startOfSettings = startOfExtended + PARTITION_GAP;
+    int startOfSettings = startOfExtended + 2;
     if (startOfSettings % PARTITION_ALIGNMENT != 0)
          startOfSettings += PARTITION_ALIGNMENT-(startOfSettings % PARTITION_ALIGNMENT);
-
+*/
     // Primary partitions
-    partitionTable  = QByteArray::number(startOfOurPartition)+","+QByteArray::number(sizeOfOurPartition)+",0E\n"; /* FAT partition */
-    partitionTable += QByteArray::number(startOfExtended)+",,E\n"; /* Extended partition with all remaining space */
+    /*
+    partitionTable  = QByteArray::number(startOfOurPartition)+","+QByteArray::number(sizeOfOurPartition)+",0E\n"; // FAT partition
+    partitionTable += QByteArray::number(startOfExtended)+",,E\n"; // Extended partition with all remaining space
     partitionTable += "0,0\n";
     partitionTable += "0,0\n";
+    */
     // Logical partitions
-    partitionTable += QByteArray::number(startOfSettings)+","+QByteArray::number(SETTINGS_PARTITION_SIZE)+",L\n"; /* Settings partition */
-    qDebug() << "Writing partition table" << partitionTable;
+    /*
+    partitionTable += QByteArray::number(startOfSettings)+","+QByteArray::number(SETTINGS_PARTITION_SIZE)+",L\n";
+    qDebug() << "Writing partition table" << partitionTable;*/
 
     /* Let sfdisk write a proper partition table */
+    /*
     QString cmd = QString("/usr/sbin/sfdisk -uS /dev/mmcblk0");
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
@@ -255,18 +259,19 @@ bool InitDriveThread::method_resizePartitions()
         return false;
     }
     qDebug() << "sfdisk done, output:" << proc.readAll();
-    QThread::msleep(500);
+    QThread::msleep(500);*/
 
     /* For reasons unknown Linux sometimes
      * only finds /dev/mmcblk0p2 and /dev/mmcblk0p1 goes missing */
+    /*
     if (!QFile::exists("/dev/mmcblk0p1"))
     {
-        /* Probe again */
+        // Probe again
         QProcess::execute("/usr/sbin/partprobe");
         QThread::msleep(1500);
     }
 
-    QProcess::execute("/sbin/mlabel p:RECOVERY");
+    QProcess::execute("/sbin/mlabel p:RECOVERY");*/
 
     return true;
 }
@@ -306,7 +311,8 @@ bool InitDriveThread::formatBootPartition()
 
 bool InitDriveThread::formatSettingsPartition()
 {
-    return QProcess::execute("/sbin/mkfs.ext4 -L SETTINGS " SETTINGS_PARTITION) == 0;
+    //return QProcess::execute("/sbin/mkfs.ext4 -L SETTINGS " SETTINGS_PARTITION) == 0;
+    return false;
 }
 
 bool InitDriveThread::zeroMbr()

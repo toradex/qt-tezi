@@ -170,8 +170,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
         }
         else
         {
-            offset += PARTITION_GAP;
-            /* Align at 4 MiB offset */
+            /* Adhere to partition alignment */
             if (offset % PARTITION_ALIGNMENT != 0)
             {
                     offset += PARTITION_ALIGNMENT-(offset % PARTITION_ALIGNMENT);
@@ -197,20 +196,10 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
         }
         else
         {
-#ifdef SHRINK_PARTITIONS_TO_MINIMIZE_GAPS
-            if (partsizeSectors % PARTITION_ALIGNMENT == 0 && p->content()->fsType() != "raw")
-            {
-                /* Partition size is dividable by 4 MiB
-                   Take off a couple sectors of the end of our partition to make room
-                   for the EBR of the next partition, so the next partition can
-                   align nicely without having a 4 MiB gap */
-                partsizeSectors -= PARTITION_GAP;
-            }
-#endif
-            if (p->wantMaximised() && (partsizeSectors+PARTITION_GAP) % PARTITION_ALIGNMENT != 0)
+            if (p->wantMaximised() && partsizeSectors % PARTITION_ALIGNMENT != 0)
             {
                 /* Enlarge partition to close gap to next partition */
-                partsizeSectors += PARTITION_ALIGNMENT-((partsizeSectors+PARTITION_GAP) % PARTITION_ALIGNMENT);
+                partsizeSectors += PARTITION_ALIGNMENT - (partsizeSectors % PARTITION_ALIGNMENT);
             }
         }
 
@@ -286,11 +275,9 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     }
 
     ::sync();
-    QThread::msleep(500);
-
-    QProcess::execute("/usr/sbin/partprobe");
-    QThread::msleep(500);
-
+    QThread::msleep(200);
+    proc.start("/usr/sbin/partprobe " + blockdevpath);
+    proc.waitForFinished(-1);
     if (proc.exitCode() != 0)
     {
         emit error(tr("Error probing partition table")+"\n"+proc.readAll());

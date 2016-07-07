@@ -71,14 +71,6 @@ WARNING: This will erase all data on your SD card</source>
         <source>Resizing FAT partition</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Creating extended partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error creating extended partition</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>MainWindow</name>
