@@ -274,16 +274,6 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
         return false;
     }
 
-    ::sync();
-    QThread::msleep(200);
-    proc.start("/usr/sbin/partprobe " + blockdevpath);
-    proc.waitForFinished(-1);
-    if (proc.exitCode() != 0)
-    {
-        emit error(tr("Error probing partition table")+"\n"+proc.readAll());
-        return false;
-    }
-
     return true;
 }
 
