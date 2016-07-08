@@ -11,6 +11,10 @@
         <source>Error mounting boot partition</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Config editor</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>InitDriveThread</name>
@@ -69,6 +73,17 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Resizing FAT partition</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LanguageDialog</name>
+    <message>
+        <source>Language (l): </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Keyboard</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

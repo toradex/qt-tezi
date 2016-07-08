@@ -55,7 +55,10 @@ HEADERS  += mainwindow.h \
     filesysteminfo.h \
     blockdevinfo.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    languagedialog.ui \
+    progressslideshowdialog.ui \
+    confeditdialog.ui
 
 RESOURCES += \
     icons.qrc
