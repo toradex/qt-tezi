@@ -36,6 +36,9 @@
 /* Partitioning settings */
 #define PARTITION_ALIGNMENT  8192
 
+/* Temporary mount folder */
+#define TEMP_MOUNT_FOLDER "/run/media/tmp"
+
 /* If the image name matches this exactly, mark it as recommended */
 #define RECOMMENDED_IMAGE "Raspbian"
 

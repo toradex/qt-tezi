@@ -22,8 +22,8 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
 {
     QDir dir;
 
-    if (!dir.exists("/mnt2"))
-        dir.mkdir("/mnt2");
+    if (!dir.exists(TEMP_MOUNT_FOLDER))
+        dir.mkdir(TEMP_MOUNT_FOLDER);
 }
 
 void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile)
@@ -337,7 +337,7 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
                 mountcmd = "/sbin/mount.ntfs-3g ";
             else
                 mountcmd = "mount ";
-            if (QProcess::execute(mountcmd+partdevice+" /mnt2") != 0)
+            if (QProcess::execute(mountcmd + partdevice + " " TEMP_MOUNT_FOLDER) != 0)
             {
                 emit error(tr("%1: Error mounting file system").arg(os_name));
                 return false;
@@ -350,7 +350,7 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
 
             bool result = untar(tarball);
 
-            QProcess::execute("umount /mnt2");
+            QProcess::execute("umount " TEMP_MOUNT_FOLDER);
 
             if (!result)
                 return false;
@@ -518,8 +518,8 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     {
         cmd += " " + tarball;
     }
-    cmd += " | tar x -C /mnt2 ";
-    cmd += "\"";
+    cmd += " | tar x -C " TEMP_MOUNT_FOLDER;
+    cmd += " \"";
 
     QTime t1;
     t1.start();
@@ -648,6 +648,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
 
 void MultiImageWriteThread::patchConfigTxt()
 {
+    /*
 
         QSettings settings("/settings/noobs.conf", QSettings::IniFormat);
         int videomode = settings.value("display_mode", 0).toInt();
@@ -656,16 +657,16 @@ void MultiImageWriteThread::patchConfigTxt()
 
         switch (videomode)
         {
-        case 0: /* HDMI PREFERRED */
+        case 0: //
             dispOptions = "hdmi_force_hotplug=1\r\n";
             break;
-        case 1: /* HDMI VGA */
+        case 1: //
             dispOptions = "hdmi_ignore_edid=0xa5000080\r\nhdmi_force_hotplug=1\r\nhdmi_group=2\r\nhdmi_mode=4\r\n";
             break;
-        case 2: /* PAL */
+        case 2: //
             dispOptions = "hdmi_ignore_hotplug=1\r\nsdtv_mode=2\r\n";
             break;
-        case 3: /* NTSC */
+        case 3: //
             dispOptions = "hdmi_ignore_hotplug=1\r\nsdtv_mode=0\r\n";
             break;
         }
@@ -674,7 +675,7 @@ void MultiImageWriteThread::patchConfigTxt()
         QFile f("/mnt2/config.txt");
         f.open(f.Append);
         f.write("\r\n# NOOBS Auto-generated Settings:\r\n"+dispOptions);
-        f.close();
+        f.close();*/
 
 }
 
