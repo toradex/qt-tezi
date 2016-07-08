@@ -55,11 +55,6 @@ public:
         return _wantMaximised;
     }
 
-    inline int uncompressedTarballSize()
-    {
-        return _uncompressedTarballSize;
-    }
-
     inline void setOffset(int offset)
     {
         _offset = offset;
@@ -99,7 +94,7 @@ protected:
     QByteArray _partitionDevice, _partitionType;
     QString _tarball;
     FileSystemInfo *_content;
-    int _partitionSizeNominal, _requiresPartitionNumber, _offset, _uncompressedTarballSize, _partitionSizeSectors;
+    int _partitionSizeNominal, _requiresPartitionNumber, _offset, _partitionSizeSectors;
     bool _wantMaximised, _active;
 };
 

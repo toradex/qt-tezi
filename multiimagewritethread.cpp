@@ -101,7 +101,8 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
         if ( partition->wantMaximised() )
             numexpandparts++;
         totalnominalsize += partition->partitionSizeNominal();
-        totaluncompressedsize += partition->uncompressedTarballSize();
+        FileSystemInfo *fs = partition->content();
+            totaluncompressedsize += fs->uncompressedSize();
 
         int reqPart = partition->requiresPartitionNumber();
         if (reqPart)
@@ -117,12 +118,8 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
         }
 
         /* Maximum overhead per partition for alignment */
-#ifdef SHRINK_PARTITIONS_TO_MINIMIZE_GAPS
         if (partition->wantMaximised() || (partition->partitionSizeNominal()*2048) % PARTITION_ALIGNMENT != 0)
             totalnominalsize += PARTITION_ALIGNMENT/2048;
-#else
-        totalnominalsize += PARTITION_ALIGNMENT/2048;
-#endif
     }
 
     if (numexpandparts)

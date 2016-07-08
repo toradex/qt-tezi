@@ -7,7 +7,6 @@ PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
     _offset        = m.value("offset_in_sectors").toInt();
     _partitionSizeNominal = m.value("partition_size_nominal").toInt();
     _requiresPartitionNumber = m.value("requires_partition_number").toInt();
-    _uncompressedTarballSize = m.value("uncompressed_tarball_size").toInt();
     _active        = m.value("active", false).toBool();
 
     QByteArray defaultPartType;

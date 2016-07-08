@@ -40,9 +40,9 @@ public:
         return _label;
     }
 
-    inline int uncompressedTarballSize()
+    inline int uncompressedSize()
     {
-        return _uncompressedTarballSize;
+        return _uncompressedSize;
     }
 
 signals:
@@ -52,7 +52,7 @@ public slots:
 protected:
     QByteArray _fstype, _mkfsOptions, _ddOptions, _label;
     QString _filename;
-    int _uncompressedTarballSize;
+    int _uncompressedSize;
 };
 
 #endif // FILESYSTEMINFO_H
