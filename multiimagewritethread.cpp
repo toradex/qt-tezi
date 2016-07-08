@@ -638,7 +638,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
 
     if (p.exitCode() != 0)
     {
-        emit error(tr("Error downloading or writing OS to SD card")+"\n"+p.readAll());
+        emit error(tr("Error downloading or writing Image")+"\n"+p.readAll());
         return false;
     }
     qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";

@@ -27,26 +27,19 @@
 #endif
 
 /*
- *
+ * Author: Stefan Agner
  * Initial author: Floris Bos
- * Maintained by Raspberry Pi
  *
  * See LICENSE.txt for license details
  *
  */
 
-void reboot_to_extended(const QString &defaultPartition, bool setDisplayMode)
+void reboot()
 {
 #ifdef Q_WS_QWS
     QWSServer::setBackground(BACKGROUND_COLOR);
     QWSServer::setCursorVisible(true);
 #endif
-    /*
-    BootSelectionDialog bsd(defaultPartition);
-    if (setDisplayMode)
-        bsd.setDisplayMode();
-    bsd.exec();
-    */
 
     // Shut down networking
     QProcess::execute("ifdown -a");
@@ -187,13 +180,6 @@ int main(int argc, char *argv[])
     }
     bailout = false;
 
-
-    if (bailout)
-    {
-        splash->hide();
-        reboot_to_extended(defaultPartition, true);
-    }
-
 #ifdef Q_WS_QWS
     QWSServer::setCursorVisible(true);
 #endif
@@ -211,8 +197,8 @@ int main(int argc, char *argv[])
 #endif
 
     a.exec();
-    //reboot_to_extended(defaultPartition, false);
-    qDebug() << "Exited successful, would reboot";
+
+    reboot();
 
     return 0;
 }

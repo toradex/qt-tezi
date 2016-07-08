@@ -147,10 +147,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Warning: this will install the selected Operating System(s). All existing data on the SD card will be overwritten, including any OSes that are already installed.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Warning: incompatible Operating System(s) detected. The following OSes aren&apos;t supported on this revision of Raspberry Pi and may fail to boot or function correctly:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -234,6 +230,10 @@ WARNING: This will erase all data on your SD card</source>
         <source>Reading images from USB mass storage device...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
@@ -310,7 +310,7 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error downloading or writing OS to SD card</source>
+        <source>Error downloading or writing Image</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

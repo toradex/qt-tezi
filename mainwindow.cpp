@@ -483,10 +483,11 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
 
 void MainWindow::on_actionInstall_triggered()
 {
-    if (_silent || QMessageBox::warning(this,
-                                        tr("Confirm"),
-                                        tr("Warning: this will install the selected Operating System(s). All existing data on the SD card will be overwritten, including any OSes that are already installed."),
-                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+    if (_silent ||
+        QMessageBox::warning(this,
+                            tr("Confirm"),
+                            tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
+                            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
         /* See if any of the OSes are unsupported */
         bool allSupported = true;
@@ -502,10 +503,11 @@ void MainWindow::on_actionInstall_triggered()
                 unsupportedOses += "\n" + name;
             }
         }
-        if (_silent || allSupported || QMessageBox::warning(this,
-                                        tr("Confirm"),
-                                        tr("Warning: incompatible Operating System(s) detected. The following OSes aren't supported on this revision of Raspberry Pi and may fail to boot or function correctly:") + unsupportedOses,
-                                        QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+        if (_silent || allSupported ||
+            QMessageBox::warning(this,
+                                tr("Confirm"),
+                                tr("Warning: incompatible Operating System(s) detected. The following OSes aren't supported on this revision of Raspberry Pi and may fail to boot or function correctly:") + unsupportedOses,
+                                QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
         {
             setEnabled(false);
             _numMetaFilesToDownload = 0;
