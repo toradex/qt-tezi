@@ -1,15 +1,11 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2013-04-30T12:10:31
-#
-#-------------------------------------------------
+# Qt Project for Toradex Installer
 
 QT       += core gui network dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = recovery
-target.files = recovery
+TARGET = tezi
+target.files = tezi
 target.path = /var/volatile
 INSTALLS = target
 TEMPLATE = app

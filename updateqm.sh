@@ -1,4 +1,4 @@
 #!/bin/sh
 
-lupdate -no-obsolete recovery.pro || true
-lrelease recovery.pro
+lupdate -no-obsolete tezi.pro || true
+lrelease tezi.pro
