@@ -5,7 +5,6 @@ FileSystemInfo::FileSystemInfo(const QVariantMap &m, QObject *parent) :
 {
 
     _fstype        = m.value("filesystem_type").toByteArray().toLower();
-    _emptyFS       = m.value("empty_fs", false).toBool();
     _mkfsOptions   = m.value("mkfs_options").toByteArray();
     _ddOptions   = m.value("dd_options").toByteArray();
     _label         = m.value("label").toByteArray();

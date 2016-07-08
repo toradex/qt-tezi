@@ -270,10 +270,6 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>File &apos;%1&apos; does not exist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1: Writing OS image</source>
         <translation type="unfinished"></translation>
     </message>

@@ -274,6 +274,15 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
         return false;
     }
 
+    for (int i=1; i <= partitionMap.keys().last(); i++) {
+        if (partitionMap.contains(i))
+        {
+            PartitionInfo *p = partitionMap.value(i);
+            while (!QFile::exists(p->partitionDevice()))
+                QThread::msleep(10);
+        }
+    }
+
     return true;
 }
 
@@ -285,22 +294,7 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     QByteArray ddopt    = fs->ddOptions();
     QByteArray label = fs->label();
     QString tarball  = fs->filename();
-    bool emptyfs     = fs->emptyFS();
 
-    if (!emptyfs && tarball.isEmpty())
-    {
-        /* If no tarball URL is specified, we expect the tarball to reside in the folder and be named <label.tar.xz> */
-        if (fstype == "raw" || fstype.startsWith("partclone"))
-            tarball = _image->folder()+"/"+label+".xz";
-        else
-            tarball = _image->folder()+"/"+label+".tar.xz";
-
-        if (!QFile::exists(tarball))
-        {
-            emit error(tr("File '%1' does not exist").arg(tarball));
-            return false;
-        }
-    }
     if (label.size() > 15)
     {
         label.clear();
@@ -337,7 +331,8 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
             return false;
         emit finishedMKFS();
 
-        if (!emptyfs)
+        /* If there is no tarball/image specified, its an empty partition which is perfectly ok too */
+        if (!tarball.isEmpty())
         {
             emit statusUpdate(tr("%1: Mounting file system").arg(os_name));
             QString mountcmd;
@@ -453,7 +448,7 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
         cmd = "/sbin/mkfs.fat ";
         if (!label.isEmpty())
         {
-            cmd += "-n "+label+" ";
+            cmd += "-F 32 -n "+label+" ";
         }
     }
     else if (fstype == "ext3")

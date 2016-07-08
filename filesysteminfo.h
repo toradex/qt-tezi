@@ -15,11 +15,6 @@ class FileSystemInfo : public QObject
 public:
     explicit FileSystemInfo(const QVariantMap &m, QObject *parent = 0);
 
-    inline bool emptyFS()
-    {
-        return _emptyFS;
-    }
-
     inline QString filename()
     {
         return _filename;
@@ -57,7 +52,6 @@ public slots:
 protected:
     QByteArray _fstype, _mkfsOptions, _ddOptions, _label;
     QString _filename;
-    bool _emptyFS;
     int _uncompressedTarballSize;
 };
 
