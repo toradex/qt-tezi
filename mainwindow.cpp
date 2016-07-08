@@ -428,7 +428,7 @@ void MainWindow::pollMedia()
             QApplication::processEvents();
         }
 
-        QString dst = "/usb";
+        QString dst = "/run/media/usb";
         if (!isMounted(MEDIA_USB)) {
             mountMedia(MEDIA_USB, dst);
         }
