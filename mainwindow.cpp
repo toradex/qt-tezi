@@ -1305,8 +1305,9 @@ void MainWindow::hideDialogIfNoNetwork()
 
 void MainWindow::on_actionWifi_triggered()
 {
+    /*
     bool wasAlreadyOnlineBefore = !_networkStatusPollTimer.isActive();
-/*
+
     WifiSettingsDialog wsd;
     if ( wsd.exec() == wsd.Accepted )
     {

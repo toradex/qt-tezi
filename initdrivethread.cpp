@@ -119,7 +119,7 @@ void InitDriveThread::run()
 bool InitDriveThread::method_resizePartitions()
 {
     int newStartOfRescuePartition = getFileContents("/sys/class/block/mmcblk0p1/start").trimmed().toInt();
-    int newSizeOfRescuePartition  = sizeofBootFilesInKB()*1.024/1000 + 100;
+    //int newSizeOfRescuePartition  = sizeofBootFilesInKB()*1.024/1000 + 100;
 
     if (!umountSystemPartition())
     {
