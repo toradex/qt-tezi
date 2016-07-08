@@ -23,7 +23,7 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
     QDir dir;
 
     if (!dir.exists(TEMP_MOUNT_FOLDER))
-        dir.mkdir(TEMP_MOUNT_FOLDER);
+        dir.mkpath(TEMP_MOUNT_FOLDER);
 }
 
 void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile)

@@ -406,7 +406,7 @@ bool MainWindow::isMounted(const QString &path) {
 }
 
 bool MainWindow::mountMedia(const QString &media, const QString &dst) {
-    QDir().mkdir(dst);
+    QDir().mkpath(dst);
     if (QProcess::execute("mount " + media + " " + dst) != 0)
     {
         qDebug() << "Error mounting external media" << media << "to" << dst;
