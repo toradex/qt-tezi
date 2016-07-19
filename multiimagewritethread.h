@@ -46,9 +46,8 @@ signals:
     void error(const QString &msg);
     void statusUpdate(const QString &msg);
     void parsedImagesize(qint64 size);
+    void imageProgress(qint64 size);
     void completed();
-    void runningMKFS();
-    void finishedMKFS();
     
 public slots:
     

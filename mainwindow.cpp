@@ -1259,11 +1259,10 @@ void MainWindow::startImageWrite()
 
     _psd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
     connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));
+    connect(imageWriteThread, SIGNAL(imageProgress(qint64)), _psd, SLOT(updateIOstats(qint64)));
     connect(imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
     connect(imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
-    connect(imageWriteThread, SIGNAL(runningMKFS()), _psd, SLOT(pauseIOaccounting()), Qt::BlockingQueuedConnection);
-    connect(imageWriteThread, SIGNAL(finishedMKFS()), _psd, SLOT(resumeIOaccounting()), Qt::BlockingQueuedConnection);
     imageWriteThread->start();
     hide();
     _psd->exec();

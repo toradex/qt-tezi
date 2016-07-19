@@ -32,17 +32,14 @@ public slots:
     void setLabelText(const QString &text);
     void setMaximum(qint64 bytes);
     void nextSlide();
-    void updateIOstats();
-    void pauseIOaccounting();
-    void resumeIOaccounting();
+    void updateIOstats(qint64 progress);
 
 protected:
     QStringList _slides;
-    int _pos, _changeInterval, _sectorsStart, _sectorsRestart, _maxSectors, _pausedAt;
-    QTimer _timer, _iotimer;
+    int _pos, _changeInterval, _maxSectors;
+    qint64 _lastBytes;
+    QTimer _timer;
     QTime _t1;
-
-    int sectorsWritten();
 
 
 private:

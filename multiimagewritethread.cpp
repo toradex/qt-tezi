@@ -322,11 +322,9 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     }
     else if (fstype != "unformatted")
     {
-        emit runningMKFS();
         emit statusUpdate(tr("%1: Creating filesystem (%2)").arg(os_name, QString(fstype)));
         if (!mkfs(partdevice, fstype, label, mkfsopt))
             return false;
-        emit finishedMKFS();
 
         /* If there is no tarball/image specified, its an empty partition which is perfectly ok too */
         if (!tarball.isEmpty())
@@ -518,6 +516,10 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     {
         cmd += " " + tarball;
     }
+
+    /* Use pipe viewer for actual processing speed */
+    cmd += " | pv -b -n";
+
     cmd += " | tar x -C " TEMP_MOUNT_FOLDER;
     cmd += " \"";
 
@@ -528,11 +530,23 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     QProcess p;
     if (!isURL(tarball))
         p.setWorkingDirectory(_image->folder());
-    p.setProcessChannelMode(p.MergedChannels);
     p.start(cmd);
-    p.closeWriteChannel();
-    p.waitForFinished(-1);
+    p.setReadChannel(QProcess::StandardError);
 
+    /* Parse pipe viewer output for progress */
+    while (p.waitForReadyRead(-1))
+    {
+        QString line = p.readLine();
+
+        bool ok;
+        qint64 bytes = line.toLongLong(&ok);
+
+        if (ok) {
+            emit imageProgress(bytes);
+        }
+    }
+
+    p.waitForFinished(-1);
     if (p.exitCode() != 0)
     {
         QByteArray msg = p.readAll();

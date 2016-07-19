@@ -20,7 +20,7 @@ ProgressSlideshowDialog::ProgressSlideshowDialog(const QStringList &slidesDirect
     _pos(0),
     _changeInterval(changeInterval),
     _maxSectors(0),
-    _pausedAt(0),
+    _lastBytes(0),
     ui(new Ui::ProgressSlideshowDialog)
 {
     ui->setupUi(this);
@@ -67,8 +67,7 @@ ProgressSlideshowDialog::ProgressSlideshowDialog(const QStringList &slidesDirect
         connect(&_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
         _timer.start(changeInterval * 1000);
     }
-    connect(&_iotimer, SIGNAL(timeout()), this, SLOT(updateIOstats()));
-    enableIOaccounting();
+    _t1.start();
 }
 
 ProgressSlideshowDialog::~ProgressSlideshowDialog()
@@ -94,106 +93,38 @@ void ProgressSlideshowDialog::nextSlide()
         ui->imagespace->setPixmap(QPixmap(newSlide));
 }
 
-/* IO accounting functionality for analyzing SD card write speed / showing progress */
-
-void ProgressSlideshowDialog::enableIOaccounting()
-{
-    qDebug() << "enableIOaccounting";
-    _sectorsStart = _sectorsRestart = sectorsWritten();
-    _t1.start();
-    _iotimer.start(1000);
-}
-
-void ProgressSlideshowDialog::disableIOaccounting()
-{
-    _iotimer.stop();
-    ui->mbwrittenLabel->setText("");
-}
-
-void ProgressSlideshowDialog::pauseIOaccounting()
-{
-    qDebug() << "pauseIOaccounting";
-    _pausedAt = sectorsWritten();
-    _iotimer.stop();
-}
-
-void ProgressSlideshowDialog::resumeIOaccounting()
-{
-    qDebug() << "resumeIOaccounting";
-    _sectorsRestart = sectorsWritten();
-    _sectorsStart += _sectorsRestart-_pausedAt;
-    _t1.restart();
-    _iotimer.start(1000);
-}
-
 void ProgressSlideshowDialog::setMaximum(qint64 bytes)
 {
-    _maxSectors = bytes/512;
+    _maxSectors = bytes / 512;
     ui->progressBar->setMaximum(_maxSectors);
 }
 
-void ProgressSlideshowDialog::updateIOstats()
+void ProgressSlideshowDialog::updateIOstats(qint64 bytes)
 {
-    int sectors = sectorsWritten();
-    int sectorsSinceStart = sectors - _sectorsStart;
-    int sectorsSinceRestart = sectors - _sectorsRestart;
-    double sectorsPerSec = sectorsSinceRestart * 1000.0 / _t1.elapsed();
+    int sectors = bytes / 512;
     QString progress;
-    //qDebug() << "Sectors: " << sectors;
 
     if (_maxSectors)
     {
         progress = tr("%1 MB of %2 MB written")
-                .arg(QString::number(sectorsSinceStart/2048), QString::number(_maxSectors/2048));
+                .arg(QString::number(sectors/2048), QString::number(_maxSectors/2048));
 
-        sectors = qMin(_maxSectors, sectorsSinceStart);
+        sectors = qMin(_maxSectors, sectors);
         ui->progressBar->setValue(sectors);
     }
     else
     {
         progress = tr("%1 MB written")
-                .arg(QString::number(sectorsSinceStart/2048));
+                .arg(QString::number(sectors/2048));
     }
 
-    if (_iotimer.isActive()) {
-        QString speed = tr("(%3 MB/sec)").arg(QString::number(sectorsPerSec/2048.0, 'f', 1));
+    // Update interval is 1 by default, so we can calculate current speed simply by using the difference
+    // to the last value provided...
+    if (_lastBytes) {
+        QString speed = tr("(%3 MB/sec)").arg(QString::number((bytes - _lastBytes)/1024.0/1024.0, 'f', 1));
         progress += " " + speed;
     }
 
+    _lastBytes = bytes;
     ui->mbwrittenLabel->setText(progress);
-}
-
-int ProgressSlideshowDialog::sectorsWritten()
-{
-    /* Poll kernel counters to get number of bytes written
-     *
-     * Fields available in /sys/block/<DEVICE>/stat
-     * (taken from https://www.kernel.org/doc/Documentation/block/stat.txt )
-     *
-     * Name            units         description
-     * ----            -----         -----------
-     * read I/Os       requests      number of read I/Os processed
-     * read merges     requests      number of read I/Os merged with in-queue I/O
-     * read sectors    sectors       number of sectors read
-     * read ticks      milliseconds  total wait time for read requests
-     * write I/Os      requests      number of write I/Os processed
-     * write merges    requests      number of write I/Os merged with in-queue I/O
-     * write sectors   sectors       number of sectors written
-     * write ticks     milliseconds  total wait time for write requests
-     * in_flight       requests      number of I/Os currently in flight
-     * io_ticks        milliseconds  total time this block device has been active
-     * time_in_queue   milliseconds  total wait time for all requests
-     */
-
-    QFile f("/sys/block/mmcblk0/stat");
-    f.open(f.ReadOnly);
-    QByteArray ioline = f.readAll().simplified();
-    f.close();
-
-    QList<QByteArray> stats = ioline.split(' ');
-
-    if (stats.count() >= 6)
-        return stats.at(6).toInt(); /* write sectors */
-    else
-        return 0;
 }
