@@ -541,9 +541,10 @@ bool MultiImageWriteThread::untar(const QString &tarball)
         bool ok;
         qint64 bytes = line.toLongLong(&ok);
 
-        if (ok) {
+        if (ok)
             emit imageProgress(bytes);
-        }
+        else
+            break;
     }
 
     p.waitForFinished(-1);
