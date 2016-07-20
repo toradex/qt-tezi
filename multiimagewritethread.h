@@ -39,7 +39,8 @@ protected:
 
     OsInfo *_image;
 
-    int _extraSpacePerPartition, _sectorOffset, _part;
+    int _extraSpacePerPartition, _sectorOffset;
+    qint64 _bytesWritten;
     QVariantList installed_os;
     
 signals:

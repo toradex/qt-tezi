@@ -9,5 +9,5 @@ FileSystemInfo::FileSystemInfo(const QVariantMap &m, QObject *parent) :
     _ddOptions   = m.value("dd_options").toByteArray();
     _label         = m.value("label").toByteArray();
     _filename      = m.value("filename").toString();
-    _uncompressedSize = m.value("uncompressed_size").toInt();
+    _uncompressedSize = m.value("uncompressed_size", 0).toInt();
 }

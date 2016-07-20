@@ -18,7 +18,7 @@
 #include <QtEndian>
 
 MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
-    QThread(parent), _extraSpacePerPartition(0), _part(5)
+    QThread(parent), _extraSpacePerPartition(0), _bytesWritten(0)
 {
     QDir dir;
 
@@ -355,8 +355,6 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
         }
     }
 
-    _part++;
-
 /*
     emit statusUpdate(tr("%1: Mounting FAT partition").arg(os_name));
     if (QProcess::execute("mount "+partitions->first()->partitionDevice()+" /mnt2") != 0)
@@ -534,24 +532,26 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     p.setReadChannel(QProcess::StandardError);
 
     /* Parse pipe viewer output for progress */
+    qint64 bytes = 0;
     while (p.waitForReadyRead(-1))
     {
         QString line = p.readLine();
 
         bool ok;
-        qint64 bytes = line.toLongLong(&ok);
+        bytes = line.toLongLong(&ok);
 
         if (ok)
-            emit imageProgress(bytes);
+            emit imageProgress(_bytesWritten + bytes);
         else
             break;
     }
+
+    _bytesWritten += bytes;
 
     p.waitForFinished(-1);
     if (p.exitCode() != 0)
     {
         QByteArray msg = p.readAll();
-        qDebug() << msg;
         emit error(tr("Error downloading or extracting tarball")+"\n"+msg);
         return false;
     }
