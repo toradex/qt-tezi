@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "multiimagewritethread.h"
-#include "initdrivethread.h"
 #include "confeditdialog.h"
 #include "progressslideshowdialog.h"
 #include "config.h"

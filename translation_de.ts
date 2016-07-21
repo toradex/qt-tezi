@@ -17,66 +17,6 @@
     </message>
 </context>
 <context>
-    <name>InitDriveThread</name>
-    <message>
-        <source>Mounting FAT partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Formatting settings partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error formatting settings partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error mounting system partition.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error unmounting system partition.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Would you like NOOBS to create one for you?
-WARNING: This will erase all data on your SD card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error: No MBR present on SD Card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Zeroing partition table</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error zero&apos;ing MBR/GPT. SD card may be broken or advertising wrong capacity.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Writing new MBR</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SD card has now been formatted ready for NOOBS installation. Please re-copy the NOOBS files onto the card and reboot</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SD card has not been formatted correctly. Please reformat using the SD Association Formatting Tool and try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Removing partitions 2,3,4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Resizing FAT partition</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>LanguageDialog</name>
     <message>
         <source>Language (l): </source>
