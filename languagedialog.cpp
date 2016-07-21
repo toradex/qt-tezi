@@ -56,7 +56,7 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_QuitOnClose, false);
 
-    QDir kdir("/keymaps/", "*.qmap");
+    QDir kdir("/usr/share/tezi/keymaps/", "*.qmap");
     QStringList keyboardlayouts = kdir.entryList();
     foreach (QString layoutfile, keyboardlayouts)
     {
@@ -113,7 +113,7 @@ void LanguageDialog::changeKeyboardLayout(const QString &langcode)
     {
         QWSServer *q = QWSServer::instance();
         q->closeKeyboard();
-        q->setKeyboardHandler(QKbdDriverFactory::create("TTY", "keymap="+keymapfile));
+        q->setKeyboardHandler(QKbdDriverFactory::create("LinuxInput", "keymap="+keymapfile));
     }
 #else
     Q_UNUSED(langcode)
