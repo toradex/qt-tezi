@@ -16,10 +16,13 @@ OsInfo::OsInfo(const QString &folder, const QString &infofile, QObject *parent) 
     _bootable = m.value("bootable", true).toBool();
     _prepareScript = m.value("prepare_script").toString();
     _wrapupScript = m.value("wrapup_script").toString();
+    QVariantList productids = m.value("supported_product_ids").toList();
+    foreach (QVariant prid, productids) {
+        _supportedProductIds.append(prid.toString());
+    }
 
     QVariantList blockdevs = m.value("blockdevs").toList();
-    foreach (QVariant bd, blockdevs)
-    {
+    foreach (QVariant bd, blockdevs) {
         QVariantMap blockdev = bd.toMap();
 
         _blockdevs.append(new BlockDevInfo(blockdev, this));

@@ -68,6 +68,10 @@ public:
         return &_blockdevs;
     }
 
+    inline QList<QString> supportedProductIds() {
+        return _supportedProductIds;
+    }
+
     inline int riscosOffset()
     {
         return _riscosOffset;
@@ -77,6 +81,7 @@ protected:
     QString _folder, _infofile, _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript;
     bool _bootable;
     QList<BlockDevInfo *> _blockdevs;
+    QList<QString> _supportedProductIds;
     int _riscosOffset;
 
 };

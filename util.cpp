@@ -39,28 +39,6 @@ void putFileContents(const QString &filename, const QByteArray &data)
     f.close();
 }
 
-static uint revision = 0;
-uint readBoardRevision()
-{
-    if (revision == 0)
-    {
-        QProcess proc;
-        proc.start("vcgencmd otp_dump");
-        proc.waitForFinished();
-        QList<QByteArray> lines = proc.readAll().split('\n');
-        for (int i=0; i < lines.size(); i++)
-        {
-            if (lines.at(i).startsWith("30:"))
-            {
-                bool ok;
-                revision = lines.at(i).right(8).toUInt(&ok, 16) & 0xFFFFFF;
-                break;
-            }
-        }
-    }
-    return revision;
-}
-
 /* Whether this OS should be displayed in the list of bootable OSes */
 bool canBootOs(const QString& name, const QVariantMap& values)
 {

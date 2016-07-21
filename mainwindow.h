@@ -39,7 +39,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWidget *parent = 0);
+    explicit MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev, QWidget *parent = 0);
     ~MainWindow();
 
 protected:
@@ -60,7 +60,7 @@ protected:
     QTimer _networkStatusPollTimer;
     QTimer _mediaPollTimer;
     QTime _time;
-    QString _model;
+    QString _model, _toradexProductId, _toradexBoardRev;
 
     QMap<QString,QVariantMap> listMediaImages(const QString &path, enum ImageSource source);
     virtual void changeEvent(QEvent * event);

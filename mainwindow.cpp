@@ -67,10 +67,10 @@ bool MainWindow::_partInited = false;
 /* Flag to keep track of current display mode. */
 int MainWindow::_currentMode = 0;
 
-MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWidget *parent) :
+MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _kcpos(0), _defaultDisplay(defaultDisplay),
+    _qpd(NULL), _kcpos(0), _defaultDisplay(defaultDisplay), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
     _silent(false), _allowSilent(false), _showAll(false), _splash(splash), _settings(NULL),
     _hasWifi(false), _netaccess(NULL)
 {
@@ -156,6 +156,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QWi
     QProcess::execute("mount -o ro -t vfat /dev/mmcblk0p1 /mnt");
 */
     _model = getFileContents("/proc/device-tree/model");
+
     QString cmdline = getFileContents("/proc/cmdline");
     if (cmdline.contains("showall"))
     {
@@ -259,6 +260,9 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QString description = m.value("description").toString();
         QString folder  = m.value("folder").toString();
         QString iconFilename = m.value("icon").toString();
+        QVariantList supportedProductIds = m.value("supported_product_ids").toList();
+        if (!supportedProductIds.contains(_toradexProductId))
+            continue;
         bool recommended = m.value("recommended").toBool();
 
         if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator()))

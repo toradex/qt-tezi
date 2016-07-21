@@ -395,4 +395,15 @@ WARNING: This will erase all data on your SD card</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>Reading Product ID failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reading the Toradex Product ID failed, the Toradex config block might be corrupted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

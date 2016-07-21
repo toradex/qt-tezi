@@ -21,6 +21,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QTime>
+#include <QMessageBox>
 
 #ifdef Q_WS_QWS
 #include <QWSServer>
@@ -58,24 +59,11 @@ int main(int argc, char *argv[])
     if (!hasTouchScreen)
         KeyDetection::waitForKeyboard();
 
-    int rev = readBoardRevision();
-
-    qDebug() << "Board revision is " << rev;
-
-    int gpioChannel;
-
-    if (rev == 2 || rev == 3)
-        gpioChannel = 0;
-    else
-        gpioChannel = 2;
-
     QApplication a(argc, argv);
     RightButtonFilter rbf;
     LongPressHandler lph;
-    GpioInput gpio(gpioChannel);
 
     bool runinstaller = false;
-    bool gpio_trigger = false;
     bool keyboard_trigger = true;
     bool force_trigger = false;
 
@@ -90,9 +78,6 @@ int main(int argc, char *argv[])
         // Flag to indicate first boot
         if (strcmp(argv[i], "-runinstaller") == 0)
             runinstaller = true;
-        // Enables use of GPIO 3 to force NOOBS to launch by pulling low
-        else if (strcmp(argv[i], "-gpiotriggerenable") == 0)
-            gpio_trigger = true;
         // Disables use of keyboard to trigger recovery GUI
         else if (strcmp(argv[i], "-keyboardtriggerdisable") == 0)
             keyboard_trigger = false;
@@ -153,8 +138,7 @@ int main(int argc, char *argv[])
     // If -runinstaller is not specified, only continue if SHIFT is pressed, GPIO is triggered,
     // or no OS is installed (/settings/installed_os.json does not exist)
     bool bailout = !runinstaller
-        && !force_trigger
-        && !(gpio_trigger && (gpio.value() == 0 ));
+        && !force_trigger;
 
     if (bailout && keyboard_trigger)
     {
@@ -184,8 +168,21 @@ int main(int argc, char *argv[])
     QWSServer::setCursorVisible(true);
 #endif
 
+    QString toradexProductId = getFileContents("/proc/device-tree/toradex,product-id");
+    QString toradexBoardRev = getFileContents("/proc/device-tree/toradex,board-rev");
+
+    qDebug() << "Product id is " << toradexProductId;
+    qDebug() << "Board revision is " << toradexBoardRev;
+
+    if (toradexProductId.isEmpty()) {
+        QMessageBox::critical(NULL, QObject::tr("Reading Product ID failed"),
+                              QObject::tr("Reading the Toradex Product ID failed, the Toradex config block might be corrupted."),
+                              QMessageBox::Close);
+        return 1;
+    }
+
     // Main window in the middle of screen
-    MainWindow mw(defaultDisplay, splash);
+    MainWindow mw(defaultDisplay, splash, toradexProductId, toradexBoardRev);
     mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     mw.show();
 
