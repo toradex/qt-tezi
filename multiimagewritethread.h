@@ -21,6 +21,7 @@ public:
 
 protected:
     virtual void run();
+    bool runScript(QString script, QByteArray &output);
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions);
     bool processContent(FileSystemInfo *fs, QByteArray partdevice);

@@ -48,6 +48,16 @@ public:
         return _releaseDate;
     }
 
+    inline QString prepareScript()
+    {
+        return _prepareScript;
+    }
+
+    inline QString wrapupScript()
+    {
+        return _wrapupScript;
+    }
+
     inline bool bootable()
     {
         return _bootable;
@@ -64,7 +74,7 @@ public:
     }
 
 protected:
-    QString _folder, _infofile, _name, _description, _version, _releaseDate;
+    QString _folder, _infofile, _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript;
     bool _bootable;
     QList<BlockDevInfo *> _blockdevs;
     int _riscosOffset;

@@ -31,10 +31,26 @@ void MultiImageWriteThread::setImage(const QString &folder, const QString &infof
     _image = new OsInfo(folder, infofile, this);
 }
 
+
 void MultiImageWriteThread::run()
 {
     QList<BlockDevInfo *> *blockdevs = _image->blockdevs();
     qDebug() << "Processing OS:" << _image->name();
+
+    /* Run prepare script */
+    if (!_image->prepareScript().isEmpty()) {
+        QString prepareScript = _image->folder() + "/" + _image->prepareScript();
+        if (!QFile::exists(prepareScript)) {
+            emit error(tr("Prepare script '%1' does not exist").arg(prepareScript));
+            return;
+        }
+
+        QByteArray output;
+        if (!runScript(prepareScript, output)) {
+            emit error(tr("Error executing prepare script") + "\n" + output);
+            return;
+        }
+    }
 
     foreach (BlockDevInfo *blockdev, *blockdevs) {
         qDebug() << "Processing blockdev: " << blockdev->name();
@@ -50,7 +66,50 @@ void MultiImageWriteThread::run()
             return;
     }
 
+
+    /* Run wrap-up script */
+    if (!_image->wrapupScript().isEmpty()) {
+        QString wrapupScript = _image->folder() + "/" + _image->wrapupScript();
+        if (!QFile::exists(wrapupScript)) {
+            emit error(tr("Wrap-up script '%1' does not exist").arg(wrapupScript));
+            return;
+        }
+
+        QByteArray output;
+        if (!runScript(wrapupScript, output)) {
+            emit error(tr("Error executing wrap-up script") + "\n" + output);
+            return;
+        }
+    }
+
     emit completed();
+}
+
+bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
+{
+    QProcess p;
+    QProcessEnvironment env;
+    QStringList cmd(script);
+
+    /* $1: image folder */
+    cmd.append(_image->folder());
+
+    env.insert("PATH", "/bin:/usr/bin:/sbin:/usr/sbin");
+
+    qDebug() << "Executing: /bin/sh" << cmd;
+    qDebug() << "Env:" << env.toStringList();
+
+    p.setProcessChannelMode(QProcess::MergedChannels);
+    p.setProcessEnvironment(env);
+    p.setWorkingDirectory(_image->folder());
+    p.start("/bin/sh", cmd);
+
+    p.waitForFinished(-1);
+    qDebug() << "Finished with exit status:" << p.exitStatus();
+
+    output = p.readAll();
+    qDebug() << output;
+    return p.exitCode() == 0;
 }
 
 bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
@@ -354,80 +413,6 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
                 return false;
         }
     }
-
-/*
-    emit statusUpdate(tr("%1: Mounting FAT partition").arg(os_name));
-    if (QProcess::execute("mount "+partitions->first()->partitionDevice()+" /mnt2") != 0)
-    {
-        emit error(tr("%1: Error mounting file system").arg(os_name));
-        return false;
-    }
-  */
-    /* Partition setup script can either reside in the image folder
-     * or inside the boot partition tarball */
-    /*
-    QString postInstallScript = image->folder()+"/partition_setup.sh";
-    if (!QFile::exists(postInstallScript))
-        postInstallScript = "/mnt2/partition_setup.sh";
-
-    if (QFile::exists(postInstallScript))
-    {
-        emit statusUpdate(tr("%1: Running partition setup script").arg(os_name));
-        QProcess proc;
-        QProcessEnvironment env;
-        QStringList args(postInstallScript);
-        env.insert("PATH", "/bin:/usr/bin:/sbin:/usr/sbin");
-*/
-        /* - Parameters to the partition-setup script are supplied both as
-         *   command line parameters and set as environement variables
-         * - Boot partition is mounted, working directory is set to its mnt folder
-         *
-         *  partition_setup.sh part1=/dev/mmcblk0p3 id1=LABEL=BOOT part2=/dev/mmcblk0p4
-         *  id2=UUID=550e8400-e29b-41d4-a716-446655440000
-         */
-    /*
-        int pnr = 1;
-        foreach (PartitionInfo *p, *partitions)
-        {
-            QString part  = p->partitionDevice();
-            QString nr    = QString::number(pnr);
-            QString uuid  = getUUID(part);
-            QString label = getLabel(part);
-            QString id;
-            if (!label.isEmpty())
-                id = "LABEL="+label;
-            else
-                id = "UUID="+uuid;
-
-            qDebug() << "part" << part << uuid << label;
-
-            args << "part"+nr+"="+part << "id"+nr+"="+id;
-            env.insert("part"+nr, part);
-            env.insert("id"+nr, id);
-            pnr++;
-        }
-
-        qDebug() << "Executing: sh" << args;
-        qDebug() << "Env:" << env.toStringList();
-        proc.setProcessChannelMode(proc.MergedChannels);
-        proc.setProcessEnvironment(env);
-        proc.setWorkingDirectory("/mnt2");
-        proc.start("/bin/sh", args);
-        proc.waitForFinished(-1);
-        qDebug() << proc.exitStatus();
-
-        if (proc.exitCode() != 0)
-        {
-            emit error(tr("%1: Error executing partition setup script").arg(os_name)+"\n"+proc.readAll());
-            return false;
-        }
-    }
-
-    emit statusUpdate(tr("%1: Unmounting FAT partition").arg(os_name));
-    if (QProcess::execute("umount /mnt2") != 0)
-    {
-        emit error(tr("%1: Error unmounting").arg(os_name));
-    }*/
 
     return true;
 }

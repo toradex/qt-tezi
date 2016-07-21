@@ -14,6 +14,8 @@ OsInfo::OsInfo(const QString &folder, const QString &infofile, QObject *parent) 
     _description = m.value("description").toString();
     _releaseDate = m.value("release_date").toString();
     _bootable = m.value("bootable", true).toBool();
+    _prepareScript = m.value("prepare_script").toString();
+    _wrapupScript = m.value("wrapup_script").toString();
 
     QVariantList blockdevs = m.value("blockdevs").toList();
     foreach (QVariant bd, blockdevs)

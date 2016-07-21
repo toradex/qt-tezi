@@ -253,10 +253,6 @@ WARNING: This will erase all data on your SD card</source>
 <context>
     <name>MultiImageWriteThread</name>
     <message>
-        <source>Finish writing (syncing)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Block device &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -326,6 +322,26 @@ WARNING: This will erase all data on your SD card</source>
     </message>
     <message>
         <source>Error downloading or writing Image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Prepare script &apos;%1&apos; does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error executing prepare script</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Finish writing (syncing)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wrap-up script &apos;%1&apos; does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error executing wrap-up script</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
