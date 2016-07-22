@@ -506,11 +506,7 @@ void MainWindow::on_actionInstall_triggered()
                 unsupportedOses += "\n" + name;
             }
         }
-        if (_silent || allSupported ||
-            QMessageBox::warning(this,
-                                tr("Confirm"),
-                                tr("Warning: incompatible Operating System(s) detected. The following OSes aren't supported on this revision of Raspberry Pi and may fail to boot or function correctly:") + unsupportedOses,
-                                QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+        if (_silent || allSupported)
         {
             setEnabled(false);
             _numMetaFilesToDownload = 0;

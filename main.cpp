@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     bool force_trigger = false;
 
     QString defaultLang = "en";
-    QString defaultKeyboard = "gb";
+    QString defaultKeyboard = "us";
     QString defaultDisplay = "0";
     QString defaultPartition = "800";
 

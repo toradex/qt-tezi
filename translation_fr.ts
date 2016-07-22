@@ -102,10 +102,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Warning: incompatible Operating System(s) detected. The following OSes aren&apos;t supported on this revision of Raspberry Pi and may fail to boot or function correctly:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>The install process will begin shortly.</source>
         <translation type="unfinished"></translation>
     </message>

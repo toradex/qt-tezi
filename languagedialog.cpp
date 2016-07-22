@@ -22,6 +22,9 @@
 #include <QProcess>
 #include <QSettings>
 
+#define KEYMAP_DIR "/usr/share/tezi/keymaps/"
+#define QT_LANG_DIR "/usr/share/qtopia/translations/"
+
 /* Extra strings for lupdate to detect and hand over to translator to translate */
 #if 0
 QT_TRANSLATE_NOOP("QDialogButtonBox","OK")
@@ -48,15 +51,13 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
     qDebug() << "Default language is " << defaultLang;
     qDebug() << "Default keyboard layout is " << defaultKeyboard;
 
-    QSettings settings("/settings/noobs.conf", QSettings::IniFormat, this);
-    QString savedLang = settings.value("language", defaultLang).toString();
-    QString savedKeyLayout = settings.value("keyboard_layout", defaultKeyboard).toString();
+    // TODO: Load language settings?
 
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_QuitOnClose, false);
 
-    QDir kdir("/usr/share/tezi/keymaps/", "*.qmap");
+    QDir kdir(KEYMAP_DIR, "*.qmap");
     QStringList keyboardlayouts = kdir.entryList();
     foreach (QString layoutfile, keyboardlayouts)
     {
@@ -73,6 +74,7 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
 
     foreach (QString langfile, translations)
     {
+        qDebug() << langfile;
         QString langcode = langfile.mid(12);
         langcode.chop(3);
         QLocale loc(langcode);
@@ -87,16 +89,17 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
         else
             ui->langCombo->addItem(languagename, langcode);
 
+        /*
         if (langcode.compare(savedLang, Qt::CaseInsensitive) == 0)
         {
             _currentLang = langcode;
             ui->langCombo->setCurrentIndex(ui->langCombo->count() - 1);
-        }
+        }*/
     }
 
-    changeLanguage(savedLang);
-    changeKeyboardLayout(savedKeyLayout);
-    ui->keyCombo->setCurrentIndex(ui->keyCombo->findData(savedKeyLayout));
+    //changeLanguage(savedLang);
+    //changeKeyboardLayout(savedKeyLayout);
+    ui->keyCombo->setCurrentIndex(ui->keyCombo->findData(defaultKeyboard));
 }
 
 LanguageDialog::~LanguageDialog()
@@ -107,7 +110,7 @@ LanguageDialog::~LanguageDialog()
 void LanguageDialog::changeKeyboardLayout(const QString &langcode)
 {
 #ifdef Q_WS_QWS
-    QString keymapfile = QString("/keymaps/%1.qmap").arg(langcode);
+    QString keymapfile = QString(KEYMAP_DIR "%1.qmap").arg(langcode);
 
     if (QFile::exists(keymapfile))
     {
@@ -119,10 +122,7 @@ void LanguageDialog::changeKeyboardLayout(const QString &langcode)
     Q_UNUSED(langcode)
 #endif
 
-        // Save new language choice to INI files
-        QSettings settings("/settings/noobs.conf", QSettings::IniFormat, this);
-        settings.setValue("keyboard_layout", langcode);
-        settings.sync();
+        // TODO: Save new language choice to INI files
 }
 
 void LanguageDialog::changeLanguage(const QString &langcode)
@@ -149,14 +149,17 @@ void LanguageDialog::changeLanguage(const QString &langcode)
         /* qt_<languagecode>.qm are generic language translation files provided by the Qt team
          * this can translate common things like the "OK" and "Cancel" button of dialog boxes
          * Unfortuneately, they are not available for all languages, but use one if we have one. */
-        if ( QFile::exists(":/qt_"+langcode+".qm" ))
+        if ( QFile::exists(QT_LANG_DIR "/qt_"+langcode+".qm"))
         {
             _qttrans = new QTranslator();
-            _qttrans->load(":/qt_" + langcode+".qm");
+            _qttrans->load("qt_" + langcode+".qm", QT_LANG_DIR);
             QApplication::installTranslator(_qttrans);
         }
 
-        /* the translation_<languagecode>.qm file is specific to our application */
+        /*
+         * The translation_<languagecode>.qm file is specific to our application
+         * this files are built-in resources (hence :).
+         */
         if ( QFile::exists(":/translation_"+langcode+".qm"))
         {
             _trans = new QTranslator();
@@ -195,10 +198,7 @@ void LanguageDialog::changeLanguage(const QString &langcode)
 
     _currentLang = langcode;
 
-    // Save new language choice to INI file
-    QSettings settings("/settings/noobs.conf", QSettings::IniFormat, this);
-    settings.setValue("language", langcode);
-    settings.sync();
+    // TODO: Save new language choice
 }
 
 void LanguageDialog::on_langCombo_currentIndexChanged(int index)

@@ -31,23 +31,23 @@
     <name>MainWindow</name>
     <message>
         <source>Disk space</source>
-        <translation type="unfinished"></translation>
+        <translation>Speicherplatz</translation>
     </message>
     <message>
         <source>Needed:</source>
-        <translation type="unfinished"></translation>
+        <translation>Benötigt:</translation>
     </message>
     <message>
         <source>Available:</source>
-        <translation type="unfinished"></translation>
+        <translation>Verfügbar:</translation>
     </message>
     <message>
         <source>Install (i)</source>
-        <translation type="unfinished"></translation>
+        <translation>Installieren (i)</translation>
     </message>
     <message>
         <source>Installs the selected operating system image onto this SD card.</source>
-        <translation type="unfinished"></translation>
+        <translation>Installiert das gewählte Image ins interne Flash.</translation>
     </message>
     <message>
         <source>I</source>
@@ -55,7 +55,7 @@
     </message>
     <message>
         <source>Exit (Esc)</source>
-        <translation type="unfinished"></translation>
+        <translation>Beenden (Esc)</translation>
     </message>
     <message>
         <source>Exits and boots the installed operating system.</source>
@@ -99,11 +99,7 @@
     </message>
     <message>
         <source>Confirm</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Warning: incompatible Operating System(s) detected. The following OSes aren&apos;t supported on this revision of Raspberry Pi and may fail to boot or function correctly:</source>
-        <translation type="unfinished"></translation>
+        <translation>Bestätigen</translation>
     </message>
     <message>
         <source>The install process will begin shortly.</source>
