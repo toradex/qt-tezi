@@ -56,6 +56,7 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setAttribute(Qt::WA_QuitOnClose, false);
+    ui->keyCombo->blockSignals(true);
 
     QDir kdir(KEYMAP_DIR, "*.qmap");
     QStringList keyboardlayouts = kdir.entryList();
@@ -65,8 +66,7 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
         ui->keyCombo->addItem(layoutfile, layoutfile);
     }
 
-    ui->langCombo->addItem(QIcon(":/icons/gb.png"), "English (UK)", "gb");
-    ui->langCombo->addItem(QIcon(":/icons/us.png"), "English (US)", "us");
+    ui->langCombo->addItem(QIcon(":/icons/en.png"), "English", "en");
 
     /* Search for translation resource files */
     QDir dir(":/", "translation_*.qm");
@@ -74,7 +74,6 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
 
     foreach (QString langfile, translations)
     {
-        qDebug() << langfile;
         QString langcode = langfile.mid(12);
         langcode.chop(3);
         QLocale loc(langcode);
@@ -97,9 +96,10 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
         }*/
     }
 
-    //changeLanguage(savedLang);
-    //changeKeyboardLayout(savedKeyLayout);
-    ui->keyCombo->setCurrentIndex(ui->keyCombo->findData(defaultKeyboard));
+    ui->keyCombo->blockSignals(false);
+
+    // Set language, keyboard is automatically adjusted too.
+    ui->langCombo->setCurrentIndex(ui->langCombo->findData(defaultLang));
 }
 
 LanguageDialog::~LanguageDialog()
@@ -116,7 +116,27 @@ void LanguageDialog::changeKeyboardLayout(const QString &langcode)
     {
         QWSServer *q = QWSServer::instance();
         q->closeKeyboard();
-        q->setKeyboardHandler(QKbdDriverFactory::create("LinuxInput", "keymap="+keymapfile));
+
+        // This basically does what QWSServer::openKeyboard is doing...
+        QString device;
+        QString type;
+        QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+        QStringList keyboards = environment.value("QWS_KEYBOARD", "TTY").split(QLatin1Char(' '));
+
+        for (int i = keyboards.size() - 1; i >= 0; --i) {
+            const QString spec = keyboards.at(i);
+            int colon=spec.indexOf(QLatin1Char(':'));
+            if (colon>=0) {
+                type = spec.left(colon);
+                device = spec.mid(colon+1);
+                device += ":keymap=" + keymapfile;
+            } else {
+                type = spec;
+                device = "keymap=" + keymapfile;
+            }
+            QWSKeyboardHandler *handler = QKbdDriverFactory::create(type, device);
+            q->setKeyboardHandler(handler);
+        }
     }
 #else
     Q_UNUSED(langcode)
@@ -127,9 +147,6 @@ void LanguageDialog::changeKeyboardLayout(const QString &langcode)
 
 void LanguageDialog::changeLanguage(const QString &langcode)
 {
-    //if (langcode == _currentLang)
-    //    return;
-
     if (_trans)
     {
         QApplication::removeTranslator(_trans);
@@ -144,7 +161,7 @@ void LanguageDialog::changeLanguage(const QString &langcode)
         _qttrans = NULL;
     }
 
-    if (!(langcode == "us" || langcode == "gb"))
+    if (!(langcode == "en"))
     {
         /* qt_<languagecode>.qm are generic language translation files provided by the Qt team
          * this can translate common things like the "OK" and "Cancel" button of dialog boxes
