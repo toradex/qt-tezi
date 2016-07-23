@@ -39,17 +39,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev, QWidget *parent = 0);
+    explicit MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
+                        bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
 
 protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
-    QList <int> _kc;
-    int _kcpos;
     const QString _defaultDisplay;
-    bool _silent, _allowSilent, _showAll;
+    bool _allowAutoinstall, _isAutoinstall, _showAll;
     static bool _partInited;
     static int _currentMode;
     QSplashScreen *_splash;
@@ -63,6 +62,7 @@ protected:
     QString _model, _toradexProductId, _toradexBoardRev;
     QString _blockdevUsb, _blockdevSd;
     QIcon _sdIcon,_usbIcon, _internetIcon;
+    QVariantMap _imageEntry;
 
     QMap<QString,QVariantMap> listMediaImages(const QString &path, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
@@ -83,7 +83,8 @@ protected:
     void downloadIcon(const QString &urlstring, const QString &originalurl);
     void downloadList(const QString &urlstring);
     void downloadLists();
-    void startImageWrite();
+    void installImage(QVariantMap entry);
+    void startImageWrite(QVariantMap entry);
     bool canInstallOs(const QString &name, const QVariantMap &values);
     bool isSupportedOs(const QString &name, const QVariantMap &values);
 

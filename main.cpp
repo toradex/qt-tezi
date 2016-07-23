@@ -63,9 +63,7 @@ int main(int argc, char *argv[])
     RightButtonFilter rbf;
     LongPressHandler lph;
 
-    bool runinstaller = false;
-    bool keyboard_trigger = true;
-    bool force_trigger = false;
+    bool autoinstall = false;
 
     QString defaultLang = "en";
     QString defaultKeyboard = "us";
@@ -76,38 +74,8 @@ int main(int argc, char *argv[])
     for (int i=1; i<argc; i++)
     {
         // Flag to indicate first boot
-        if (strcmp(argv[i], "-runinstaller") == 0)
-            runinstaller = true;
-        // Disables use of keyboard to trigger recovery GUI
-        else if (strcmp(argv[i], "-keyboardtriggerdisable") == 0)
-            keyboard_trigger = false;
-        // Forces display of recovery GUI every time
-        else if (strcmp(argv[i], "-forcetrigger") == 0)
-            force_trigger = true;
-        // Allow default language to be specified in commandline
-        else if (strcmp(argv[i], "-lang") == 0)
-        {
-            if (argc > i+1)
-                defaultLang = argv[i+1];
-        }
-        // Allow default keyboard layout to be specified in commandline
-        else if (strcmp(argv[i], "-kbdlayout") == 0)
-        {
-            if (argc > i+1)
-                defaultKeyboard = argv[i+1];
-        }
-        // Allow default display mode to be specified in commandline
-        else if (strcmp(argv[i], "-dispmode") == 0)
-        {
-            if (argc > i+1)
-                defaultDisplay = --argv[i+1];
-        }
-        // Allow default boot partition to be specified in commandline
-        else if (strcmp(argv[i], "-partition") == 0)
-        {
-            if (argc > i+1)
-                defaultPartition = argv[i+1];
-        }
+        if (strcmp(argv[i], "-autoinstall") == 0)
+            autoinstall = true;
     }
 
     // Intercept right mouse clicks sent to the title bar
@@ -137,6 +105,7 @@ int main(int argc, char *argv[])
 
     // If -runinstaller is not specified, only continue if SHIFT is pressed, GPIO is triggered,
     // or no OS is installed (/settings/installed_os.json does not exist)
+        /*
     bool bailout = !runinstaller
         && !force_trigger;
 
@@ -162,7 +131,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    bailout = false;
+    bailout = false;*/
 
 #ifdef Q_WS_QWS
     QWSServer::setCursorVisible(true);
@@ -182,7 +151,7 @@ int main(int argc, char *argv[])
     }
 
     // Main window in the middle of screen
-    MainWindow mw(defaultDisplay, splash, toradexProductId, toradexBoardRev);
+    MainWindow mw(defaultDisplay, splash, toradexProductId, toradexBoardRev, autoinstall);
     mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     mw.show();
 

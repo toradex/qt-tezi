@@ -63,94 +63,25 @@ bool MainWindow::_partInited = false;
 /* Flag to keep track of current display mode. */
 int MainWindow::_currentMode = 0;
 
-MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev, QWidget *parent) :
+MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
+                       bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _kcpos(0), _defaultDisplay(defaultDisplay), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
-    _silent(false), _allowSilent(false), _showAll(false), _splash(splash), _settings(NULL),
+    _qpd(NULL), _defaultDisplay(defaultDisplay), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
+    _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _settings(NULL),
     _hasWifi(false), _netaccess(NULL)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     setContextMenuPolicy(Qt::NoContextMenu);
     update_window_title();
-    _kc << 0x01000013 << 0x01000013 << 0x01000015 << 0x01000015 << 0x01000012
-        << 0x01000014 << 0x01000012 << 0x01000014 << 0x42 << 0x41;
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
     ui->advToolBar->setVisible(false);
 
     QRect s = QApplication::desktop()->screenGeometry();
     if (s.height() < 500)
         resize(s.width()-10, s.height()-100);
-/*
-    if (qApp->arguments().contains("-runinstaller") && !_partInited)
-    {
-        // Repartition SD card first
-        _partInited = true;
-        setEnabled(false);
-        _qpd = new QProgressDialog( tr("Setting up SD card"), QString(), 0, 0, this);
-        _qpd->setWindowModality(Qt::WindowModal);
-        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
-        InitDriveThread *idt = new InitDriveThread(this);
-        connect(idt, SIGNAL(statusUpdate(QString)), _qpd, SLOT(setLabelText(QString)));
-        connect(idt, SIGNAL(completed()), _qpd, SLOT(deleteLater()));
-        connect(idt, SIGNAL(error(QString)), this, SLOT(onError(QString)));
-        connect(idt, SIGNAL(query(QString, QString, QMessageBox::StandardButton*)),
-                this, SLOT(onQuery(QString, QString, QMessageBox::StandardButton*)),
-                Qt::BlockingQueuedConnection);
-
-        idt->start();
-        _qpd->exec();
-        setEnabled(true);
-    }
-
-    // Make sure the SD card is ready, and partition table is read by Linux
-    if (!QFile::exists(SETTINGS_PARTITION))
-    {
-        _qpd = new QProgressDialog( tr("Waiting for SD card (settings partition)"), QString(), 0, 0, this);
-        _qpd->setWindowModality(Qt::WindowModal);
-        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-        _qpd->show();
-
-        while (!QFile::exists(SETTINGS_PARTITION))
-        {
-            QApplication::processEvents(QEventLoop::WaitForMoreEvents, 250);
-        }
-        _qpd->hide();
-        _qpd->deleteLater();
-    }
-
-    _qpd = new QProgressDialog( tr("Mounting settings partition"), QString(), 0, 0, this);
-    _qpd->setWindowModality(Qt::WindowModal);
-    _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    _qpd->show();
-    QApplication::processEvents();
-
-    if (QProcess::execute("mount -t ext4 " SETTINGS_PARTITION " /settings") != 0)
-    {
-        _qpd->hide();
-
-        if (QMessageBox::question(this,
-                                  tr("Error mounting settings partition"),
-                                  tr("Persistent settings partition seems corrupt. Reformat?"),
-                                  QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-        {
-            QProcess::execute("umount /settings");
-            if (QProcess::execute("/sbin/mkfs.ext4 " SETTINGS_PARTITION) != 0
-                || QProcess::execute("mount " SETTINGS_PARTITION " /settings") != 0)
-            {
-                QMessageBox::critical(this, tr("Reformat failed"), tr("SD card might be damaged"), QMessageBox::Close);
-            }
-
-            rebuildInstalledList();
-        }
-    }
-    _qpd->hide();
-    _qpd->deleteLater();
-    _qpd = NULL;
-    QProcess::execute("mount -o ro -t vfat /dev/mmcblk0p1 /mnt");
-*/
     _model = getFileContents("/proc/device-tree/model");
 
     QString cmdline = getFileContents("/proc/cmdline");
@@ -159,10 +90,6 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
         _showAll = true;
     }
     /*
-    if (cmdline.contains("silentinstall"))
-    {
-        _allowSilent = true;
-    }
     else
     {
         startNetworking();
@@ -178,7 +105,11 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    QTimer::singleShot(1, this, SLOT(populate()));
+    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
+
+    connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
+    _mediaPollTimer.start(100);
+    //QTimer::singleShot(1, this, SLOT(populate()));
 }
 
 MainWindow::~MainWindow()
@@ -192,28 +123,18 @@ MainWindow::~MainWindow()
 void MainWindow::populate()
 {
     /* Ask user to wait while list is populated */
-    if (!_allowSilent)
-    {
-        _qpd = new QProgressDialog(tr("Wait for external media or network..."), QString(), 0, 0, this);
-        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-        _qpd->show();
+    _qpd = new QProgressDialog(tr("Wait for external media or network..."), QString(), 0, 0, this);
+    _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    _qpd->show();
 /*
-        int timeout = 5000;
-        if (getFileContents("/settings/wpa_supplicant.conf").contains("ssid="))
-        {
-            // Longer timeout if we have a wifi network configured
-            timeout = 8000;
-        }
-        QTimer::singleShot(timeout, this, SLOT(hideDialogIfNoNetwork()));
-        */
+    int timeout = 5000;
+    if (getFileContents("/settings/wpa_supplicant.conf").contains("ssid="))
+    {
+        // Longer timeout if we have a wifi network configured
+        timeout = 8000;
     }
-
-    connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
-    _mediaPollTimer.start(100);
-
-
-    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
-    updateNeeded();
+    QTimer::singleShot(timeout, this, SLOT(hideDialogIfNoNetwork()));
+    */
 
     // Fill in list of images
     /*
@@ -260,17 +181,32 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QVariantMap m = v.toMap();
         QString name = m.value("name").toString();
         QString description = m.value("description").toString();
+        QString version = m.value("version").toString();
+        QString releasedate = m.value("release_date").toString();
         QString folder  = m.value("folder").toString();
         QString iconFilename = m.value("icon").toString();
+        bool autoinstall = m.value("autoinstall").toBool();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
-        bool recommended = m.value("recommended").toBool();
+        bool supportedImage = supportedProductIds.contains(_toradexProductId);
+
+        /* We found an auto install image, immediately start flashing it... */
+        qDebug() << _allowAutoinstall;
+        if (_allowAutoinstall && autoinstall && supportedImage) {
+            _isAutoinstall = true;
+            installImage(m);
+            return;
+        }
 
         if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator()))
             iconFilename = folder + QDir::separator() + iconFilename;
 
         QString friendlyname = name;
-        if (recommended)
-            friendlyname += " ["+tr("RECOMMENDED")+"]";
+        if (!version.isEmpty()) {
+            friendlyname += " (" + version;
+            if (!releasedate.isEmpty())
+                friendlyname += ", " + releasedate;
+            friendlyname += ")";
+        }
         if (!description.isEmpty())
             friendlyname += "\n"+description;
 
@@ -300,7 +236,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
         item->setData(Qt::UserRole, m);
 
-        if (supportedProductIds.contains(_toradexProductId))
+        if (supportedImage)
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         else
             item->setFlags(Qt::NoItemFlags);
@@ -314,10 +250,8 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             item->setData(SecondIconRole, _internetIcon);
         }
 
-        if (recommended)
-            ui->list->insertItem(0, item);
-        else
-            ui->list->addItem(item);
+        ui->list->addItem(item);
+
     }
 
     if (haveicons)
@@ -335,8 +269,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         }
     }
 
-    ui->list->item(0)->setSelected(true);
-
     ui->actionCancel->setEnabled(true);
 
     /* Hide progress dialog since we have images we could use now... */
@@ -345,6 +277,9 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         _qpd->deleteLater();
         _qpd = NULL;
     }
+
+    ui->list->setCurrentRow(0);
+    updateNeeded();
 }
 
 /* Whether this OS should be displayed in the list of installable OSes */
@@ -573,55 +508,60 @@ void MainWindow::on_list_currentItemChanged(QListWidgetItem * current, QListWidg
     updateNeeded();
 }
 
+void MainWindow::installImage(QVariantMap entry)
+{
+    _numMetaFilesToDownload = 0;
+
+    if (!entry.contains("folder"))
+    {
+        _imageEntry = entry;
+        QDir d;
+        QString folder = "/settings/os/"+entry.value("name").toString();
+        folder.replace(' ', '_');
+        if (!d.exists(folder))
+            d.mkpath(folder);
+
+        downloadMetaFile(entry.value("os_info").toString(), folder+"/os.json");
+        downloadMetaFile(entry.value("partitions_info").toString(), folder+"/partitions.json");
+
+        if (entry.contains("marketing_info"))
+            downloadMetaFile(entry.value("marketing_info").toString(), folder+"/marketing.tar");
+
+        if (entry.contains("partition_setup"))
+            downloadMetaFile(entry.value("partition_setup").toString(), folder+"/partition_setup.sh");
+
+        if (entry.contains("icon"))
+            downloadMetaFile(entry.value("icon").toString(), folder+"/icon.png");
+    }
+
+    if (_numMetaFilesToDownload == 0)
+    {
+        /* All OSes selected are local */
+        startImageWrite(entry);
+    }
+    else
+    {
+        _qpd = new QProgressDialog(tr("The install process will begin shortly."), QString(), 0, 0, this);
+        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+        _qpd->show();
+    }
+}
+
+
 void MainWindow::on_actionInstall_triggered()
 {
     if (!ui->list->currentItem())
         return;
 
-    if (_silent ||
-        QMessageBox::warning(this,
+    if (QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
         setEnabled(false);
-        _numMetaFilesToDownload = 0;
-
         QListWidgetItem *item = ui->list->currentItem();
         QVariantMap entry = item->data(Qt::UserRole).toMap();
-
-        if (!entry.contains("folder"))
-        {
-            QDir d;
-            QString folder = "/settings/os/"+entry.value("name").toString();
-            folder.replace(' ', '_');
-            if (!d.exists(folder))
-                d.mkpath(folder);
-
-            downloadMetaFile(entry.value("os_info").toString(), folder+"/os.json");
-            downloadMetaFile(entry.value("partitions_info").toString(), folder+"/partitions.json");
-
-            if (entry.contains("marketing_info"))
-                downloadMetaFile(entry.value("marketing_info").toString(), folder+"/marketing.tar");
-
-            if (entry.contains("partition_setup"))
-                downloadMetaFile(entry.value("partition_setup").toString(), folder+"/partition_setup.sh");
-
-            if (entry.contains("icon"))
-                downloadMetaFile(entry.value("icon").toString(), folder+"/icon.png");
-        }
-
-        if (_numMetaFilesToDownload == 0)
-        {
-            /* All OSes selected are local */
-            startImageWrite();
-        }
-        else if (!_silent)
-        {
-            _qpd = new QProgressDialog(tr("The install process will begin shortly."), QString(), 0, 0, this);
-            _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-            _qpd->show();
-        }
+        installImage(entry);
     }
 }
 
@@ -634,7 +574,7 @@ void MainWindow::onCompleted()
 {
     _psd->hide();
 
-    if (!_silent)
+    if (!_isAutoinstall)
         QMessageBox::information(this,
                                  tr("Image Installed"),
                                  tr("Image installed successfully"), QMessageBox::Ok);
@@ -1232,11 +1172,11 @@ void MainWindow::downloadMetaComplete()
             _qpd->deleteLater();
             _qpd = NULL;
         }
-        startImageWrite();
+        startImageWrite(_imageEntry);
     }
 }
 
-void MainWindow::startImageWrite()
+void MainWindow::startImageWrite(QVariantMap entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     MultiImageWriteThread *imageWriteThread = new MultiImageWriteThread();
@@ -1245,9 +1185,6 @@ void MainWindow::startImageWrite()
 
     /* Stop media poller in case still running */
     _mediaPollTimer.stop();
-
-    QListWidgetItem *item = ui->list->currentItem();
-    QVariantMap entry = item->data(Qt::UserRole).toMap();
 
     if (entry.contains("folder"))
     {
