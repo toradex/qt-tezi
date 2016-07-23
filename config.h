@@ -21,7 +21,7 @@
 
 /* Location to download the list of available distributions from
  * Multiple lists can be specified by space separating the URLs */
-#define DEFAULT_REPO_SERVER  "http://downloads.raspberrypi.org/os_list_v3.json"
+#define DEFAULT_REPO_SERVER  "http://sources1.toradex.com/tezi/image_list.json"
 
 /* Size of recovery FAT partition in MB.
  * First partition starts at offset 1 MB (sector 2048)

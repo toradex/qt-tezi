@@ -18,6 +18,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QTime>
+#include <QUrl>
 
 enum ImageSource {
     SOURCE_USB,
@@ -96,8 +97,8 @@ protected slots:
     void pollNetworkStatus();
     void onOnlineStateChanged(bool online);
     void downloadListComplete();
-    void processJson(QVariant json);
-    void processJsonOs(const QString &name, QVariantMap &details, QSet<QString> &iconurls);
+    void downloadImageComplete();
+    void processImageList(QUrl sourceurl, QVariant json);
     /* Events from ImageWriterThread */
     void onError(const QString &msg);
     void onCompleted();

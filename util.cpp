@@ -39,6 +39,12 @@ void putFileContents(const QString &filename, const QByteArray &data)
     f.close();
 }
 
+QString getUrlPath(const QString& url)
+{
+    int slash = url.lastIndexOf('/');
+    return url.left(slash + 1);
+}
+
 /* Whether this OS should be displayed in the list of bootable OSes */
 bool canBootOs(const QString& name, const QVariantMap& values)
 {

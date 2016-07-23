@@ -89,11 +89,6 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
     {
         _showAll = true;
     }
-    /*
-    else
-    {
-        startNetworking();
-    }*/
 
     /* Initialize icons */
     _sdIcon = QIcon(":/icons/sd_memory.png");
@@ -110,6 +105,9 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
     connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
     _mediaPollTimer.start(100);
     //QTimer::singleShot(1, this, SLOT(populate()));
+
+    startNetworking();
+
 }
 
 MainWindow::~MainWindow()
@@ -173,7 +171,6 @@ void MainWindow::populate()
 
 void MainWindow::addImages(QMap<QString,QVariantMap> images)
 {
-    bool haveicons = false;
     QSize currentsize = ui->list->iconSize();
 
     foreach (QVariant v, images.values())
@@ -223,7 +220,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             else
             {
                 QSize iconsize = avs.first();
-                haveicons = true;
 
                 if (iconsize.width() > currentsize.width() || iconsize.height() > currentsize.height())
                 {
@@ -254,18 +250,15 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
 
     }
 
-    if (haveicons)
-    {
-        /* Giving items without icon a dummy icon to make them have equal height and text alignment */
-        QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
-        dummyicon.fill();
+    /* Giving items without icon a dummy icon to make them have equal height and text alignment */
+    QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
+    dummyicon.fill();
 
-        for (int i=0; i< ui->list->count(); i++)
+    for (int i=0; i< ui->list->count(); i++)
+    {
+        if (ui->list->item(i)->icon().isNull())
         {
-            if (ui->list->item(i)->icon().isNull())
-            {
-                ui->list->item(i)->setIcon(dummyicon);
-            }
+            ui->list->item(i)->setIcon(dummyicon);
         }
     }
 
@@ -472,7 +465,6 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
         QVariantMap imagemap = Json::loadFromFile(imagejson).toMap();
 
         QString basename = imagemap.value("name").toString();
-        imagemap["recommended"] = true;
         imagemap["folder"] = imagefolder;
         imagemap["source"] = source;
 
@@ -512,26 +504,30 @@ void MainWindow::installImage(QVariantMap entry)
 {
     _numMetaFilesToDownload = 0;
 
-    if (!entry.contains("folder"))
+    if (entry.value("source") == SOURCE_NETWORK)
     {
         _imageEntry = entry;
         QDir d;
-        QString folder = "/settings/os/"+entry.value("name").toString();
-        folder.replace(' ', '_');
+        QString folder = "/var/volatile/" + entry.value("name").toString().replace(' ', '_');
         if (!d.exists(folder))
             d.mkpath(folder);
+        entry["folder"] = folder;
 
-        downloadMetaFile(entry.value("os_info").toString(), folder+"/os.json");
-        downloadMetaFile(entry.value("partitions_info").toString(), folder+"/partitions.json");
+        downloadMetaFile(entry.value("image_info").toString(), folder + "/image.json");
+
+        QString url = entry.value("baseurl").toString();
 
         if (entry.contains("marketing_info"))
-            downloadMetaFile(entry.value("marketing_info").toString(), folder+"/marketing.tar");
+            downloadMetaFile(url + entry.value("marketing_info").toString(), folder+"/marketing.tar");
 
-        if (entry.contains("partition_setup"))
-            downloadMetaFile(entry.value("partition_setup").toString(), folder+"/partition_setup.sh");
-
-        if (entry.contains("icon"))
-            downloadMetaFile(entry.value("icon").toString(), folder+"/icon.png");
+        if (entry.contains("prepare_script")) {
+            QString script = entry.value("prepare_script").toString();
+            downloadMetaFile(url + script, folder + "/" + script);
+        }
+        if (entry.contains("wrapup_script")) {
+            QString script = entry.value("wrapup_script").toString();
+            downloadMetaFile(url + script, folder + "/" + script);
+        }
     }
 
     if (_numMetaFilesToDownload == 0)
@@ -683,17 +679,18 @@ void MainWindow::startBrowser()
 
 void MainWindow::startNetworking()
 {
+    /*
     QFile f("/settings/wpa_supplicant.conf");
 
     if ( f.exists() && f.size() == 0 )
     {
-        /* Remove corrupt file */
+        // Remove corrupt file
         f.remove();
     }
     if ( !f.exists() )
     {
-        /* If user supplied a wpa_supplicant.conf on the FAT partition copy that one to settings
-           otherwise copy the default one stored in the initramfs */
+        // If user supplied a wpa_supplicant.conf on the FAT partition copy that one to settings
+        //   otherwise copy the default one stored in the initramfs
         if (QFile::exists("/mnt/wpa_supplicant.conf"))
             QFile::copy("/mnt/wpa_supplicant.conf", "/settings/wpa_supplicant.conf");
         else
@@ -704,14 +701,17 @@ void MainWindow::startNetworking()
     }
     QFile::remove("/etc/wpa_supplicant.conf");
 
-    /* Enable dbus so that we can use it to talk to wpa_supplicant later */
+    // Enable dbus so that we can use it to talk to wpa_supplicant later
     qDebug() << "Starting dbus";
     QProcess::execute("/etc/init.d/S30dbus start");
+*/
 
     /* Run dhcpcd in background */
+    /*
     QProcess *proc = new QProcess(this);
     qDebug() << "Starting dhcpcd";
     proc->start("/sbin/dhcpcd --noarp -e wpa_supplicant_conf=/settings/wpa_supplicant.conf --denyinterfaces \"*_ap\"");
+    */
 
     _time.start();
 
@@ -761,7 +761,6 @@ void MainWindow::pollNetworkStatus()
 
 void MainWindow::onOnlineStateChanged(bool online)
 {
-    qDebug() << "onOnlineStateChanged";
     if (online)
     {
         qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
@@ -787,6 +786,7 @@ void MainWindow::onOnlineStateChanged(bool online)
 void MainWindow::downloadList(const QString &urlstring)
 {
     QNetworkReply *reply = _netaccess->get(QNetworkRequest(QUrl(urlstring)));
+    reply->setProperty("isList", true);
     connect(reply, SIGNAL(finished()), this, SLOT(downloadListRedirectCheck()));
 }
 
@@ -830,128 +830,90 @@ void MainWindow::downloadListComplete()
     }
     else
     {
-        processJson(Json::parse( reply->readAll() ));
+        QVariant json = Json::parse(reply->readAll());
+        if (json.isNull()) {
+            QMessageBox::critical(this, tr("Error"), tr("Error parsing list.json downloaded from server"), QMessageBox::Close);
+        } else {
+            processImageList(reply->url(), json);
+        }
     }
 
     reply->deleteLater();
 }
 
-void MainWindow::processJson(QVariant json)
+void MainWindow::downloadImageComplete()
 {
-    if (json.isNull())
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Error parsing list.json downloaded from server"), QMessageBox::Close);
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    if (reply->error() != reply->NoError) {
+        qDebug() << "Getting image JSON failed:" << reply->url();
         return;
     }
 
-    QSet<QString> iconurls;
-    QVariantList list = json.toMap().value("os_list").toList();
+    QVariantMap imagemap = Json::parse(reply->readAll()).toMap();
 
-    foreach (QVariant osv, list)
-    {
-        QVariantMap  os = osv.toMap();
+    QString basename = imagemap.value("name").toString();
+    //imagemap["folder"] = imagefolder;
+    imagemap["source"] = SOURCE_NETWORK;
 
-        QString basename = os.value("os_name").toString();
-        if (canInstallOs(basename, os))
-        {
-            if (os.contains("flavours"))
-            {
-                QVariantList flavours = os.value("flavours").toList();
-
-                foreach (QVariant flv, flavours)
+    if (!imagemap.contains("nominal_size")) {
+        // Calculate nominal_size based on partition information
+        int nominal_size = 0;
+        QVariantList blockdevs = imagemap.value("blockdevs").toList();
+        foreach (QVariant b, blockdevs) {
+            QVariantMap blockdev = b.toMap();
+            if (blockdev.value("name") == "mmcblk0") {
+                QVariantList pvl = blockdev.value("partitions").toList();
+                foreach (QVariant v, pvl)
                 {
-                    QVariantMap flavour = flv.toMap();
-                    QVariantMap item = os;
-                    QString name        = flavour.value("name").toString();
-                    QString description = flavour.value("description").toString();
-                    QString iconurl     = flavour.value("icon").toString();
-
-                    item.insert("name", name);
-                    item.insert("description", description);
-                    item.insert("icon", iconurl);
-                    item.insert("feature_level", flavour.value("feature_level"));
-                    item.insert("source", SOURCE_NETWORK);
-
-                    processJsonOs(name, item, iconurls);
+                    QVariantMap pv = v.toMap();
+                    nominal_size += pv.value("partition_size_nominal").toInt();
                 }
-            }
-            if (os.contains("description"))
-            {
-                QString name = basename;
-                os["name"] = name;
-                os["source"] = SOURCE_NETWORK;
-                processJsonOs(name, os, iconurls);
+                break;
             }
         }
+
+        imagemap["nominal_size"] = nominal_size;
     }
 
-    /* Download icons */
-    if (!iconurls.isEmpty())
-    {
-         _numIconsToDownload += iconurls.count();
-        foreach (QString iconurl, iconurls)
-        {
-            downloadIcon(iconurl, iconurl);
-        }
-    }
-    else
-    {
-        if (_qpd)
-        {
-            _qpd->deleteLater();
-            _qpd = NULL;
-        }
+    QString url = reply->url().toString();
+    imagemap["image_info"] = url;
+    imagemap["baseurl"] = getUrlPath(url);
+    QMap<QString,QVariantMap> images;
+    images[basename] = imagemap;
+
+    addImages(images);
+
+    QString icon = imagemap.value("icon").toString();
+    if (!icon.isNull()) {
+        QString iconurl = icon;
+        if (!icon.startsWith("http"))
+            iconurl = imagemap["baseurl"].toString() + icon;
+
+        downloadIcon(iconurl, icon);
     }
 }
 
-void MainWindow::processJsonOs(const QString &name, QVariantMap &new_details, QSet<QString> &iconurls)
+
+
+void MainWindow::processImageList(QUrl sourceurl, QVariant json)
 {
-    QListWidgetItem *witem = findItem(name);
-    if (witem)
+    //QSet<QString> iconurls;
+    QVariantList list = json.toMap().value("images").toList();
+    QString sourceurlpath = getUrlPath(sourceurl.toString());
+
+    foreach (QVariant image, list)
     {
-        QVariantMap existing_details = witem->data(Qt::UserRole).toMap();
-/*
-        if ((existing_details["release_date"].toString() < new_details["release_date"].toString()) ||
-                (existing_details["source"].toString() == SOURCE_INSTALLED_OS))
-        {
-            // Local version is older (or unavailable). Replace info with newer Internet version
-            new_details.insert("installed", existing_details.value("installed", false));
-            if (existing_details.contains("partitions"))
-            {
-                new_details["partitions"] = existing_details["partitions"];
-            }
-            witem->setData(Qt::UserRole, new_details);
-            witem->setData(SecondIconRole, internetIcon);
-            ui->list->update();
-        }
-*/
-    }
-    else
-    {
-        /* It's a new OS, so add it to the list */
-        QString iconurl = new_details.value("icon").toString();
-        QString description = new_details.value("description").toString();
+        QString url = image.toString();
 
-        if (!iconurl.isEmpty())
-            iconurls.insert(iconurl);
+        // Relative URL...
+        if (!url.startsWith("http"))
+            url = sourceurlpath + url;
 
-        bool recommended = (name == RECOMMENDED_IMAGE);
-
-        QString friendlyname = name;
-        if (recommended)
-            friendlyname += " ["+tr("RECOMMENDED")+"]";
-        if (!description.isEmpty())
-            friendlyname += "\n"+description;
-
-        witem = new QListWidgetItem(friendlyname);
-        witem->setCheckState(Qt::Unchecked);
-        witem->setData(Qt::UserRole, new_details);
-        witem->setData(SecondIconRole, _internetIcon);
-
-        if (recommended)
-            ui->list->insertItem(0, witem);
-        else
-            ui->list->addItem(witem);
+        qDebug() << url;
+        QNetworkReply *reply = _netaccess->get(QNetworkRequest(QUrl(url)));
+        connect(reply, SIGNAL(finished()), this, SLOT(downloadListRedirectCheck()));
     }
 }
 
@@ -1094,8 +1056,10 @@ void MainWindow::downloadListRedirectCheck()
         qDebug() << "Redirection - Re-trying download from" << redirectionurl;
         downloadList(redirectionurl);
     }
-    else
+    else if (reply->property("isList").toBool())
         downloadListComplete();
+    else
+        downloadImageComplete();
 }
 
 void MainWindow::downloadIconRedirectCheck()

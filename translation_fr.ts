@@ -94,10 +94,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>RECOMMENDED</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Confirm</source>
         <translation type="unfinished"></translation>
     </message>
@@ -130,30 +126,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Needed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Available</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error downloading meta file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error writing downloaded file to SD card. SD card or file system may be damaged.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Network access is required to use NOOBS without local images. Please select your wifi network in the next screen.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Tez-i v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -183,6 +155,30 @@
     </message>
     <message>
         <source>Error mounting external device (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Needed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading meta file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error writing downloaded file to SD card. SD card or file system may be damaged.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Network access is required to use NOOBS without local images. Please select your wifi network in the next screen.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

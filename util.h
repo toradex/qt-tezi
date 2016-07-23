@@ -17,9 +17,7 @@
 QByteArray getFileContents(const QString &filename);
 void putFileContents(const QString &filename, const QByteArray &data);
 void getOverscan(int &top, int &bottom, int &left, int &right);
-bool nameMatchesRiscOS(const QString &name);
-QString readBoardRevision();
-QString readProductId();
+QString getUrlPath(const QString& url);
 bool canBootOs(const QString& name, const QVariantMap& values);
 bool setRebootPartition(QByteArray partition);
 #endif // UTIL_H
