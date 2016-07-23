@@ -61,12 +61,16 @@ protected:
     QTimer _mediaPollTimer;
     QTime _time;
     QString _model, _toradexProductId, _toradexBoardRev;
+    QString _blockdevUsb, _blockdevSd;
+    QIcon _sdIcon,_usbIcon, _internetIcon;
 
     QMap<QString,QVariantMap> listMediaImages(const QString &path, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
     void inputSequence();
     bool isMounted(const QString &path);
-    bool mountMedia(const QString &media, const QString &dst);
+    QString getFirstRemovableBlockdev(const QString &nameFilter);
+    QString getFirstSD();
+    bool processMedia(enum ImageSource src, const QString &dev, const QString &mntpoint);
     void addImages(QMap<QString,QVariantMap> images);
     void update_window_title();
     bool requireNetwork();

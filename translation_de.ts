@@ -154,10 +154,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error mounting external media (%1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Tez-i v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -178,11 +174,15 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reading images from USB mass storage device...</source>
+        <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
+        <source>Reading images from device %1...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error mounting external device (%1)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

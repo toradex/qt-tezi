@@ -57,9 +57,6 @@
  *
  */
 
-#define MEDIA_USB "/dev/sda1"
-#define MEDIA_SDCARD "/dev/mmcblk1p1"
-
 /* Flag to keep track wheter or not we already repartitioned. */
 bool MainWindow::_partInited = false;
 
@@ -171,6 +168,11 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
         startNetworking();
     }*/
 
+    /* Initialize icons */
+    _sdIcon = QIcon(":/icons/sd_memory.png");
+    _usbIcon = QIcon(":/icons/flashdisk_logo.png");
+    _internetIcon = QIcon(":/icons/download.png");
+
     /* Disable online help buttons until network is functional */
     ui->actionBrowser->setEnabled(false);
 
@@ -181,8 +183,8 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
 
 MainWindow::~MainWindow()
 {
-    QProcess::execute("umount " MEDIA_USB);
-    QProcess::execute("umount " MEDIA_SDCARD);
+    QProcess::execute("umount " + _blockdevUsb);
+    QProcess::execute("umount " + _blockdevSd);
     delete ui;
 }
 
@@ -252,8 +254,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
 {
     bool haveicons = false;
     QSize currentsize = ui->list->iconSize();
-    QIcon localIcon(":/icons/hdd.png");
-    QIcon internetIcon(":/icons/download.png");
 
     foreach (QVariant v, images.values())
     {
@@ -305,10 +305,14 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         else
             item->setFlags(Qt::NoItemFlags);
 
-        if (folder.startsWith(QDir::separator()))
-            item->setData(SecondIconRole, localIcon);
-        else
-            item->setData(SecondIconRole, internetIcon);
+        if (folder.startsWith(QDir::separator())) {
+            if (m.value("source") == SOURCE_USB)
+                item->setData(SecondIconRole, _usbIcon);
+            else if (m.value("source") == SOURCE_SDCARD)
+                item->setData(SecondIconRole, _sdIcon);
+        } else {
+            item->setData(SecondIconRole, _internetIcon);
+        }
 
         if (recommended)
             ui->list->insertItem(0, item);
@@ -400,7 +404,6 @@ bool MainWindow::isSupportedOs(const QString &name, const QVariantMap &values)
 
 bool MainWindow::isMounted(const QString &path) {
     QFile file("/proc/mounts");
-    qDebug() << path;
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return false;
 
@@ -415,14 +418,71 @@ bool MainWindow::isMounted(const QString &path) {
     return false;
 }
 
-bool MainWindow::mountMedia(const QString &media, const QString &dst) {
-    QDir().mkpath(dst);
-    if (QProcess::execute("mount " + media + " " + dst) != 0)
-    {
-        qDebug() << "Error mounting external media" << media << "to" << dst;
-        QMessageBox::critical(this, tr("Error mounting"), tr("Error mounting external media (%1)").arg(media), QMessageBox::Close);
-        return false;
+
+QString MainWindow::getFirstRemovableBlockdev(const QString &nameFilter)
+{
+    QDir dir("/sys/block/", nameFilter, QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList list = dir.entryList();
+
+    foreach(QString blockdev, list) {
+        QByteArray removable = getFileContents("/sys/block/" + blockdev + "/removable");
+        if (removable.startsWith("1")) {
+            /* Get first partition of this device */
+            QDir devdir("/dev", blockdev + "?", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
+            QStringList devdirs = devdir.entryList();
+            if (devdirs.isEmpty())
+                return blockdev;
+            else
+                return devdirs.first();
+        }
     }
+    return NULL;
+}
+
+QString MainWindow::getFirstSD()
+{
+    QDir dir("/sys/block/", "mmcblk*", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList list = dir.entryList();
+
+    // Unfortunately we can't rely on removable property for SD card... just ignore mmcblk0 and take everything else
+    foreach(QString blockdev, list) {
+        if (blockdev.startsWith("mmcblk0"))
+            continue;
+
+        /* Get first partition of this device */
+        QDir devdir("/dev", blockdev + "p?", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
+        QStringList devdirs = devdir.entryList();
+        if (devdirs.isEmpty())
+            return blockdev;
+        else
+            return devdirs.first();
+    }
+    return NULL;
+}
+
+bool MainWindow::processMedia(enum ImageSource src, const QString &blockdev, const QString &mntpoint)
+{
+    qDebug() << "Reading images from media" << blockdev;
+    if (_qpd) {
+        _qpd->setLabelText(tr("Reading images from device %1...").arg(blockdev));
+        QApplication::processEvents();
+    }
+
+    if (!isMounted(blockdev)) {
+        QDir().mkpath(mntpoint);
+        if (QProcess::execute("mount " + blockdev + " " + mntpoint) != 0)
+        {
+            qDebug() << "Error mounting external device" << blockdev << "to" << mntpoint;
+            QMessageBox::critical(this, tr("Error mounting"),
+                                  tr("Error mounting external device (%1)").arg(blockdev),
+                                  QMessageBox::Close);
+            return false;
+        }
+    }
+
+    QMap<QString,QVariantMap> images = listMediaImages(mntpoint, src);
+    if (!images.isEmpty())
+        addImages(images);
 
     return true;
 }
@@ -432,24 +492,33 @@ void MainWindow::pollMedia()
     static bool usbProcessed = false;
     static bool sdProcessed = false;
 
-    if (!usbProcessed && QFile::exists(MEDIA_USB)) {
-        if (_qpd) {
-            _qpd->setLabelText(tr("Reading images from USB mass storage device..."));
-            QApplication::processEvents();
+    if (!usbProcessed) {
+        QString blockdev = getFirstRemovableBlockdev("sd*");
+        if (blockdev != NULL) {
+            QString blockdevpath = "/dev/" + blockdev;
+            if (processMedia(SOURCE_USB, blockdevpath, "/run/media/usb")) {
+                usbProcessed = true;
+                _blockdevUsb = blockdevpath;
+            }
         }
+    }
 
-        QString dst = "/run/media/usb";
-        if (!isMounted(MEDIA_USB)) {
-            mountMedia(MEDIA_USB, dst);
+    if (!sdProcessed) {
+        QString blockdev = getFirstSD();
+        if (blockdev != NULL) {
+            QString blockdevpath = "/dev/" + blockdev;
+            if (processMedia(SOURCE_SDCARD, blockdevpath, "/run/media/sd")) {
+                sdProcessed = true;
+                _blockdevSd = blockdevpath;
+            }
         }
-
-        QMap<QString,QVariantMap> images = listMediaImages(dst, SOURCE_USB);
-        addImages(images);
-        usbProcessed = true;
     }
 
     /* After first poll, set intervall to 2s */
     _mediaPollTimer.setInterval(2000);
+
+    if (usbProcessed && sdProcessed)
+        _mediaPollTimer.stop();
 }
 
 QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum ImageSource source)
@@ -462,8 +531,10 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
 
     foreach(QString image, list) {
         QString imagefolder = path + QDir::separator() + image;
-        qDebug() << imagefolder;
-        QVariantMap imagemap = Json::loadFromFile(imagefolder + QDir::separator() + "image.json").toMap();
+        QString imagejson = imagefolder + QDir::separator() + "image.json";
+        if (!QFile::exists(imagejson))
+            continue;
+        QVariantMap imagemap = Json::loadFromFile(imagejson).toMap();
 
         QString basename = imagemap.value("name").toString();
         imagemap["recommended"] = true;
@@ -895,8 +966,6 @@ void MainWindow::processJson(QVariant json)
 
 void MainWindow::processJsonOs(const QString &name, QVariantMap &new_details, QSet<QString> &iconurls)
 {
-    QIcon internetIcon(":/icons/download.png");
-
     QListWidgetItem *witem = findItem(name);
     if (witem)
     {
@@ -937,7 +1006,7 @@ void MainWindow::processJsonOs(const QString &name, QVariantMap &new_details, QS
         witem = new QListWidgetItem(friendlyname);
         witem->setCheckState(Qt::Unchecked);
         witem->setData(Qt::UserRole, new_details);
-        witem->setData(SecondIconRole, internetIcon);
+        witem->setData(SecondIconRole, _internetIcon);
 
         if (recommended)
             ui->list->insertItem(0, witem);

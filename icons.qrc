@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/toradex_icon.png</file>
-        <file>icons/backups.png</file>
         <file>icons/door_in.png</file>
         <file>icons/page_white_edit.png</file>
         <file>icons/setting_tools.png</file>
@@ -17,7 +16,6 @@
         <file>icons/fi.png</file>
         <file>icons/us.png</file>
         <file>icons/download.png</file>
-        <file>icons/hdd.png</file>
         <file>icons/keyboard.png</file>
         <file>icons/network-wireless.png</file>
         <file>icons/network-wireless-connected-00.png</file>
@@ -28,5 +26,8 @@
         <file>icons/tick.png</file>
         <file>icons/it.png</file>
         <file>icons/en.png</file>
+        <file>icons/flashimage.png</file>
+        <file>icons/sd_memory.png</file>
+        <file>icons/flashdisk_logo.png</file>
     </qresource>
 </RCC>

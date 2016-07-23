@@ -117,7 +117,7 @@
    </property>
    <property name="icon">
     <iconset resource="icons.qrc">
-     <normaloff>:/icons/backups.png</normaloff>:/icons/backups.png</iconset>
+     <normaloff>:/icons/flashimage.png</normaloff>:/icons/flashimage.png</iconset>
    </property>
    <property name="text">
     <string>Install (i)</string>
