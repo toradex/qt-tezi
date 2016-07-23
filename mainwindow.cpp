@@ -210,7 +210,7 @@ void MainWindow::populate()
     _mediaPollTimer.start(100);
 
 
-    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/start").trimmed().toULongLong()-getFileContents("/sys/class/block/mmcblk0p5/size").trimmed().toULongLong())/2048;
+    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
     updateNeeded();
 
     // Fill in list of images
@@ -473,14 +473,20 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
         if (!imagemap.contains("nominal_size")) {
             // Calculate nominal_size based on partition information
             int nominal_size = 0;
-            QVariantList pvl = imagemap.value("partitions").toList();
-
-            foreach (QVariant v, pvl)
-            {
-                QVariantMap pv = v.toMap();
-                nominal_size += pv.value("partition_size_nominal").toInt();
-                nominal_size += 1; // Overhead per partition for EBR
+            QVariantList blockdevs = imagemap.value("blockdevs").toList();
+            foreach (QVariant b, blockdevs) {
+                QVariantMap blockdev = b.toMap();
+                if (blockdev.value("name") == "mmcblk0") {
+                    QVariantList pvl = blockdev.value("partitions").toList();
+                    foreach (QVariant v, pvl)
+                    {
+                        QVariantMap pv = v.toMap();
+                        nominal_size += pv.value("partition_size_nominal").toInt();
+                    }
+                    break;
+                }
             }
+
             imagemap["nominal_size"] = nominal_size;
         }
 
