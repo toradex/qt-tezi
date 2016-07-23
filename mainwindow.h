@@ -12,6 +12,7 @@
 
 #include "languagedialog.h"
 #include "progressslideshowdialog.h"
+#include "osinfo.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -19,12 +20,6 @@
 #include <QTimer>
 #include <QTime>
 #include <QUrl>
-
-enum ImageSource {
-    SOURCE_USB,
-    SOURCE_SDCARD,
-    SOURCE_NETWORK,
-};
 
 namespace Ui {
 class MainWindow;
@@ -114,7 +109,6 @@ private slots:
     /* UI events */
     void on_actionInstall_triggered();
     void on_actionCancel_triggered();
-    void on_list_currentRowChanged();
     void on_actionAdvanced_triggered(bool checked);
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();

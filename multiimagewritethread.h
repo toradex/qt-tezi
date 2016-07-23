@@ -1,6 +1,7 @@
 #ifndef MULTIIMAGEWRITETHREAD_H
 #define MULTIIMAGEWRITETHREAD_H
 
+#include "osinfo.h"
 #include <QThread>
 #include <QStringList>
 #include <QMultiMap>
@@ -17,7 +18,7 @@ class MultiImageWriteThread : public QThread
     Q_OBJECT
 public:
     explicit MultiImageWriteThread(QObject *parent = 0);
-    void setImage(const QString &folder, const QString &fileinfo);
+    void setImage(const QString &folder, const QString &fileinfo, const QString &baseurl, enum ImageSource source);
 
 protected:
     virtual void run();

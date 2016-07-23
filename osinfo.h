@@ -9,6 +9,12 @@
 #include <QObject>
 #include <QList>
 
+enum ImageSource {
+    SOURCE_USB,
+    SOURCE_SDCARD,
+    SOURCE_NETWORK,
+};
+
 class BlockDevInfo;
 
 class OsInfo : public QObject
@@ -16,7 +22,7 @@ class OsInfo : public QObject
     Q_OBJECT
 public:
     /* Constructor parses the json files in <folder>, and stores information in local variables */
-    explicit OsInfo(const QString &folder, const QString &infofile, QObject *parent = 0);
+    explicit OsInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent = 0);
 
     inline QString folder()
     {
@@ -72,17 +78,21 @@ public:
         return _supportedProductIds;
     }
 
-    inline int riscosOffset()
-    {
-        return _riscosOffset;
+    inline enum ImageSource imageSource() {
+        return _imageSource;
+    }
+
+    inline QString baseUrl() {
+        return _baseUrl;
     }
 
 protected:
-    QString _folder, _infofile, _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript;
+    QString _folder, _infofile, _baseUrl;
+    QString _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript;
     bool _bootable;
     QList<BlockDevInfo *> _blockdevs;
     QList<QString> _supportedProductIds;
-    int _riscosOffset;
+    enum ImageSource _imageSource;
 
 };
 

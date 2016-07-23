@@ -3,7 +3,6 @@
 #include "config.h"
 #include "json.h"
 #include "util.h"
-#include "osinfo.h"
 #include "partitioninfo.h"
 #include <QDir>
 #include <QFile>
@@ -26,16 +25,16 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
         dir.mkpath(TEMP_MOUNT_FOLDER);
 }
 
-void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile)
+void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile, const QString &baseurl, enum ImageSource source)
 {
-    _image = new OsInfo(folder, infofile, this);
+    _image = new OsInfo(folder, infofile, baseurl, source, this);
 }
 
 
 void MultiImageWriteThread::run()
 {
     QList<BlockDevInfo *> *blockdevs = _image->blockdevs();
-    qDebug() << "Processing OS:" << _image->name();
+    qDebug() << "Processing Image:" << _image->name();
 
     /* Run prepare script */
     if (!_image->prepareScript().isEmpty()) {
@@ -350,6 +349,11 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     QByteArray ddopt    = fs->ddOptions();
     QByteArray label = fs->label();
     QString tarball  = fs->filename();
+
+    if (_image->imageSource() == SOURCE_NETWORK) {
+        tarball = _image->baseUrl() + tarball;
+    }
+
 
     if (label.size() > 15)
     {

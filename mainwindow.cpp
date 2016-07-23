@@ -237,14 +237,13 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         else
             item->setFlags(Qt::NoItemFlags);
 
-        if (folder.startsWith(QDir::separator())) {
-            if (m.value("source") == SOURCE_USB)
-                item->setData(SecondIconRole, _usbIcon);
-            else if (m.value("source") == SOURCE_SDCARD)
-                item->setData(SecondIconRole, _sdIcon);
-        } else {
+        QVariant source = m.value("source");
+        if (source == SOURCE_USB)
+            item->setData(SecondIconRole, _usbIcon);
+        else if (source == SOURCE_SDCARD)
+            item->setData(SecondIconRole, _sdIcon);
+        else if (source == SOURCE_NETWORK)
             item->setData(SecondIconRole, _internetIcon);
-        }
 
         ui->list->addItem(item);
 
@@ -507,14 +506,8 @@ void MainWindow::installImage(QVariantMap entry)
     if (entry.value("source") == SOURCE_NETWORK)
     {
         _imageEntry = entry;
-        QDir d;
-        QString folder = "/var/volatile/" + entry.value("name").toString().replace(' ', '_');
-        if (!d.exists(folder))
-            d.mkpath(folder);
-        entry["folder"] = folder;
 
-        downloadMetaFile(entry.value("image_info").toString(), folder + "/image.json");
-
+        QString folder = entry.value("folder").toString();
         QString url = entry.value("baseurl").toString();
 
         if (entry.contains("marketing_info"))
@@ -591,12 +584,6 @@ void MainWindow::onError(const QString &msg)
 void MainWindow::onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer)
 {
     *answer = QMessageBox::question(this, title, msg, QMessageBox::Yes|QMessageBox::No);
-}
-
-void MainWindow::on_list_currentRowChanged()
-{
-    QListWidgetItem *item = ui->list->currentItem();
-    ui->actionEdit_config->setEnabled(item && item->data(Qt::UserRole).toMap().contains("partitions"));
 }
 
 void MainWindow::update_window_title()
@@ -850,11 +837,15 @@ void MainWindow::downloadImageComplete()
         qDebug() << "Getting image JSON failed:" << reply->url();
         return;
     }
-
-    QVariantMap imagemap = Json::parse(reply->readAll()).toMap();
+    QByteArray json = reply->readAll();
+    QVariantMap imagemap = Json::parse(json).toMap();
 
     QString basename = imagemap.value("name").toString();
-    //imagemap["folder"] = imagefolder;
+    QDir d;
+    QString folder = "/var/volatile/" + basename.replace(' ', '_');
+    if (!d.exists(folder))
+        d.mkpath(folder);
+    imagemap["folder"] = folder;
     imagemap["source"] = SOURCE_NETWORK;
 
     if (!imagemap.contains("nominal_size")) {
@@ -877,9 +868,12 @@ void MainWindow::downloadImageComplete()
         imagemap["nominal_size"] = nominal_size;
     }
 
-    QString url = reply->url().toString();
-    imagemap["image_info"] = url;
-    imagemap["baseurl"] = getUrlPath(url);
+    QFile imageinfo(folder + "/image.json");
+    imageinfo.open(QIODevice::WriteOnly | QIODevice::Text);
+    imageinfo.write(json);
+    imageinfo.close();
+    imagemap["image_info"] = "image.json";
+    imagemap["baseurl"] = getUrlPath(reply->url().toString());
     QMap<QString,QVariantMap> images;
     images[basename] = imagemap;
 
@@ -1157,7 +1151,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
     }
     else
     {
-        folder = "/settings/os/"+entry.value("name").toString();
+        folder = "/var/volatile/"+entry.value("name").toString();
         folder.replace(' ', '_');
 
         QString marketingTar = folder+"/marketing.tar";
@@ -1167,21 +1161,6 @@ void MainWindow::startImageWrite(QVariantMap entry)
             QProcess::execute("tar xf "+marketingTar+" -C "+folder);
             QFile::remove(marketingTar);
         }
-
-        /* Insert tarball download URL information into partition_info.json */
-        QVariantMap json = Json::loadFromFile(folder+"/partitions.json").toMap();
-        QVariantList partitions = json["partitions"].toList();
-        int i=0;
-        QStringList tarballs = entry.value("tarballs").toStringList();
-        foreach (QString tarball, tarballs)
-        {
-            QVariantMap partition = partitions[i].toMap();
-            partition.insert("tarball", tarball);
-            partitions[i] = partition;
-            i++;
-        }
-        json["partitions"] = partitions;
-        Json::saveToFile(folder+"/partitions.json", json);
     }
 
     slidesFolder.clear();
@@ -1194,7 +1173,8 @@ void MainWindow::startImageWrite(QVariantMap entry)
     {
         slidesFolder = folder+"/slides_vga";
     }
-    imageWriteThread->setImage(folder, entry.value("image_info").toString());
+    imageWriteThread->setImage(folder, entry.value("image_info").toString(),
+                               entry.value("baseurl").toString(), (enum ImageSource)entry.value("source").toInt());
     if (!slidesFolder.isEmpty())
         slidesFolders.append(slidesFolder);
 

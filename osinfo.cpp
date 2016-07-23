@@ -5,8 +5,8 @@
 #include "partitioninfo.h"
 #include "json.h"
 
-OsInfo::OsInfo(const QString &folder, const QString &infofile, QObject *parent) :
-    QObject(parent), _folder(folder), _infofile(infofile)
+OsInfo::OsInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent) :
+    QObject(parent), _folder(folder), _infofile(infofile), _baseUrl(baseUrl), _imageSource(source)
 {
     QVariantMap m = Json::loadFromFile(folder + QDir::separator() + infofile).toMap();
     _name = m.value("name").toString();
