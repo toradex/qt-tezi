@@ -173,6 +173,9 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
 
     /* Disable online help buttons until network is functional */
     ui->actionBrowser->setEnabled(false);
+
+    ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
+
     QTimer::singleShot(1, this, SLOT(populate()));
 }
 
@@ -260,8 +263,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QString folder  = m.value("folder").toString();
         QString iconFilename = m.value("icon").toString();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
-        if (!supportedProductIds.contains(_toradexProductId))
-            continue;
         bool recommended = m.value("recommended").toBool();
 
         if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator()))
@@ -298,7 +299,11 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         }
         QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
         item->setData(Qt::UserRole, m);
-        item->setCheckState(Qt::Unchecked);
+
+        if (supportedProductIds.contains(_toradexProductId))
+            item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        else
+            item->setFlags(Qt::NoItemFlags);
 
         if (folder.startsWith(QDir::separator()))
             item->setData(SecondIconRole, localIcon);
@@ -325,6 +330,8 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             }
         }
     }
+
+    ui->list->item(0)->setSelected(true);
 
     ui->actionCancel->setEnabled(true);
 
@@ -484,71 +491,59 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
     return images;
 }
 
+void MainWindow::on_list_currentItemChanged(QListWidgetItem * current, QListWidgetItem * previous)
+{
+    updateNeeded();
+}
+
 void MainWindow::on_actionInstall_triggered()
 {
+    if (!ui->list->currentItem())
+        return;
+
     if (_silent ||
         QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        /* See if any of the OSes are unsupported */
-        bool allSupported = true;
-        QString unsupportedOses;
-        QList<QListWidgetItem *> selected = selectedItems();
-        foreach (QListWidgetItem *item, selected)
+        setEnabled(false);
+        _numMetaFilesToDownload = 0;
+
+        QListWidgetItem *item = ui->list->currentItem();
+        QVariantMap entry = item->data(Qt::UserRole).toMap();
+
+        if (!entry.contains("folder"))
         {
-            QVariantMap entry = item->data(Qt::UserRole).toMap();
-            QString name = entry.value("name").toString();
-            if (!isSupportedOs(name, entry))
-            {
-                allSupported = false;
-                unsupportedOses += "\n" + name;
-            }
+            QDir d;
+            QString folder = "/settings/os/"+entry.value("name").toString();
+            folder.replace(' ', '_');
+            if (!d.exists(folder))
+                d.mkpath(folder);
+
+            downloadMetaFile(entry.value("os_info").toString(), folder+"/os.json");
+            downloadMetaFile(entry.value("partitions_info").toString(), folder+"/partitions.json");
+
+            if (entry.contains("marketing_info"))
+                downloadMetaFile(entry.value("marketing_info").toString(), folder+"/marketing.tar");
+
+            if (entry.contains("partition_setup"))
+                downloadMetaFile(entry.value("partition_setup").toString(), folder+"/partition_setup.sh");
+
+            if (entry.contains("icon"))
+                downloadMetaFile(entry.value("icon").toString(), folder+"/icon.png");
         }
-        if (_silent || allSupported)
+
+        if (_numMetaFilesToDownload == 0)
         {
-            setEnabled(false);
-            _numMetaFilesToDownload = 0;
-
-            QList<QListWidgetItem *> selected = selectedItems();
-            foreach (QListWidgetItem *item, selected)
-            {
-                QVariantMap entry = item->data(Qt::UserRole).toMap();
-
-                if (!entry.contains("folder"))
-                {
-                    QDir d;
-                    QString folder = "/settings/os/"+entry.value("name").toString();
-                    folder.replace(' ', '_');
-                    if (!d.exists(folder))
-                        d.mkpath(folder);
-
-                    downloadMetaFile(entry.value("os_info").toString(), folder+"/os.json");
-                    downloadMetaFile(entry.value("partitions_info").toString(), folder+"/partitions.json");
-
-                    if (entry.contains("marketing_info"))
-                        downloadMetaFile(entry.value("marketing_info").toString(), folder+"/marketing.tar");
-
-                    if (entry.contains("partition_setup"))
-                        downloadMetaFile(entry.value("partition_setup").toString(), folder+"/partition_setup.sh");
-
-                    if (entry.contains("icon"))
-                        downloadMetaFile(entry.value("icon").toString(), folder+"/icon.png");
-                }
-            }
-
-            if (_numMetaFilesToDownload == 0)
-            {
-                /* All OSes selected are local */
-                startImageWrite();
-            }
-            else if (!_silent)
-            {
-                _qpd = new QProgressDialog(tr("The install process will begin shortly."), QString(), 0, 0, this);
-                _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-                _qpd->show();
-            }
+            /* All OSes selected are local */
+            startImageWrite();
+        }
+        else if (!_silent)
+        {
+            _qpd = new QProgressDialog(tr("The install process will begin shortly."), QString(), 0, 0, this);
+            _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+            _qpd->show();
         }
     }
 }
@@ -667,18 +662,6 @@ void MainWindow::startBrowser()
     if (lang == "gb" || lang == "us" || lang == "")
         lang = "en";
     proc->start("arora -lang "+lang+" "+HOMEPAGE);
-}
-
-void MainWindow::on_list_doubleClicked(const QModelIndex &index)
-{
-    if (index.isValid())
-    {
-        QListWidgetItem *item = ui->list->currentItem();
-        if (item->checkState() == Qt::Unchecked)
-            item->setCheckState(Qt::Checked);
-        else
-            item->setCheckState(Qt::Unchecked);
-    }
 }
 
 void MainWindow::startNetworking()
@@ -1041,12 +1024,14 @@ void MainWindow::updateNeeded()
     bool bold = false;
 
     _neededMB = 0;
-    QList<QListWidgetItem *> selected = selectedItems();
 
-    foreach (QListWidgetItem *item, selected)
+    QListWidgetItem *current = ui->list->currentItem();
+    /* If current is valid, we asume its the one we want to install (isSelected() behaves weird) */
+    if (current)
     {
-        QVariantMap entry = item->data(Qt::UserRole).toMap();
+        QVariantMap entry = current->data(Qt::UserRole).toMap();
         _neededMB += entry.value("nominal_size").toInt();
+        enableOk = true;
     }
 
     ui->neededLabel->setText(QString("%1: %2 MB").arg(tr("Needed"), QString::number(_neededMB)));
@@ -1057,11 +1042,7 @@ void MainWindow::updateNeeded()
         /* Selection exceeds available space, make label red to alert user */
         colorNeededLabel = Qt::red;
         bold = true;
-    }
-    else
-    {
-        /* Enable OK button if a selection has been made that fits on the card */
-        enableOk = true;
+        enableOk = false;
     }
 
     ui->actionInstall->setEnabled(enableOk);
@@ -1074,11 +1055,6 @@ void MainWindow::updateNeeded()
     QFont font = ui->neededLabel->font();
     font.setBold(bold);
     ui->neededLabel->setFont(font);
-}
-
-void MainWindow::on_list_itemChanged(QListWidgetItem *)
-{
-    updateNeeded();
 }
 
 void MainWindow::downloadMetaFile(const QString &urlstring, const QString &saveAs)
@@ -1195,63 +1171,56 @@ void MainWindow::startImageWrite()
     /* Stop media poller in case still running */
     _mediaPollTimer.stop();
 
-    QList<QListWidgetItem *> selected = selectedItems();
-    foreach (QListWidgetItem *item, selected)
+    QListWidgetItem *item = ui->list->currentItem();
+    QVariantMap entry = item->data(Qt::UserRole).toMap();
+
+    if (entry.contains("folder"))
     {
-        QVariantMap entry = item->data(Qt::UserRole).toMap();
-
-        if (entry.contains("folder"))
-        {
-            /* Local image */
-            folder = entry.value("folder").toString();
-        }
-        else
-        {
-            folder = "/settings/os/"+entry.value("name").toString();
-            folder.replace(' ', '_');
-
-            QString marketingTar = folder+"/marketing.tar";
-            if (QFile::exists(marketingTar))
-            {
-                /* Extract tarball with slides */
-                QProcess::execute("tar xf "+marketingTar+" -C "+folder);
-                QFile::remove(marketingTar);
-            }
-
-            /* Insert tarball download URL information into partition_info.json */
-            QVariantMap json = Json::loadFromFile(folder+"/partitions.json").toMap();
-            QVariantList partitions = json["partitions"].toList();
-            int i=0;
-            QStringList tarballs = entry.value("tarballs").toStringList();
-            foreach (QString tarball, tarballs)
-            {
-                QVariantMap partition = partitions[i].toMap();
-                partition.insert("tarball", tarball);
-                partitions[i] = partition;
-                i++;
-            }
-            json["partitions"] = partitions;
-            Json::saveToFile(folder+"/partitions.json", json);
-        }
-
-        slidesFolder.clear();
-        //QRect s = QApplication::desktop()->screenGeometry();
-        //if (s.width() > 640 && QFile::exists(folder+"/slides"))
-        //{
-        //    slidesFolder = folder+"/slides";
-        //}
-        if (QFile::exists(folder+"/slides_vga"))
-        {
-            slidesFolder = folder+"/slides_vga";
-        }
-        imageWriteThread->setImage(folder, entry.value("image_info").toString());
-        if (!slidesFolder.isEmpty())
-            slidesFolders.append(slidesFolder);
-
-
-        // TODO: We only support one image. Option list instead of checkboxes?
-        break;
+        /* Local image */
+        folder = entry.value("folder").toString();
     }
+    else
+    {
+        folder = "/settings/os/"+entry.value("name").toString();
+        folder.replace(' ', '_');
+
+        QString marketingTar = folder+"/marketing.tar";
+        if (QFile::exists(marketingTar))
+        {
+            /* Extract tarball with slides */
+            QProcess::execute("tar xf "+marketingTar+" -C "+folder);
+            QFile::remove(marketingTar);
+        }
+
+        /* Insert tarball download URL information into partition_info.json */
+        QVariantMap json = Json::loadFromFile(folder+"/partitions.json").toMap();
+        QVariantList partitions = json["partitions"].toList();
+        int i=0;
+        QStringList tarballs = entry.value("tarballs").toStringList();
+        foreach (QString tarball, tarballs)
+        {
+            QVariantMap partition = partitions[i].toMap();
+            partition.insert("tarball", tarball);
+            partitions[i] = partition;
+            i++;
+        }
+        json["partitions"] = partitions;
+        Json::saveToFile(folder+"/partitions.json", json);
+    }
+
+    slidesFolder.clear();
+    //QRect s = QApplication::desktop()->screenGeometry();
+    //if (s.width() > 640 && QFile::exists(folder+"/slides"))
+    //{
+    //    slidesFolder = folder+"/slides";
+    //}
+    if (QFile::exists(folder+"/slides_vga"))
+    {
+        slidesFolder = folder+"/slides_vga";
+    }
+    imageWriteThread->setImage(folder, entry.value("image_info").toString());
+    if (!slidesFolder.isEmpty())
+        slidesFolders.append(slidesFolder);
 
     if (slidesFolders.isEmpty())
         slidesFolder.append("/mnt/defaults/slides");

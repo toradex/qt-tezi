@@ -112,8 +112,7 @@ private slots:
     void on_actionAdvanced_triggered(bool checked);
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();
-    void on_list_doubleClicked(const QModelIndex &index);
-    void on_list_itemChanged(QListWidgetItem *item);
+    void on_list_currentItemChanged(QListWidgetItem * current, QListWidgetItem * previous);
     void on_actionWifi_triggered();
 
 signals:
