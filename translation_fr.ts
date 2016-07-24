@@ -213,10 +213,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1: Writing OS image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1: Creating filesystem (%2)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -274,6 +270,14 @@
     </message>
     <message>
         <source>Error executing wrap-up script</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: Writing raw image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -373,13 +373,13 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
 
     if (fstype == "raw")
     {
-        emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
+        emit statusUpdate(tr("%1: Writing raw image").arg(os_name));
         if (!dd(tarball, partdevice, ddopt))
             return false;
     }
     else if (fstype.startsWith("partclone"))
     {
-        emit statusUpdate(tr("%1: Writing OS image").arg(os_name));
+        emit statusUpdate(tr("%1: Writing partition clone image").arg(os_name));
         if (!partclone_restore(tarball, partdevice))
             return false;
     }

@@ -187,7 +187,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         bool supportedImage = supportedProductIds.contains(_toradexProductId);
 
         /* We found an auto install image, immediately start flashing it... */
-        qDebug() << _allowAutoinstall;
         if (_allowAutoinstall && autoinstall && supportedImage) {
             _isAutoinstall = true;
             installImage(m);
@@ -699,23 +698,19 @@ void MainWindow::startNetworking()
     qDebug() << "Starting dhcpcd";
     proc->start("/sbin/dhcpcd --noarp -e wpa_supplicant_conf=/settings/wpa_supplicant.conf --denyinterfaces \"*_ap\"");
     */
+    QProcess *proc = new QProcess(this);
+    qDebug() << "Starting dhcpcd";
+    proc->start("/sbin/udhcpc");
 
     _time.start();
 
-    if ( isOnline() )
-    {
-        onOnlineStateChanged(true);
-    }
-    else
-    {
-        /* We could ask Qt's Bearer management to notify us once we are online,
-           but it tends to poll every 10 seconds.
-           Users are not that patient, so lets poll ourselves every 0.1 second */
-        //QNetworkConfigurationManager *_netconfig = new QNetworkConfigurationManager(this);
-        //connect(_netconfig, SIGNAL(onlineStateChanged(bool)), this, SLOT(onOnlineStateChanged(bool)));
-        connect(&_networkStatusPollTimer, SIGNAL(timeout()), SLOT(pollNetworkStatus()));
-        _networkStatusPollTimer.start(100);
-    }
+    /* We could ask Qt's Bearer management to notify us once we are online,
+       but it tends to poll every 10 seconds.
+       Users are not that patient, so lets poll ourselves every 0.1 second */
+    //QNetworkConfigurationManager *_netconfig = new QNetworkConfigurationManager(this);
+    //connect(_netconfig, SIGNAL(onlineStateChanged(bool)), this, SLOT(onOnlineStateChanged(bool)));
+    connect(&_networkStatusPollTimer, SIGNAL(timeout()), SLOT(pollNetworkStatus()));
+    _networkStatusPollTimer.start(100);
 }
 
 bool MainWindow::isOnline()
@@ -765,7 +760,7 @@ void MainWindow::onOnlineStateChanged(bool online)
 
             downloadLists();
         }
-        ui->actionBrowser->setEnabled(true);
+        //ui->actionBrowser->setEnabled(true);
         emit networkUp();
     }
 }
@@ -905,7 +900,6 @@ void MainWindow::processImageList(QUrl sourceurl, QVariant json)
         if (!url.startsWith("http"))
             url = sourceurlpath + url;
 
-        qDebug() << url;
         QNetworkReply *reply = _netaccess->get(QNetworkRequest(QUrl(url)));
         connect(reply, SIGNAL(finished()), this, SLOT(downloadListRedirectCheck()));
     }
