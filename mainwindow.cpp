@@ -486,6 +486,7 @@ void MainWindow::on_list_currentItemChanged(QListWidgetItem * current, QListWidg
 void MainWindow::installImage(QVariantMap entry)
 {
     _numMetaFilesToDownload = 0;
+    _networkStatusPollTimer.stop();
 
     if (entry.value("source") == SOURCE_NETWORK)
     {
@@ -733,11 +734,9 @@ void MainWindow::onOnlineStateChanged(bool online)
         qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
         if (!_netaccess)
         {
-            QDir dir;
-            dir.mkdir("/settings/cache");
             _netaccess = new QNetworkAccessManager(this);
             QNetworkDiskCache *_cache = new QNetworkDiskCache(this);
-            _cache->setCacheDirectory("/settings/cache");
+            _cache->setCacheDirectory("/tmp/");
             _cache->setMaximumCacheSize(8 * 1024 * 1024);
             _netaccess->setCache(_cache);
             QNetworkConfigurationManager manager;
