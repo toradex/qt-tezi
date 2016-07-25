@@ -87,8 +87,6 @@ protected:
     void downloadLists();
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap entry);
-    bool canInstallOs(const QString &name, const QVariantMap &values);
-    bool isSupportedOs(const QString &name, const QVariantMap &values);
 
 protected slots:
     void populate();

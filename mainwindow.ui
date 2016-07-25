@@ -188,6 +188,9 @@
    <property name="shortcut">
     <string notr="true">H</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionWifi">
    <property name="enabled">

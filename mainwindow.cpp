@@ -284,61 +284,6 @@ void MainWindow::removeImagesByBlockdev(const QString &blockdev)
     }
 }
 
-/* Whether this OS should be displayed in the list of installable OSes */
-bool MainWindow::canInstallOs(const QString &name, const QVariantMap &values)
-{
-    /* Can't simply pull "name" from "values" because in some JSON files it's "os_name" and in others it's "name" */
-
-    return true;
-    /* If it's not bootable, it isn't really an OS, so is always installable */
-    if (!canBootOs(name, values))
-    {
-        return true;
-    }
-
-    /* Display OS in list if it is supported or "showall" is specified in recovery.cmdline */
-    if (_showAll)
-    {
-        return true;
-    }
-    else
-    {
-        return isSupportedOs(name, values);
-    }
-}
-
-/* Whether this OS is supported */
-bool MainWindow::isSupportedOs(const QString &name, const QVariantMap &values)
-{
-    /* Can't simply pull "name" from "values" because in some JSON files it's "os_name" and in others it's "name" */
-
-    return true;
-    /* If it's not bootable, it isn't really an OS, so is always supported */
-    if (!canBootOs(name, values))
-    {
-        return true;
-    }
-
-    if (values.contains("supported_models"))
-    {
-        QStringList supportedModels = values.value("supported_models").toStringList();
-
-        foreach (QString m, supportedModels)
-        {
-            /* Check if the full formal model name (e.g. "Raspberry Pi 2 Model B Rev 1.1")
-             * contains the string we are told to look for (e.g. "Pi 2") */
-            if (_model.contains(m, Qt::CaseInsensitive))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    return true;
-}
-
 bool MainWindow::isMounted(const QString &path) {
     QFile file("/proc/mounts");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
