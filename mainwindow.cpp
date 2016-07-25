@@ -69,7 +69,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
     ui(new Ui::MainWindow),
     _qpd(NULL), _defaultDisplay(defaultDisplay), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
     _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _settings(NULL),
-    _hasWifi(false), _netaccess(NULL)
+    _hasWifi(false), _netaccess(NULL), _mediaMounted(false)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
@@ -95,6 +95,9 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
     _usbIcon = QIcon(":/icons/flashdisk_logo.png");
     _internetIcon = QIcon(":/icons/download.png");
 
+    QDir dir;
+    dir.mkdir(SRC_MOUNT_FOLDER);
+
     /* Disable online help buttons until network is functional */
     ui->actionBrowser->setEnabled(false);
 
@@ -112,8 +115,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
 
 MainWindow::~MainWindow()
 {
-    QProcess::execute("umount " + _blockdevUsb);
-    QProcess::execute("umount " + _blockdevSd);
+    QProcess::execute("umount " SRC_MOUNT_FOLDER);
     delete ui;
 }
 
@@ -180,8 +182,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QString description = m.value("description").toString();
         QString version = m.value("version").toString();
         QString releasedate = m.value("release_date").toString();
-        QString folder  = m.value("folder").toString();
-        QString iconFilename = m.value("icon").toString();
+        QIcon icon = m.value("iconimage").value<QIcon>();
         bool autoinstall = m.value("autoinstall").toBool();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
         bool supportedImage = supportedProductIds.contains(_toradexProductId);
@@ -193,9 +194,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             return;
         }
 
-        if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator()))
-            iconFilename = folder + QDir::separator() + iconFilename;
-
         QString friendlyname = name;
         if (!version.isEmpty()) {
             friendlyname += " (" + version;
@@ -206,10 +204,8 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         if (!description.isEmpty())
             friendlyname += "\n"+description;
 
-        QIcon icon;
-        if (QFile::exists(iconFilename))
+        if (!icon.isNull())
         {
-            icon = QIcon(iconFilename);
             QList<QSize> avs = icon.availableSizes();
             if (avs.isEmpty())
             {
@@ -386,7 +382,36 @@ QString MainWindow::getFirstSD()
     return NULL;
 }
 
-bool MainWindow::processMedia(enum ImageSource src, const QString &blockdev, const QString &mntpoint)
+bool MainWindow::mountMedia(const QString &blockdev)
+{
+    if (_mediaMounted ||
+        QProcess::execute("mount " + blockdev + " " SRC_MOUNT_FOLDER) != 0)
+    {
+        qDebug() << "Error mounting external device" << blockdev << "to" << SRC_MOUNT_FOLDER;
+        QMessageBox::critical(this, tr("Error mounting"),
+                              tr("Error mounting external device (%1)").arg(blockdev),
+                              QMessageBox::Close);
+        return false;
+    }
+
+    _mediaMounted = true;
+
+    return true;
+}
+
+bool MainWindow::unmountMedia()
+{
+    if (QProcess::execute("umount " SRC_MOUNT_FOLDER) != 0) {
+        qDebug() << "Error unmounting external device" << SRC_MOUNT_FOLDER;
+        return false;
+    }
+
+    _mediaMounted = false;
+
+    return true;
+}
+
+bool MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
 {
     qDebug() << "Reading images from media" << blockdev;
     if (_qpd) {
@@ -394,19 +419,10 @@ bool MainWindow::processMedia(enum ImageSource src, const QString &blockdev, con
         QApplication::processEvents();
     }
 
-    if (!isMounted(blockdev)) {
-        QDir().mkpath(mntpoint);
-        if (QProcess::execute("mount " + blockdev + " " + mntpoint) != 0)
-        {
-            qDebug() << "Error mounting external device" << blockdev << "to" << mntpoint;
-            QMessageBox::critical(this, tr("Error mounting"),
-                                  tr("Error mounting external device (%1)").arg(blockdev),
-                                  QMessageBox::Close);
-            return false;
-        }
-    }
+    mountMedia(blockdev);
+    QMap<QString,QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdev, src);
+    unmountMedia();
 
-    QMap<QString,QVariantMap> images = listMediaImages(mntpoint, src);
     if (!images.isEmpty())
         addImages(images);
 
@@ -422,9 +438,9 @@ void MainWindow::pollMedia()
         QString blockdev = getFirstRemovableBlockdev("sd*");
         if (blockdev != NULL) {
             QString blockdevpath = "/dev/" + blockdev;
-            if (processMedia(SOURCE_USB, blockdevpath, "/run/media/usb")) {
+            if (processMedia(SOURCE_USB, blockdevpath)) {
                 usbProcessed = true;
-                _blockdevUsb = blockdevpath;
+                _blockdevs.append(blockdevpath);
             }
         }
     }
@@ -433,9 +449,9 @@ void MainWindow::pollMedia()
         QString blockdev = getFirstSD();
         if (blockdev != NULL) {
             QString blockdevpath = "/dev/" + blockdev;
-            if (processMedia(SOURCE_SDCARD, blockdevpath, "/run/media/sd")) {
+            if (processMedia(SOURCE_SDCARD, blockdevpath)) {
                 sdProcessed = true;
-                _blockdevSd = blockdevpath;
+                _blockdevs.append(blockdevpath);
             }
         }
     }
@@ -447,7 +463,7 @@ void MainWindow::pollMedia()
         _mediaPollTimer.stop();
 }
 
-QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum ImageSource source)
+QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
 {
     QMap<QString,QVariantMap> images;
 
@@ -486,7 +502,16 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, enum
             imagemap["nominal_size"] = nominal_size;
         }
 
+        QString iconFilename = imagemap["icon"].toString();
+        if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator())) {
+            QPixmap pix;
+            pix.load(imagefolder + QDir::separator() + iconFilename);
+            QIcon icon(pix);
+            imagemap["iconimage"] = icon;
+        }
+
         imagemap["image_info"] = "image.json";
+        imagemap["image_source"] = blockdev;
         images[basename] = imagemap;
     }
 
@@ -950,7 +975,7 @@ void MainWindow::downloadIconComplete()
         {
             QVariantMap m = ui->list->item(i)->data(Qt::UserRole).toMap();
             ui->list->setIconSize(QSize(40,40));
-            if (m.value("icon") == originalurl)
+            if (m.value("icon") == originalurl && m.value("source") == SOURCE_NETWORK)
             {
                 ui->list->item(i)->setIcon(icon);
             }
@@ -1137,6 +1162,9 @@ void MainWindow::startImageWrite(QVariantMap entry)
 
     /* Stop media poller in case still running */
     _mediaPollTimer.stop();
+
+    /* Re-mount local media */
+    mountMedia(entry.value("image_source").toString());
 
     if (entry.contains("folder"))
     {

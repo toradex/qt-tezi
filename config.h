@@ -36,6 +36,9 @@
 /* Partitioning settings */
 #define PARTITION_ALIGNMENT  8192
 
+/* Source media mount folder */
+#define SRC_MOUNT_FOLDER "/run/media/src"
+
 /* Temporary mount folder */
 #define TEMP_MOUNT_FOLDER "/run/media/tmp"
 
