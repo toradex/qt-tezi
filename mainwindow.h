@@ -20,6 +20,7 @@
 #include <QTimer>
 #include <QTime>
 #include <QUrl>
+#include <QSet>
 
 namespace Ui {
 class MainWindow;
@@ -59,18 +60,20 @@ protected:
     QIcon _sdIcon,_usbIcon, _internetIcon;
     QVariantMap _imageEntry;
     bool _mediaMounted;
-    QList<QString> _blockdevs;
+    QSet<QString> _blockdevsChecked;
+    QSet<QString> _blockdevsChecking;
 
-    bool processMedia(enum ImageSource src, const QString &dev);
+    void processMedia(enum ImageSource src, const QString &blockdev);
     QMap<QString,QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
     void inputSequence();
     bool isMounted(const QString &path);
     bool mountMedia(const QString &blockdev);
     bool unmountMedia();
-    QString getFirstRemovableBlockdev(const QString &nameFilter);
-    QString getFirstSD();
+    void checkRemovableBlockdev(const QString &nameFilter);
+    void checkSDcard();
     void addImages(QMap<QString,QVariantMap> images);
+    void removeImagesByBlockdev(const QString &blockdev);
     void update_window_title();
     bool requireNetwork();
     bool isOnline();

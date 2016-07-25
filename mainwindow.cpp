@@ -98,6 +98,9 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
     QDir dir;
     dir.mkdir(SRC_MOUNT_FOLDER);
 
+    if (isMounted(SRC_MOUNT_FOLDER))
+        unmountMedia();
+
     /* Disable online help buttons until network is functional */
     ui->actionBrowser->setEnabled(false);
 
@@ -241,7 +244,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             item->setData(SecondIconRole, _internetIcon);
 
         ui->list->addItem(item);
-
     }
 
     /* Giving items without icon a dummy icon to make them have equal height and text alignment */
@@ -267,6 +269,19 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
 
     ui->list->setCurrentRow(0);
     updateNeeded();
+}
+
+void MainWindow::removeImagesByBlockdev(const QString &blockdev)
+{
+    for (int i=0; i< ui->list->count(); i++)
+    {
+        QListWidgetItem *item = ui->list->item(i);
+        QVariantMap entry = item->data(Qt::UserRole).toMap();
+        if (entry.value("image_source_blockdev").toString() == blockdev) {
+            delete item;
+            i--;
+        }
+    }
 }
 
 /* Whether this OS should be displayed in the list of installable OSes */
@@ -340,8 +355,7 @@ bool MainWindow::isMounted(const QString &path) {
     return false;
 }
 
-
-QString MainWindow::getFirstRemovableBlockdev(const QString &nameFilter)
+void MainWindow::checkRemovableBlockdev(const QString &nameFilter)
 {
     QDir dir("/sys/block/", nameFilter, QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList list = dir.entryList();
@@ -349,19 +363,23 @@ QString MainWindow::getFirstRemovableBlockdev(const QString &nameFilter)
     foreach(QString blockdev, list) {
         QByteArray removable = getFileContents("/sys/block/" + blockdev + "/removable");
         if (removable.startsWith("1")) {
-            /* Get first partition of this device */
-            QDir devdir("/dev", blockdev + "?", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
-            QStringList devdirs = devdir.entryList();
-            if (devdirs.isEmpty())
-                return blockdev;
-            else
-                return devdirs.first();
+            /* Get partitions of this device */
+            QDir devdir("/dev", blockdev + "?*", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
+            QStringList devfiles = devdir.entryList();
+            if (devfiles.isEmpty()) {
+                /* Raw blockdev without any partition table? Try to use that... */
+                processMedia(SOURCE_USB, blockdev);
+            } else {
+                /* Everything else... */
+                foreach (QString devfile, devfiles) {
+                    processMedia(SOURCE_USB, devfile);
+                }
+            }
         }
     }
-    return NULL;
 }
 
-QString MainWindow::getFirstSD()
+void MainWindow::checkSDcard()
 {
     QDir dir("/sys/block/", "mmcblk*", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList list = dir.entryList();
@@ -373,13 +391,17 @@ QString MainWindow::getFirstSD()
 
         /* Get first partition of this device */
         QDir devdir("/dev", blockdev + "p?", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
-        QStringList devdirs = devdir.entryList();
-        if (devdirs.isEmpty())
-            return blockdev;
-        else
-            return devdirs.first();
+        QStringList devfiles = devdir.entryList();
+        if (devfiles.isEmpty()) {
+            /* Raw blockdev without any partition table? Try to use that... */
+            processMedia(SOURCE_SDCARD, blockdev);
+        } else {
+            /* Everything else... */
+            foreach (QString devfile, devfiles) {
+                processMedia(SOURCE_SDCARD, devfile);
+            }
+        }
     }
-    return NULL;
 }
 
 bool MainWindow::mountMedia(const QString &blockdev)
@@ -411,56 +433,49 @@ bool MainWindow::unmountMedia()
     return true;
 }
 
-bool MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
+void MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
 {
-    qDebug() << "Reading images from media" << blockdev;
+    QString blockdevpath = "/dev/" + blockdev;
+
+    _blockdevsChecking.insert(blockdevpath);
+
+    /* Did we already checked this block device? */
+    if (_blockdevsChecked.contains(blockdevpath))
+        return;
+
+    qDebug() << "Reading images from media" << blockdevpath;
     if (_qpd) {
-        _qpd->setLabelText(tr("Reading images from device %1...").arg(blockdev));
+        _qpd->setLabelText(tr("Reading images from device %1...").arg(blockdevpath));
         QApplication::processEvents();
     }
 
-    mountMedia(blockdev);
-    QMap<QString,QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdev, src);
-    unmountMedia();
+    if (mountMedia(blockdevpath))
+    {
+        QMap<QString,QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdevpath, src);
+        unmountMedia();
 
-    if (!images.isEmpty())
-        addImages(images);
-
-    return true;
+        if (!images.isEmpty())
+            addImages(images);
+    }
 }
 
 void MainWindow::pollMedia()
 {
-    static bool usbProcessed = false;
-    static bool sdProcessed = false;
+    _blockdevsChecking.clear();
 
-    if (!usbProcessed) {
-        QString blockdev = getFirstRemovableBlockdev("sd*");
-        if (blockdev != NULL) {
-            QString blockdevpath = "/dev/" + blockdev;
-            if (processMedia(SOURCE_USB, blockdevpath)) {
-                usbProcessed = true;
-                _blockdevs.append(blockdevpath);
-            }
-        }
+    checkRemovableBlockdev("sd*");
+    checkSDcard();
+
+    /* Check which blockdevices disappeared since last poll and remove them */
+    QSet<QString> lostblockdevs = _blockdevsChecked - _blockdevsChecking;
+    foreach(QString blockdev, lostblockdevs) {
+        removeImagesByBlockdev(blockdev);
     }
 
-    if (!sdProcessed) {
-        QString blockdev = getFirstSD();
-        if (blockdev != NULL) {
-            QString blockdevpath = "/dev/" + blockdev;
-            if (processMedia(SOURCE_SDCARD, blockdevpath)) {
-                sdProcessed = true;
-                _blockdevs.append(blockdevpath);
-            }
-        }
-    }
+    _blockdevsChecked = _blockdevsChecking;
 
-    /* After first poll, set intervall to 2s */
-    _mediaPollTimer.setInterval(2000);
-
-    if (usbProcessed && sdProcessed)
-        _mediaPollTimer.stop();
+    /* After first poll, set intervall to 1s */
+    _mediaPollTimer.setInterval(1000);
 }
 
 QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
@@ -511,7 +526,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
         }
 
         imagemap["image_info"] = "image.json";
-        imagemap["image_source"] = blockdev;
+        imagemap["image_source_blockdev"] = blockdev;
         images[basename] = imagemap;
     }
 
@@ -1160,11 +1175,11 @@ void MainWindow::startImageWrite(QVariantMap entry)
     QString folder, slidesFolder;
     QStringList slidesFolders;
 
-    /* Stop media poller in case still running */
+    /* Stop media poller... */
     _mediaPollTimer.stop();
 
     /* Re-mount local media */
-    mountMedia(entry.value("image_source").toString());
+    mountMedia(entry.value("image_source_blockdev").toString());
 
     if (entry.contains("folder"))
     {
