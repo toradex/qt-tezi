@@ -67,8 +67,6 @@ int main(int argc, char *argv[])
 
     QString defaultLang = "en";
     QString defaultKeyboard = "us";
-    QString defaultDisplay = "0";
-    QString defaultPartition = "800";
 
     // Process command-line arguments
     for (int i=1; i<argc; i++)
@@ -151,7 +149,7 @@ int main(int argc, char *argv[])
     }
 
     // Main window in the middle of screen
-    MainWindow mw(defaultDisplay, splash, toradexProductId, toradexBoardRev, autoinstall);
+    MainWindow mw(splash, toradexProductId, toradexBoardRev, autoinstall);
     mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     mw.show();
     mw.showProgressDialog();

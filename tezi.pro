@@ -54,6 +54,8 @@ FORMS    += mainwindow.ui \
     progressslideshowdialog.ui \
     confeditdialog.ui
 
+# Avoid warnings from resources. Unfortunately applied to all files...
+QMAKE_CXXFLAGS += -Wno-unused-variable
 RESOURCES += \
     icons.qrc \
     translations.qrc

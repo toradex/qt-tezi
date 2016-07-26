@@ -63,11 +63,11 @@ bool MainWindow::_partInited = false;
 /* Flag to keep track of current display mode. */
 int MainWindow::_currentMode = 0;
 
-MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
+MainWindow::MainWindow(QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
                        bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _defaultDisplay(defaultDisplay), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
+    _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
     _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _settings(NULL),
     _hasWifi(false), _netaccess(NULL), _mediaMounted(false)
 {
@@ -435,7 +435,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
     return images;
 }
 
-void MainWindow::on_list_currentItemChanged(QListWidgetItem * current, QListWidgetItem * previous)
+void MainWindow::on_list_currentItemChanged()
 {
     updateNeeded();
 }
@@ -775,7 +775,6 @@ void MainWindow::downloadListComplete()
 void MainWindow::downloadImageComplete()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (reply->error() != reply->NoError) {
         qDebug() << "Getting image JSON failed:" << reply->url();

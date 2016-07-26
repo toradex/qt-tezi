@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
+    explicit MainWindow(QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
                         bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
     void showProgressDialog();
@@ -46,7 +46,7 @@ protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
-    const QString _defaultDisplay;
+    QString _model, _toradexProductId, _toradexBoardRev;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     static bool _partInited;
     static int _currentMode;
@@ -58,7 +58,6 @@ protected:
     QTimer _networkStatusPollTimer;
     QTimer _mediaPollTimer;
     QTime _time;
-    QString _model, _toradexProductId, _toradexBoardRev;
     QIcon _sdIcon,_usbIcon, _internetIcon;
     QVariantMap _imageEntry;
     bool _mediaMounted;
@@ -116,7 +115,7 @@ private slots:
     void on_actionAdvanced_triggered(bool checked);
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();
-    void on_list_currentItemChanged(QListWidgetItem * current, QListWidgetItem * previous);
+    void on_list_currentItemChanged();
     void on_actionWifi_triggered();
 
 signals:
