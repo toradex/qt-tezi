@@ -350,10 +350,9 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     QByteArray label = fs->label();
     QString tarball  = fs->filename();
 
-    if (_image->imageSource() == SOURCE_NETWORK) {
+    if (_image->imageSource() == SOURCE_NETWORK && !tarball.isEmpty()) {
         tarball = _image->baseUrl() + tarball;
     }
-
 
     if (label.size() > 15)
     {
