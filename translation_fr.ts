@@ -118,10 +118,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error downloading distribution list from Internet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error parsing list.json downloaded from server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -179,6 +175,14 @@
     </message>
     <message>
         <source>Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading image list from Internet: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading image list from Internet: HTTP status code %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

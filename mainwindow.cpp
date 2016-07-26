@@ -96,7 +96,7 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
     _internetIcon = QIcon(":/icons/download.png");
 
     QDir dir;
-    dir.mkdir(SRC_MOUNT_FOLDER);
+    dir.mkpath(SRC_MOUNT_FOLDER);
 
     if (isMounted(SRC_MOUNT_FOLDER))
         unmountMedia();
@@ -686,7 +686,7 @@ void MainWindow::startNetworking()
     */
     QProcess *proc = new QProcess(this);
     qDebug() << "Starting dhcpcd";
-    proc->start("/sbin/udhcpc");
+    proc->start("/sbin/udhcpc -i eth0");
 
     _time.start();
 
@@ -706,8 +706,10 @@ bool MainWindow::isOnline()
 
     foreach (QHostAddress a, addresses)
     {
-        if (a != QHostAddress::LocalHost && a != QHostAddress::LocalHostIPv6)
+        if (a != QHostAddress::LocalHost && a != QHostAddress::LocalHostIPv6 &&
+            a.scopeId() == "") {
             return true;
+        }
     }
 
     return false;
@@ -788,11 +790,17 @@ void MainWindow::downloadListComplete()
         settimeofday(&tv, NULL);
     }
 
-    if (reply->error() != reply->NoError || httpstatuscode < 200 || httpstatuscode > 399)
+    if (reply->error() != reply->NoError)
     {
         if (_qpd)
             _qpd->hide();
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading distribution list from Internet"), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: %1").arg(reply->errorString()), QMessageBox::Close);
+    }
+    else if (httpstatuscode < 200 || httpstatuscode > 399)
+    {
+        if (_qpd)
+            _qpd->hide();
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: HTTP status code %1").arg(httpstatuscode), QMessageBox::Close);
     }
     else
     {
