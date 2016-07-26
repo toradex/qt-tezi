@@ -1088,7 +1088,8 @@ void MainWindow::startImageWrite(QVariantMap entry)
     _mediaPollTimer.stop();
 
     /* Re-mount local media */
-    mountMedia(entry.value("image_source_blockdev").toString());
+    if (entry.value("source") != SOURCE_NETWORK)
+        mountMedia(entry.value("image_source_blockdev").toString());
 
     if (entry.contains("folder"))
     {
