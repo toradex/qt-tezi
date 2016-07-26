@@ -483,6 +483,48 @@ bool MultiImageWriteThread::isLabelAvailable(const QByteArray &label)
     return (QProcess::execute("/sbin/findfs LABEL="+label) != 0);
 }
 
+bool MultiImageWriteThread::runwritecmd(const QString &cmd)
+{
+    QTime t1;
+    t1.start();
+
+    QProcess p;
+    if (_image->imageSource() != SOURCE_NETWORK)
+        p.setWorkingDirectory(_image->folder());
+    p.start(cmd);
+    p.closeWriteChannel();
+    p.setReadChannel(QProcess::StandardError);
+
+    /* Parse pipe viewer output for progress */
+    qint64 bytes = 0;
+    while (p.waitForReadyRead(-1))
+    {
+        QString line = p.readLine();
+
+        bool ok;
+        bytes = line.toLongLong(&ok);
+
+        if (ok)
+            emit imageProgress(_bytesWritten + bytes);
+        else
+            break;
+    }
+
+    _bytesWritten += bytes;
+
+    p.waitForFinished(-1);
+
+    if (p.exitCode() != 0)
+    {
+        QByteArray msg = p.readAll();
+        emit error(tr("Error downloading or writing image")+"\n" + msg);
+        return false;
+    }
+    qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";
+
+    return true;
+}
+
 bool MultiImageWriteThread::untar(const QString &tarball)
 {
     QString cmd = "sh -o pipefail -c \"";
@@ -509,43 +551,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     cmd += " | tar x -C " TEMP_MOUNT_FOLDER;
     cmd += " \"";
 
-    QTime t1;
-    t1.start();
-    qDebug() << "Executing:" << cmd;
-
-    QProcess p;
-    if (!isURL(tarball))
-        p.setWorkingDirectory(_image->folder());
-    p.start(cmd);
-    p.setReadChannel(QProcess::StandardError);
-
-    /* Parse pipe viewer output for progress */
-    qint64 bytes = 0;
-    while (p.waitForReadyRead(-1))
-    {
-        QString line = p.readLine();
-
-        bool ok;
-        bytes = line.toLongLong(&ok);
-
-        if (ok)
-            emit imageProgress(_bytesWritten + bytes);
-        else
-            break;
-    }
-
-    _bytesWritten += bytes;
-
-    p.waitForFinished(-1);
-    if (p.exitCode() != 0)
-    {
-        QByteArray msg = p.readAll();
-        emit error(tr("Error downloading or extracting tarball")+"\n"+msg);
-        return false;
-    }
-    qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";
-
-    return true;
+    return runwritecmd(cmd);
 }
 
 bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device, const QByteArray &dd_options)
@@ -563,28 +569,12 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device, 
     if (!isURL(imagePath))
         cmd += " "+imagePath;
 
+    /* Use pipe viewer for actual processing speed */
+    cmd += " | pv -b -n";
+
     cmd += " | dd of=" + device + " " + dd_options; // BusyBox can't do this: +" conv=fsync obs=4M\"";
 
-    QTime t1;
-    t1.start();
-    qDebug() << "Executing:" << cmd;
-
-    QProcess p;
-    if (!isURL(imagePath))
-        p.setWorkingDirectory(_image->folder());
-    p.setProcessChannelMode(p.MergedChannels);
-    p.start(cmd);
-    p.closeWriteChannel();
-    p.waitForFinished(-1);
-
-    if (p.exitCode() != 0)
-    {
-        emit error(tr("Error downloading or writing image")+"\n"+p.readAll());
-        return false;
-    }
-    qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";
-
-    return true;
+    return runwritecmd(cmd);
 }
 
 QString MultiImageWriteThread::getUncompressCommand(const QString &file)
@@ -627,59 +617,12 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
     if (!isURL(imagePath))
         cmd += " "+imagePath;
 
+    /* Use pipe viewer for actual processing speed */
+    cmd += " | pv -b -n";
+
     cmd += " | partclone.restore -q -s - -o "+device+" \"";
 
-    QTime t1;
-    t1.start();
-    qDebug() << "Executing:" << cmd;
-
-    QProcess p;
-    p.setProcessChannelMode(p.MergedChannels);
-    p.start(cmd);
-    p.closeWriteChannel();
-    p.waitForFinished(-1);
-
-    if (p.exitCode() != 0)
-    {
-        emit error(tr("Error downloading or writing Image")+"\n"+p.readAll());
-        return false;
-    }
-    qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";
-
-    return true;
-}
-
-void MultiImageWriteThread::patchConfigTxt()
-{
-    /*
-
-        QSettings settings("/settings/noobs.conf", QSettings::IniFormat);
-        int videomode = settings.value("display_mode", 0).toInt();
-
-        QByteArray dispOptions;
-
-        switch (videomode)
-        {
-        case 0: //
-            dispOptions = "hdmi_force_hotplug=1\r\n";
-            break;
-        case 1: //
-            dispOptions = "hdmi_ignore_edid=0xa5000080\r\nhdmi_force_hotplug=1\r\nhdmi_group=2\r\nhdmi_mode=4\r\n";
-            break;
-        case 2: //
-            dispOptions = "hdmi_ignore_hotplug=1\r\nsdtv_mode=2\r\n";
-            break;
-        case 3: //
-            dispOptions = "hdmi_ignore_hotplug=1\r\nsdtv_mode=0\r\n";
-            break;
-        }
-
-
-        QFile f("/mnt2/config.txt");
-        f.open(f.Append);
-        f.write("\r\n# NOOBS Auto-generated Settings:\r\n"+dispOptions);
-        f.close();*/
-
+    return runwritecmd(cmd);
 }
 
 QByteArray MultiImageWriteThread::getLabel(const QString part)
