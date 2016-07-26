@@ -380,11 +380,15 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
 {
     QMap<QString,QVariantMap> images;
 
-    /* Local image folders */
+    /* Local image folders, search all subfolders... */
     QDir dir(path, "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList list = dir.entryList();
 
+    /* ...and root too */
+    list.append("");
+
     foreach(QString image, list) {
+        qDebug() << image;
         QString imagefolder = path + QDir::separator() + image;
         QString imagejson = imagefolder + QDir::separator() + "image.json";
         if (!QFile::exists(imagejson))
