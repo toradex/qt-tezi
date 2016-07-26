@@ -154,6 +154,8 @@ int main(int argc, char *argv[])
     MainWindow mw(defaultDisplay, splash, toradexProductId, toradexBoardRev, autoinstall);
     mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     mw.show();
+    mw.showProgressDialog();
+    mw.startNetworking();
 
 #ifdef ENABLE_LANGUAGE_CHOOSER
      // Language chooser at the bottom center

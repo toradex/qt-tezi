@@ -39,6 +39,8 @@ public:
     explicit MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
                         bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
+    void showProgressDialog();
+    void startNetworking();
 
 protected:
     Ui::MainWindow *ui;
@@ -89,9 +91,7 @@ protected:
     void startImageWrite(QVariantMap entry);
 
 protected slots:
-    void populate();
     void startBrowser();
-    void startNetworking();
     void pollMedia();
     void pollNetworkStatus();
     void onOnlineStateChanged(bool online);

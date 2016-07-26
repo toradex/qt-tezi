@@ -110,10 +110,6 @@ MainWindow::MainWindow(const QString &defaultDisplay, QSplashScreen *splash, QSt
 
     connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
     _mediaPollTimer.start(100);
-    //QTimer::singleShot(1, this, SLOT(populate()));
-
-    startNetworking();
-
 }
 
 MainWindow::~MainWindow()
@@ -123,55 +119,12 @@ MainWindow::~MainWindow()
 }
 
 /* Discover which images we have, and fill in the list */
-void MainWindow::populate()
+void MainWindow::showProgressDialog()
 {
     /* Ask user to wait while list is populated */
     _qpd = new QProgressDialog(tr("Wait for external media or network..."), QString(), 0, 0, this);
     _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     _qpd->show();
-/*
-    int timeout = 5000;
-    if (getFileContents("/settings/wpa_supplicant.conf").contains("ssid="))
-    {
-        // Longer timeout if we have a wifi network configured
-        timeout = 8000;
-    }
-    QTimer::singleShot(timeout, this, SLOT(hideDialogIfNoNetwork()));
-    */
-
-    // Fill in list of images
-    /*
-    repopulate();
-
-    if (ui->list->count() != 0)
-    {
-        QList<QListWidgetItem *> l = ui->list->findItems(RECOMMENDED_IMAGE, Qt::MatchExactly);
-
-        if (!l.isEmpty())
-        {
-            ui->list->setCurrentItem(l.first());
-        }
-        else
-        {
-            ui->list->setCurrentRow(0);
-        }
-
-        if (_allowSilent && !QFile::exists(FAT_PARTITION_OF_IMAGE) && ui->list->count() == 1)
-        {
-            // No OS installed, perform silent installation
-            qDebug() << "Performing silent installation";
-            _silent = true;
-            ui->list->item(0)->setCheckState(Qt::Checked);
-            on_actionInstall_triggered();
-        }
-    }
-
-    _qpd->hide();
-    _qpd->deleteLater();
-    _qpd = NULL;
-
-    bool osInstalled = QFile::exists(FAT_PARTITION_OF_IMAGE);
-    ui->actionCancel->setEnabled(osInstalled);*/
 }
 
 void MainWindow::addImages(QMap<QString,QVariantMap> images)
