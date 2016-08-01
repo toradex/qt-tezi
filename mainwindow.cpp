@@ -77,6 +77,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     setContextMenuPolicy(Qt::NoContextMenu);
     update_window_title();
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
+    ui->list->setIconSize(QSize(40, 40));
     ui->advToolBar->setVisible(false);
 
     QRect s = QApplication::desktop()->screenGeometry();
@@ -161,16 +162,14 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         if (!description.isEmpty())
             friendlyname += "\n"+description;
 
-        if (!icon.isNull())
-        {
+        if (icon.isNull()) {
+            icon = QIcon();
+        } else {
             QList<QSize> avs = icon.availableSizes();
-            if (avs.isEmpty())
-            {
+            if (avs.isEmpty()) {
                 /* Icon file corrupt */
                 icon = QIcon();
-            }
-            else
-            {
+            } else {
                 QSize iconsize = avs.first();
 
                 if (iconsize.width() > currentsize.width() || iconsize.height() > currentsize.height())
@@ -831,11 +830,54 @@ void MainWindow::downloadImageComplete()
         if (!icon.startsWith("http"))
             iconurl = imagemap["baseurl"].toString() + icon;
 
-        downloadIcon(iconurl, icon);
+        ResourceDownload *rd = new ResourceDownload(_netaccess, iconurl, icon);
+        connect(rd, SIGNAL(failed()), this, SLOT(downloadIconFailed()));
+        connect(rd, SIGNAL(completed()), this, SLOT(downloadIconCompleted()));
     }
 }
 
+void MainWindow::downloadIconCompleted()
+{
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
+    QPixmap pix;
+    pix.loadFromData(rd->data());
+    QIcon icon(pix);
+
+    for (int i=0; i<ui->list->count(); i++)
+    {
+        QVariantMap m = ui->list->item(i)->data(Qt::UserRole).toMap();
+        ui->list->setIconSize(QSize(40, 40));
+        if (m.value("icon") == rd->saveAs() && m.value("source") == SOURCE_NETWORK)
+        {
+            ui->list->item(i)->setIcon(icon);
+        }
+    }
+
+    if (--_numIconsToDownload == 0 && _qpd)
+    {
+        _qpd->hide();
+        _qpd->deleteLater();
+        _qpd = NULL;
+    }
+
+    rd->deleteLater();
+}
+
+void MainWindow::downloadIconFailed()
+{
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
+
+    qDebug() << "Error downloading icon" << rd->urlString();
+    if (--_numIconsToDownload == 0 && _qpd)
+    {
+        _qpd->hide();
+        _qpd->deleteLater();
+        _qpd = NULL;
+    }
+
+    rd->deleteLater();
+}
 
 void MainWindow::processImageList(QUrl sourceurl, QVariant json)
 {
@@ -856,15 +898,6 @@ void MainWindow::processImageList(QUrl sourceurl, QVariant json)
     }
 }
 
-void MainWindow::downloadIcon(const QString &urlstring, const QString &originalurl)
-{
-    QUrl url(urlstring);
-    QNetworkRequest request(url);
-    request.setAttribute(QNetworkRequest::User, originalurl);
-    QNetworkReply *reply = _netaccess->get(request);
-    connect(reply, SIGNAL(finished()), this, SLOT(downloadIconRedirectCheck()));
-}
-
 QListWidgetItem *MainWindow::findItem(const QVariant &name)
 {
     for (int i=0; i<ui->list->count(); i++)
@@ -877,44 +910,6 @@ QListWidgetItem *MainWindow::findItem(const QVariant &name)
         }
     }
     return NULL;
-}
-
-void MainWindow::downloadIconComplete()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    QString url = reply->url().toString();
-    QString originalurl = reply->request().attribute(QNetworkRequest::User).toString();
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-    if (reply->error() != reply->NoError || httpstatuscode < 200 || httpstatuscode > 399)
-    {
-        //QMessageBox::critical(this, tr("Download error"), tr("Error downloading icon '%1'").arg(reply->url().toString()), QMessageBox::Close);
-        qDebug() << "Error downloading icon" << url;
-    }
-    else
-    {
-        QPixmap pix;
-        pix.loadFromData(reply->readAll());
-        QIcon icon(pix);
-
-        for (int i=0; i<ui->list->count(); i++)
-        {
-            QVariantMap m = ui->list->item(i)->data(Qt::UserRole).toMap();
-            ui->list->setIconSize(QSize(40,40));
-            if (m.value("icon") == originalurl && m.value("source") == SOURCE_NETWORK)
-            {
-                ui->list->item(i)->setIcon(icon);
-            }
-        }
-    }
-    if (--_numIconsToDownload == 0 && _qpd)
-    {
-        _qpd->hide();
-        _qpd->deleteLater();
-        _qpd = NULL;
-    }
-
-    reply->deleteLater();
 }
 
 QList<QListWidgetItem *> MainWindow::selectedItems()
@@ -996,22 +991,6 @@ void MainWindow::downloadListRedirectCheck()
         downloadListComplete();
     else
         downloadImageComplete();
-}
-
-void MainWindow::downloadIconRedirectCheck()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    QString redirectionurl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
-    QString originalurl = reply->request().attribute(QNetworkRequest::User).toString();;
-
-    if (httpstatuscode > 300 && httpstatuscode < 400)
-    {
-        qDebug() << "Redirection - Re-trying download from" << redirectionurl;
-        downloadIcon(redirectionurl, originalurl);
-    }
-    else
-        downloadIconComplete();
 }
 
 void MainWindow::downloadMetaCompleted()

@@ -84,7 +84,6 @@ protected:
     QList<QListWidgetItem *> selectedItems();
     void updateNeeded();
     void downloadMetaFile(const QString &url, const QString &saveAs);
-    void downloadIcon(const QString &urlstring, const QString &originalurl);
     void downloadList(const QString &urlstring);
     void downloadLists();
     void installImage(QVariantMap entry);
@@ -101,8 +100,8 @@ protected slots:
     /* Events from ImageWriterThread */
     void onError(const QString &msg);
     void onCompleted();
-    void downloadIconComplete();
-    void downloadIconRedirectCheck();
+    void downloadIconCompleted();
+    void downloadIconFailed();
     void downloadListRedirectCheck();
     void downloadMetaCompleted();
     void downloadMetaFailed();
