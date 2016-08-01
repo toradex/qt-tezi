@@ -15,7 +15,10 @@
 ResourceDownload::ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, QObject *parent) : QObject(parent),
   _netaccess(netaccess), _saveAs(saveAs)
 {
-    qDebug() << "Downloading" << urlstring << "to" << saveAs;
+    if (saveAs != NULL)
+        qDebug() << "Downloading" << urlstring << "to" << saveAs;
+    else
+        qDebug() << "Downloading" << urlstring;
     downloadFile(urlstring);
 }
 
@@ -38,15 +41,21 @@ void ResourceDownload::downloadRedirectCheck()
         qDebug() << "Redirection - Re-trying download from" << redirectionurl;
         downloadFile(redirectionurl);
     } else {
-        int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        _httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        _networkError = reply->error();
 
-        if (reply->error() != reply->NoError || httpstatuscode < 200 || httpstatuscode > 399) {
+        if (_networkError != QNetworkReply::NoError) {
+            _networkErrorString = reply->errorString();
+            emit failed();
+        } else if (_httpStatusCode < 200 || _httpStatusCode > 399) {
             emit failed();
         } else {
             _data = reply->readAll();
             emit completed();
         }
     }
+
+    reply->deleteLater();
 }
 
 int ResourceDownload::saveToFile()

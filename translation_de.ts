@@ -245,15 +245,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error downloading or extracting tarball</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error downloading or writing image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error downloading or writing Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

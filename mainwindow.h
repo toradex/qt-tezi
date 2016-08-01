@@ -84,7 +84,6 @@ protected:
     QList<QListWidgetItem *> selectedItems();
     void updateNeeded();
     void downloadMetaFile(const QString &url, const QString &saveAs);
-    void downloadList(const QString &urlstring);
     void downloadLists();
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap entry);
@@ -94,17 +93,18 @@ protected slots:
     void pollMedia();
     void pollNetworkStatus();
     void onOnlineStateChanged(bool online);
-    void downloadListComplete();
-    void downloadImageComplete();
-    void processImageList(QUrl sourceurl, QVariant json);
+    void downloadListJsonCompleted();
+    void downloadListJsonFailed();
+    void downloadImageJsonCompleted();
+    void downloadImageJsonFailed();
+    void downloadIconCompleted();
+    void downloadIconFailed();
+    void downloadMetaCompleted();
+    void downloadMetaFailed();
+
     /* Events from ImageWriterThread */
     void onError(const QString &msg);
     void onCompleted();
-    void downloadIconCompleted();
-    void downloadIconFailed();
-    void downloadListRedirectCheck();
-    void downloadMetaCompleted();
-    void downloadMetaFailed();
     void onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer);
     void hideDialogIfNoNetwork();
 

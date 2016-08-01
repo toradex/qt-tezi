@@ -703,18 +703,12 @@ void MainWindow::onOnlineStateChanged(bool online)
             QNetworkConfigurationManager manager;
             _netaccess->setConfiguration(manager.defaultConfiguration());
 
+            /* Download list of images from static URLs... */
             downloadLists();
         }
         //ui->actionBrowser->setEnabled(true);
         emit networkUp();
     }
-}
-
-void MainWindow::downloadList(const QString &urlstring)
-{
-    QNetworkReply *reply = _netaccess->get(QNetworkRequest(QUrl(urlstring)));
-    reply->setProperty("isList", true);
-    connect(reply, SIGNAL(finished()), this, SLOT(downloadListRedirectCheck()));
 }
 
 void MainWindow::downloadLists()
@@ -724,65 +718,62 @@ void MainWindow::downloadLists()
 
     foreach (QString url, urls)
     {
-        downloadList(url);
+        ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
+        connect(rd, SIGNAL(failed()), this, SLOT(downloadListJsonFailed()));
+        connect(rd, SIGNAL(completed()), this, SLOT(downloadListJsonCompleted()));
     }
 }
 
-void MainWindow::downloadListComplete()
+void MainWindow::downloadListJsonCompleted()
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
-    /* Set our clock to server time if we currently have a date before 2015 */
-    QByteArray dateStr = reply->rawHeader("Date");
-    if (!dateStr.isEmpty() && QDate::currentDate().year() < 2015)
-    {
-        // Qt 4 does not have a standard function for parsing the Date header, but it does
-        // have one for parsing a Last-Modified header that uses the same date/time format, so just use that
-        QNetworkRequest dummyReq;
-        dummyReq.setRawHeader("Last-Modified", dateStr);
-        QDateTime parsedDate = dummyReq.header(dummyReq.LastModifiedHeader).toDateTime();
-
-        struct timeval tv;
-        tv.tv_sec = parsedDate.toTime_t();
-        tv.tv_usec = 0;
-        settimeofday(&tv, NULL);
-    }
-
-    if (reply->error() != reply->NoError)
-    {
-        if (_qpd)
-            _qpd->hide();
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: %1").arg(reply->errorString()), QMessageBox::Close);
-    }
-    else if (httpstatuscode < 200 || httpstatuscode > 399)
-    {
-        if (_qpd)
-            _qpd->hide();
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: HTTP status code %1").arg(httpstatuscode), QMessageBox::Close);
-    }
-    else
-    {
-        QVariant json = Json::parse(reply->readAll());
-        if (json.isNull()) {
-            QMessageBox::critical(this, tr("Error"), tr("Error parsing list.json downloaded from server"), QMessageBox::Close);
-        } else {
-            processImageList(reply->url(), json);
-        }
-    }
-
-    reply->deleteLater();
-}
-
-void MainWindow::downloadImageComplete()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-
-    if (reply->error() != reply->NoError) {
-        qDebug() << "Getting image JSON failed:" << reply->url();
+    QVariant json = Json::parse(rd->data());
+    rd->deleteLater();
+    if (json.isNull()) {
+        QMessageBox::critical(this, tr("Error"), tr("Error parsing list.json downloaded from server"), QMessageBox::Close);
         return;
     }
-    QByteArray json = reply->readAll();
+
+    QVariantList list = json.toMap().value("images").toList();
+    QString sourceurlpath = getUrlPath(rd->urlString());
+
+    foreach (QVariant image, list)
+    {
+        QString url = image.toString();
+
+        // Relative URL...
+        if (!url.startsWith("http"))
+            url = sourceurlpath + url;
+
+        ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
+        connect(rd, SIGNAL(failed()), this, SLOT(downloadImageJsonFailed()));
+        connect(rd, SIGNAL(completed()), this, SLOT(downloadImageJsonCompleted()));
+    }
+}
+
+
+void MainWindow::downloadListJsonFailed()
+{
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
+
+    if (_qpd)
+        _qpd->hide();
+
+    if (rd->networkError() != QNetworkReply::NoError) {
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: %1").arg(rd->networkErrorString()), QMessageBox::Close);
+    } else {
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: HTTP status code %1").arg(rd->httpStatusCode()), QMessageBox::Close);
+    }
+
+    rd->deleteLater();
+}
+
+void MainWindow::downloadImageJsonCompleted()
+{
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
+
+    QByteArray json = rd->data();
     QVariantMap imagemap = Json::parse(json).toMap();
 
     QString basename = imagemap.value("name").toString();
@@ -818,7 +809,7 @@ void MainWindow::downloadImageComplete()
     imageinfo.write(json);
     imageinfo.close();
     imagemap["image_info"] = "image.json";
-    imagemap["baseurl"] = getUrlPath(reply->url().toString());
+    imagemap["baseurl"] = getUrlPath(rd->urlString());
     QMap<QString,QVariantMap> images;
     images[basename] = imagemap;
 
@@ -834,6 +825,21 @@ void MainWindow::downloadImageComplete()
         connect(rd, SIGNAL(failed()), this, SLOT(downloadIconFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadIconCompleted()));
     }
+
+    rd->deleteLater();
+}
+
+void MainWindow::downloadImageJsonFailed()
+{
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
+
+    if (rd->networkError() != QNetworkReply::NoError) {
+        qDebug() << "Getting image JSON failed:" << rd->networkErrorString();
+    } else {
+        qDebug() << "Getting image JSON failed: HTTP status code" << rd->httpStatusCode();
+    }
+
+    rd->deleteLater();
 }
 
 void MainWindow::downloadIconCompleted()
@@ -877,25 +883,6 @@ void MainWindow::downloadIconFailed()
     }
 
     rd->deleteLater();
-}
-
-void MainWindow::processImageList(QUrl sourceurl, QVariant json)
-{
-    //QSet<QString> iconurls;
-    QVariantList list = json.toMap().value("images").toList();
-    QString sourceurlpath = getUrlPath(sourceurl.toString());
-
-    foreach (QVariant image, list)
-    {
-        QString url = image.toString();
-
-        // Relative URL...
-        if (!url.startsWith("http"))
-            url = sourceurlpath + url;
-
-        QNetworkReply *reply = _netaccess->get(QNetworkRequest(QUrl(url)));
-        connect(reply, SIGNAL(finished()), this, SLOT(downloadListRedirectCheck()));
-    }
 }
 
 QListWidgetItem *MainWindow::findItem(const QVariant &name)
@@ -974,23 +961,6 @@ void MainWindow::downloadMetaFile(const QString &urlstring, const QString &saveA
     ResourceDownload *fd = new ResourceDownload(_netaccess, urlstring, saveAs);
     connect(fd, SIGNAL(completed()), this, SLOT(downloadMetaCompleted()));
     connect(fd, SIGNAL(failed()), this, SLOT(downloadMetaFailed()));
-}
-
-void MainWindow::downloadListRedirectCheck()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    QString redirectionurl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
-
-    if (httpstatuscode > 300 && httpstatuscode < 400)
-    {
-        qDebug() << "Redirection - Re-trying download from" << redirectionurl;
-        downloadList(redirectionurl);
-    }
-    else if (reply->property("isList").toBool())
-        downloadListComplete();
-    else
-        downloadImageComplete();
 }
 
 void MainWindow::downloadMetaCompleted()

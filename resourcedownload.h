@@ -23,6 +23,18 @@ public:
     {
         return _data;
     }
+    inline int networkError()
+    {
+        return _networkError;
+    }
+    inline QString networkErrorString()
+    {
+        return _networkErrorString;
+    }
+    inline int httpStatusCode()
+    {
+        return _httpStatusCode;
+    }
 
 signals:
     void completed();
@@ -39,6 +51,9 @@ private:
     QString _saveAs;
     QString _urlString;
     QByteArray _data;
+    int _networkError;
+    QString _networkErrorString;
+    int _httpStatusCode;
 };
 
 #endif // RESOURCEDOWNLOAD_H
