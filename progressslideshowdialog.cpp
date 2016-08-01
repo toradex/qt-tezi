@@ -80,7 +80,7 @@ void ProgressSlideshowDialog::setLabelText(const QString &text)
     QString txt = text;
     txt.replace('\n',' ');
     ui->statusLabel->setText(txt);
-    qDebug() << text;
+    qDebug() << "Progress:" << text;
 }
 
 void ProgressSlideshowDialog::nextSlide()

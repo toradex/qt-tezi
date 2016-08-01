@@ -388,7 +388,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
     list.append("");
 
     foreach(QString image, list) {
-        qDebug() << image;
+        qDebug() << "Adding image" << image << "from" << blockdev;
         QString imagefolder = path + QDir::separator() + image;
         QString imagejson = imagefolder + QDir::separator() + "image.json";
         if (!QFile::exists(imagejson))
@@ -443,7 +443,10 @@ void MainWindow::on_list_currentItemChanged()
 void MainWindow::installImage(QVariantMap entry)
 {
     _numMetaFilesToDownload = 0;
+
+    /* Stop any polling, we are about to install a image */
     _networkStatusPollTimer.stop();
+    _mediaPollTimer.stop();
 
     if (entry.value("source") == SOURCE_NETWORK)
     {
@@ -477,7 +480,6 @@ void MainWindow::installImage(QVariantMap entry)
         _qpd->show();
     }
 }
-
 
 void MainWindow::on_actionInstall_triggered()
 {
@@ -1080,27 +1082,18 @@ void MainWindow::startImageWrite(QVariantMap entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     MultiImageWriteThread *imageWriteThread = new MultiImageWriteThread();
-    QString folder, slidesFolder;
+    QString folder;
     QStringList slidesFolders;
-
-    /* Stop media poller... */
-    _mediaPollTimer.stop();
 
     /* Re-mount local media */
     if (entry.value("source") != SOURCE_NETWORK)
         mountMedia(entry.value("image_source_blockdev").toString());
 
-    if (entry.contains("folder"))
+    if (entry.contains("marketing_info"))
     {
-        /* Local image */
         folder = entry.value("folder").toString();
-    }
-    else
-    {
-        folder = "/var/volatile/"+entry.value("name").toString();
-        folder.replace(' ', '_');
 
-        QString marketingTar = folder+"/marketing.tar";
+        QString marketingTar = folder + "/marketing.tar";
         if (QFile::exists(marketingTar))
         {
             /* Extract tarball with slides */
@@ -1109,25 +1102,21 @@ void MainWindow::startImageWrite(QVariantMap entry)
         }
     }
 
-    slidesFolder.clear();
     //QRect s = QApplication::desktop()->screenGeometry();
     //if (s.width() > 640 && QFile::exists(folder+"/slides"))
     //{
     //    slidesFolder = folder+"/slides";
     //}
+    slidesFolders.clear();
     if (QFile::exists(folder+"/slides_vga"))
     {
-        slidesFolder = folder+"/slides_vga";
+        slidesFolders.append(folder+"/slides_vga");
     }
+
     imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), (enum ImageSource)entry.value("source").toInt());
-    if (!slidesFolder.isEmpty())
-        slidesFolders.append(slidesFolder);
 
-    if (slidesFolders.isEmpty())
-        slidesFolder.append("/mnt/defaults/slides");
-
-    _psd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
+    _psd = new ProgressSlideshowDialog(slidesFolders, "", 15, this);
     connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));
     connect(imageWriteThread, SIGNAL(imageProgress(qint64)), _psd, SLOT(updateIOstats(qint64)));
     connect(imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
