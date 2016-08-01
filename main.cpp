@@ -148,19 +148,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Main window in the middle of screen
-    MainWindow mw(splash, toradexProductId, toradexBoardRev, autoinstall);
-    mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
-    mw.show();
-    mw.showProgressDialog();
-    mw.startNetworking();
-
 #ifdef ENABLE_LANGUAGE_CHOOSER
      // Language chooser at the bottom center
     LanguageDialog* ld = new LanguageDialog(defaultLang, defaultKeyboard);
     ld->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignBottom, ld->size(), a.desktop()->availableGeometry()));
     ld->show();
 #endif
+
+    // Main window in the middle of screen
+    MainWindow mw(splash, ld, toradexProductId, toradexBoardRev, autoinstall);
+    mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
+    mw.show();
+    mw.showProgressDialog();
+    mw.startNetworking();
 
     a.exec();
 

@@ -63,12 +63,12 @@ bool MainWindow::_partInited = false;
 /* Flag to keep track of current display mode. */
 int MainWindow::_currentMode = 0;
 
-MainWindow::MainWindow(QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
+MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
                        bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
-    _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _settings(NULL),
+    _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld), _settings(NULL),
     _hasWifi(false), _netaccess(NULL), _mediaMounted(false)
 {
     ui->setupUi(this);
@@ -1123,6 +1123,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
     connect(imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
     imageWriteThread->start();
+    _ld->hide();
     hide();
     _psd->exec();
 }

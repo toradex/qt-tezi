@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QSplashScreen *splash, QString &toradexProductId, QString &toradexBoardRev,
+    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
                         bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
     void showProgressDialog();
@@ -51,6 +51,7 @@ protected:
     static bool _partInited;
     static int _currentMode;
     QSplashScreen *_splash;
+    LanguageDialog *_ld;
     QSettings *_settings;
     bool _hasWifi;
     QNetworkAccessManager *_netaccess;
