@@ -45,7 +45,7 @@ protected:
     int _extraSpacePerPartition, _sectorOffset;
     qint64 _bytesWritten;
     QVariantList installed_os;
-    
+
 signals:
     void error(const QString &msg);
     void statusUpdate(const QString &msg);

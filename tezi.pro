@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     partitioninfo.cpp \
     longpresshandler.cpp \
     filesysteminfo.cpp \
-    blockdevinfo.cpp
+    blockdevinfo.cpp \
+    resourcedownload.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -47,7 +48,8 @@ HEADERS  += mainwindow.h \
     partitioninfo.h \
     longpresshandler.h \
     filesysteminfo.h \
-    blockdevinfo.h
+    blockdevinfo.h \
+    resourcedownload.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

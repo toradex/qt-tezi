@@ -4,6 +4,7 @@
 #include "confeditdialog.h"
 #include "progressslideshowdialog.h"
 #include "config.h"
+#include "resourcedownload.h"
 #include "languagedialog.h"
 #include "json.h"
 #include "util.h"
@@ -974,13 +975,10 @@ void MainWindow::updateNeeded()
 
 void MainWindow::downloadMetaFile(const QString &urlstring, const QString &saveAs)
 {
-    qDebug() << "Downloading" << urlstring << "to" << saveAs;
     _numMetaFilesToDownload++;
-    QUrl url(urlstring);
-    QNetworkRequest request(url);
-    request.setAttribute(QNetworkRequest::User, saveAs);
-    QNetworkReply *reply = _netaccess->get(request);
-    connect(reply, SIGNAL(finished()), this, SLOT(downloadMetaRedirectCheck()));
+    ResourceDownload *fd = new ResourceDownload(_netaccess, urlstring, saveAs);
+    connect(fd, SIGNAL(completed()), this, SLOT(downloadMetaCompleted()));
+    connect(fd, SIGNAL(failed()), this, SLOT(downloadMetaFailed()));
 }
 
 void MainWindow::downloadListRedirectCheck()
@@ -1016,58 +1014,19 @@ void MainWindow::downloadIconRedirectCheck()
         downloadIconComplete();
 }
 
-void MainWindow::downloadMetaRedirectCheck()
+void MainWindow::downloadMetaCompleted()
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    QString redirectionurl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
-    QString saveAs = reply->request().attribute(QNetworkRequest::User).toString();
+    ResourceDownload *fd = qobject_cast<ResourceDownload *>(sender());
 
-    if (httpstatuscode > 300 && httpstatuscode < 400)
-    {
-        qDebug() << "Redirection - Re-trying download from" << redirectionurl;
-        _numMetaFilesToDownload--;
-        downloadMetaFile(redirectionurl, saveAs);
-    }
-    else
-        downloadMetaComplete();
-}
-
-void MainWindow::downloadMetaComplete()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-    if (reply->error() != reply->NoError || httpstatuscode < 200 || httpstatuscode > 399)
-    {
-        if (_qpd)
-        {
-            _qpd->hide();
-            _qpd->deleteLater();
-            _qpd = NULL;
-        }
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading meta file")+"\n"+reply->url().toString(), QMessageBox::Close);
+    if (fd->saveToFile() < 0) {
+        QMessageBox::critical(this, tr("Download error"), tr("Error writing downloaded file to SD card. SD card or file system may be damaged."), QMessageBox::Close);
         setEnabled(true);
+    } else {
+        _numMetaFilesToDownload--;
     }
-    else
-    {
-        QString saveAs = reply->request().attribute(QNetworkRequest::User).toString();
-        QFile f(saveAs);
-        f.open(f.WriteOnly);
-        if (f.write(reply->readAll()) == -1)
-        {
-            QMessageBox::critical(this, tr("Download error"), tr("Error writing downloaded file to SD card. SD card or file system may be damaged."), QMessageBox::Close);
-            setEnabled(true);
-        }
-        else
-        {
-            _numMetaFilesToDownload--;
-        }
-        f.close();
-    }
+    fd->deleteLater();
 
-    if (_numMetaFilesToDownload == 0)
-    {
+    if (_numMetaFilesToDownload == 0) {
         if (_qpd)
         {
             _qpd->hide();
@@ -1076,6 +1035,21 @@ void MainWindow::downloadMetaComplete()
         }
         startImageWrite(_imageEntry);
     }
+}
+
+void MainWindow::downloadMetaFailed()
+{
+    ResourceDownload *fd = qobject_cast<ResourceDownload *>(sender());
+
+    if (_qpd)
+    {
+        _qpd->hide();
+        _qpd->deleteLater();
+        _qpd = NULL;
+    }
+    QMessageBox::critical(this, tr("Download error"), tr("Error downloading meta file")+"\n"+fd->urlString(), QMessageBox::Close);
+    setEnabled(true);
+    fd->deleteLater();
 }
 
 void MainWindow::startImageWrite(QVariantMap entry)

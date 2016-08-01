@@ -102,10 +102,10 @@ protected slots:
     void onError(const QString &msg);
     void onCompleted();
     void downloadIconComplete();
-    void downloadMetaRedirectCheck();
     void downloadIconRedirectCheck();
     void downloadListRedirectCheck();
-    void downloadMetaComplete();
+    void downloadMetaCompleted();
+    void downloadMetaFailed();
     void onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer);
     void hideDialogIfNoNetwork();
 
