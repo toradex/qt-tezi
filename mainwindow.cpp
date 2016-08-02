@@ -439,6 +439,11 @@ void MainWindow::on_list_currentItemChanged()
     updateNeeded();
 }
 
+void MainWindow::on_list_itemDoubleClicked()
+{
+    on_actionInstall_triggered();
+}
+
 void MainWindow::installImage(QVariantMap entry)
 {
     setEnabled(false);

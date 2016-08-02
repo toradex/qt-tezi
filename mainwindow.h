@@ -115,6 +115,7 @@ private slots:
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();
     void on_list_currentItemChanged();
+    void on_list_itemDoubleClicked();
     void on_actionWifi_triggered();
 
 signals:
