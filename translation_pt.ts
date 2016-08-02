@@ -130,10 +130,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Image installed successfully</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Wait for external media or network...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -183,6 +179,18 @@
     </message>
     <message>
         <source>Error parsing list JSON downloaded from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image installed successfully.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restart</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>In case recovery mode has been used a power cycle will be necessary.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -515,10 +515,13 @@ void MainWindow::onCompleted()
 {
     _psd->hide();
 
-    if (!_isAutoinstall)
-        QMessageBox::information(this,
-                                 tr("Image Installed"),
-                                 tr("Image installed successfully"), QMessageBox::Ok);
+    if (!_isAutoinstall) {
+        QMessageBox msgbox(QMessageBox::Information,
+                           tr("Image Installed"),
+                           tr("Image installed successfully.") + "\n\n" + tr("In case recovery mode has been used a power cycle will be necessary."), QMessageBox::Ok, this);
+        msgbox.button(QMessageBox::Ok)->setText(tr("Restart"));
+        msgbox.exec();
+    }
     _psd->deleteLater();
     _psd = NULL;
     close();
