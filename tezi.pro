@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     longpresshandler.cpp \
     filesysteminfo.cpp \
     blockdevinfo.cpp \
-    resourcedownload.cpp
+    resourcedownload.cpp \
+    scrolltextdialog.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
     longpresshandler.h \
     filesysteminfo.h \
     blockdevinfo.h \
-    resourcedownload.h
+    resourcedownload.h \
+    scrolltextdialog.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

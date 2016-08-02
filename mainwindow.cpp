@@ -6,6 +6,7 @@
 #include "config.h"
 #include "resourcedownload.h"
 #include "languagedialog.h"
+#include "scrolltextdialog.h"
 #include "json.h"
 #include "util.h"
 #include "twoiconsdelegate.h"
@@ -442,6 +443,7 @@ void MainWindow::on_list_currentItemChanged()
 
 void MainWindow::installImage(QVariantMap entry)
 {
+    setEnabled(false);
     _numMetaFilesToDownload = 0;
 
     /* Stop any polling, we are about to install a image */
@@ -464,6 +466,10 @@ void MainWindow::installImage(QVariantMap entry)
         }
         if (entry.contains("wrapup_script")) {
             QString script = entry.value("wrapup_script").toString();
+            downloadMetaFile(url + script, folder + "/" + script);
+        }
+        if (entry.contains("eula")) {
+            QString script = entry.value("eula").toString();
             downloadMetaFile(url + script, folder + "/" + script);
         }
     }
@@ -491,7 +497,6 @@ void MainWindow::on_actionInstall_triggered()
                             tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        setEnabled(false);
         QListWidgetItem *item = ui->list->currentItem();
         QVariantMap entry = item->data(Qt::UserRole).toMap();
         installImage(entry);
@@ -1005,8 +1010,22 @@ void MainWindow::startImageWrite(QVariantMap entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     MultiImageWriteThread *imageWriteThread = new MultiImageWriteThread();
-    QString folder;
+    QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
+
+    if (entry.contains("eula")) {
+        QByteArray text = getFileContents(folder + "/" + entry.value("eula").toString());
+        ScrollTextDialog eula("EULA", QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
+        eula.setDefaultButton(QDialogButtonBox::No);
+        int ret = eula.exec();
+
+        if (ret != QDialogButtonBox::Yes) {
+            _networkStatusPollTimer.start();
+            _mediaPollTimer.start();
+            setEnabled(true);
+            return;
+        }
+    }
 
     /* Re-mount local media */
     if (entry.value("source") != SOURCE_NETWORK)

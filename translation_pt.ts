@@ -338,4 +338,11 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>ScrollTextDialog</name>
+    <message>
+        <source>I Agree</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>
