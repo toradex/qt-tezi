@@ -466,8 +466,8 @@ void MainWindow::installImage(QVariantMap entry)
             QString script = entry.value("wrapup_script").toString();
             downloadMetaFile(url + script, folder + "/" + script);
         }
-        if (entry.contains("eula")) {
-            QString script = entry.value("eula").toString();
+        if (entry.contains("license")) {
+            QString script = entry.value("license").toString();
             downloadMetaFile(url + script, folder + "/" + script);
         }
     }
@@ -994,9 +994,9 @@ void MainWindow::startImageWrite(QVariantMap entry)
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
 
-    if (entry.contains("eula")) {
-        QByteArray text = getFileContents(folder + "/" + entry.value("eula").toString());
-        ScrollTextDialog eula("EULA", QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
+    if (entry.contains("license")) {
+        QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());
+        ScrollTextDialog eula(entry.value("license_title").toString(), QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
         eula.setDefaultButton(QDialogButtonBox::No);
         int ret = eula.exec();
 
