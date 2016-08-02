@@ -65,6 +65,7 @@ protected:
     QSet<QString> _blockdevsChecked;
     QSet<QString> _blockdevsChecking;
 
+    int calculateNominalSize(const QVariantMap &imagemap);
     void processMedia(enum ImageSource src, const QString &blockdev);
     QMap<QString,QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);

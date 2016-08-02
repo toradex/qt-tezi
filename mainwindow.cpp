@@ -400,25 +400,8 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
         imagemap["folder"] = imagefolder;
         imagemap["source"] = source;
 
-        if (!imagemap.contains("nominal_size")) {
-            // Calculate nominal_size based on partition information
-            int nominal_size = 0;
-            QVariantList blockdevs = imagemap.value("blockdevs").toList();
-            foreach (QVariant b, blockdevs) {
-                QVariantMap blockdev = b.toMap();
-                if (blockdev.value("name") == "mmcblk0") {
-                    QVariantList pvl = blockdev.value("partitions").toList();
-                    foreach (QVariant v, pvl)
-                    {
-                        QVariantMap pv = v.toMap();
-                        nominal_size += pv.value("partition_size_nominal").toInt();
-                    }
-                    break;
-                }
-            }
-
-            imagemap["nominal_size"] = nominal_size;
-        }
+        if (!imagemap.contains("nominal_size"))
+            imagemap["nominal_size"] = calculateNominalSize(imagemap);
 
         QString iconFilename = imagemap["icon"].toString();
         if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator())) {
@@ -434,6 +417,27 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
     }
 
     return images;
+}
+
+/* Calculates nominal image size based on partition information. */
+int MainWindow::calculateNominalSize(const QVariantMap &imagemap)
+{
+    int nominal_size = 0;
+    QVariantList blockdevs = imagemap.value("blockdevs").toList();
+    foreach (QVariant b, blockdevs) {
+        QVariantMap blockdev = b.toMap();
+        if (blockdev.value("name") == "mmcblk0") {
+            QVariantList pvl = blockdev.value("partitions").toList();
+            foreach (QVariant v, pvl)
+            {
+                QVariantMap pv = v.toMap();
+                nominal_size += pv.value("partition_size_nominal").toInt();
+            }
+            break;
+        }
+    }
+
+    return nominal_size;
 }
 
 void MainWindow::on_list_currentItemChanged()
@@ -789,25 +793,8 @@ void MainWindow::downloadImageJsonCompleted()
     imagemap["folder"] = folder;
     imagemap["source"] = SOURCE_NETWORK;
 
-    if (!imagemap.contains("nominal_size")) {
-        // Calculate nominal_size based on partition information
-        int nominal_size = 0;
-        QVariantList blockdevs = imagemap.value("blockdevs").toList();
-        foreach (QVariant b, blockdevs) {
-            QVariantMap blockdev = b.toMap();
-            if (blockdev.value("name") == "mmcblk0") {
-                QVariantList pvl = blockdev.value("partitions").toList();
-                foreach (QVariant v, pvl)
-                {
-                    QVariantMap pv = v.toMap();
-                    nominal_size += pv.value("partition_size_nominal").toInt();
-                }
-                break;
-            }
-        }
-
-        imagemap["nominal_size"] = nominal_size;
-    }
+    if (!imagemap.contains("nominal_size"))
+        imagemap["nominal_size"] = calculateNominalSize(imagemap);
 
     QFile imageinfo(folder + "/image.json");
     imageinfo.open(QIODevice::WriteOnly | QIODevice::Text);
