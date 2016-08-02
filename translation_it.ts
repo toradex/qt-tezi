@@ -115,125 +115,125 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="128"/>
+        <location filename="mainwindow.cpp" line="122"/>
         <source>Wait for external media or network...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="312"/>
+        <location filename="mainwindow.cpp" line="306"/>
         <source>Error mounting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="313"/>
+        <location filename="mainwindow.cpp" line="307"/>
         <source>Error mounting external device (%1)</source>
         <oldsource>Error mounting external media (%1)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="347"/>
+        <location filename="mainwindow.cpp" line="341"/>
         <source>Reading images from device %1...</source>
         <oldsource>Reading images from media %1...</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="496"/>
+        <location filename="mainwindow.cpp" line="494"/>
         <source>Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="497"/>
+        <location filename="mainwindow.cpp" line="495"/>
         <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="484"/>
+        <location filename="mainwindow.cpp" line="482"/>
         <source>The install process will begin shortly.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="517"/>
+        <location filename="mainwindow.cpp" line="515"/>
         <source>Image Installed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="518"/>
+        <location filename="mainwindow.cpp" line="516"/>
         <source>Image installed successfully</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="529"/>
-        <location filename="mainwindow.cpp" line="739"/>
+        <location filename="mainwindow.cpp" line="527"/>
+        <location filename="mainwindow.cpp" line="737"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="540"/>
+        <location filename="mainwindow.cpp" line="538"/>
         <source>Tez-i v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="596"/>
-        <location filename="mainwindow.cpp" line="1090"/>
-        <location filename="mainwindow.cpp" line="1098"/>
+        <location filename="mainwindow.cpp" line="594"/>
+        <location filename="mainwindow.cpp" line="1071"/>
+        <location filename="mainwindow.cpp" line="1079"/>
         <source>No network access</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="597"/>
+        <location filename="mainwindow.cpp" line="595"/>
         <source>Wired network access is required for this feature. Please insert a network cable into the network port.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="mainwindow.cpp" line="737"/>
+        <source>Error parsing list JSON downloaded from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="767"/>
         <location filename="mainwindow.cpp" line="769"/>
-        <location filename="mainwindow.cpp" line="771"/>
-        <location filename="mainwindow.cpp" line="976"/>
-        <location filename="mainwindow.cpp" line="1004"/>
+        <location filename="mainwindow.cpp" line="957"/>
+        <location filename="mainwindow.cpp" line="985"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="769"/>
+        <location filename="mainwindow.cpp" line="767"/>
         <source>Error downloading image list from Internet: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="771"/>
+        <location filename="mainwindow.cpp" line="769"/>
         <source>Error downloading image list from Internet: HTTP status code %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="739"/>
-        <source>Error parsing list.json downloaded from server</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="940"/>
+        <location filename="mainwindow.cpp" line="921"/>
         <source>Needed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="941"/>
+        <location filename="mainwindow.cpp" line="922"/>
         <source>Available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1004"/>
+        <location filename="mainwindow.cpp" line="985"/>
         <source>Error downloading meta file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="976"/>
+        <location filename="mainwindow.cpp" line="957"/>
         <source>Error writing downloaded file to SD card. SD card or file system may be damaged.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1091"/>
+        <location filename="mainwindow.cpp" line="1072"/>
         <source>Network access is required to use NOOBS without local images. Please select your wifi network in the next screen.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1099"/>
+        <location filename="mainwindow.cpp" line="1080"/>
         <source>Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port.</source>
         <translation type="unfinished"></translation>
     </message>

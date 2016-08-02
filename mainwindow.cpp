@@ -59,12 +59,6 @@
  *
  */
 
-/* Flag to keep track wheter or not we already repartitioned. */
-bool MainWindow::_partInited = false;
-
-/* Flag to keep track of current display mode. */
-int MainWindow::_currentMode = 0;
-
 MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
                        bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
@@ -740,7 +734,7 @@ void MainWindow::downloadListJsonCompleted()
     QVariant json = Json::parse(rd->data());
     rd->deleteLater();
     if (json.isNull()) {
-        QMessageBox::critical(this, tr("Error"), tr("Error parsing list.json downloaded from server"), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Error"), tr("Error parsing list JSON downloaded from server"), QMessageBox::Close);
         return;
     }
 

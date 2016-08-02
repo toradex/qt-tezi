@@ -48,8 +48,6 @@ protected:
     ProgressSlideshowDialog *_psd;
     QString _model, _toradexProductId, _toradexBoardRev;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
-    static bool _partInited;
-    static int _currentMode;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
     QSettings *_settings;

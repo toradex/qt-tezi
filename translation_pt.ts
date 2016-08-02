@@ -118,10 +118,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error parsing list.json downloaded from server</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Tez-i v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -183,6 +179,10 @@
     </message>
     <message>
         <source>Error downloading image list from Internet: HTTP status code %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error parsing list JSON downloaded from server</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
