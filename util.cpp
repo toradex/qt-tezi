@@ -44,39 +44,3 @@ QString getUrlPath(const QString& url)
     int slash = url.lastIndexOf('/');
     return url.left(slash + 1);
 }
-
-/* Whether this OS should be displayed in the list of bootable OSes */
-bool canBootOs(const QString& name, const QVariantMap& values)
-{
-    /* Can't simply pull "name" from "values" because in some JSON files it's "os_name" and in others it's "name" */
-
-    /* Check if it's explicitly not bootable */
-    bool bootable = values.value("bootable", true).toBool();
-    if (!bootable)
-    {
-        return false;
-    }
-
-    /* Data Partition isn't bootable */
-    if (name == "Data Partition")
-    {
-        return false;
-    }
-
-    return true;
-}
-
-bool setRebootPartition(QByteArray partition)
-{
-    if (QFileInfo("/sys/module/bcm2708/parameters/reboot_part").exists())
-    {
-        putFileContents("/sys/module/bcm2708/parameters/reboot_part", partition+"\n");
-        return true;
-    }
-    else if (QFileInfo("/sys/module/bcm2709/parameters/reboot_part").exists())
-    {
-        putFileContents("/sys/module/bcm2709/parameters/reboot_part", partition+"\n");
-        return true;
-    }
-    return false;
-}
