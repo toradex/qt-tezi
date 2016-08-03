@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
-    <height>450</height>
+    <width>640</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="font">
@@ -23,6 +23,12 @@
     <enum>Qt::NoFocus</enum>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
+    <property name="topMargin">
+     <number>9</number>
+    </property>
+    <property name="bottomMargin">
+     <number>49</number>
+    </property>
     <item row="0" column="0">
      <widget class="QListWidget" name="list">
       <property name="font">
@@ -67,8 +73,23 @@
    </layout>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>90</height>
+    </size>
+   </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
    </property>
    <property name="movable">
     <bool>false</bool>
@@ -81,6 +102,9 @@
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>

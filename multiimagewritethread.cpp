@@ -322,10 +322,11 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     proc.closeWriteChannel();
     proc.waitForFinished(-1);
 
-    qDebug() << "sfdisk done, output:" << proc.readAll();
+    QByteArray output = proc.readAll();
+    qDebug() << "sfdisk done, output:" << output;
     if (proc.exitCode() != 0)
     {
-        emit error(tr("Error creating partition table")+"\n"+proc.readAll());
+        emit error(tr("Error creating partition table") + "\n" + output);
         return false;
     }
 

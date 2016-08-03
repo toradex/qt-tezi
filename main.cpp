@@ -157,7 +157,8 @@ int main(int argc, char *argv[])
 
     // Main window in the middle of screen
     MainWindow mw(splash, ld, toradexProductId, toradexBoardRev, autoinstall);
-    mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
+    //mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
+    //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();
     mw.showProgressDialog();
     mw.startNetworking();

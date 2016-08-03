@@ -54,7 +54,7 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
     // TODO: Load language settings?
 
     ui->setupUi(this);
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     setAttribute(Qt::WA_QuitOnClose, false);
     ui->keyCombo->blockSignals(true);
 

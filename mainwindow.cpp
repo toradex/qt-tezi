@@ -67,17 +67,14 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld), _settings(NULL),
     _wasOnline(false), _netaccess(NULL), _mediaMounted(false)
 {
-    ui->setupUi(this);
-    setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    setWindowState(Qt::WindowMaximized);
     setContextMenuPolicy(Qt::NoContextMenu);
+    ui->setupUi(this);
     update_window_title();
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
     ui->list->setIconSize(QSize(40, 40));
     ui->advToolBar->setVisible(false);
-
-    QRect s = QApplication::desktop()->screenGeometry();
-    if (s.height() < 500)
-        resize(s.width()-10, s.height()-100);
 
     _model = getFileContents("/proc/device-tree/model");
 
