@@ -51,7 +51,7 @@ protected:
     QSplashScreen *_splash;
     LanguageDialog *_ld;
     QSettings *_settings;
-    bool _hasWifi;
+    bool _wasOnline;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numMetaFilesToDownload, _numIconsToDownload;
     QTimer _networkStatusPollTimer;
@@ -75,6 +75,7 @@ protected:
     void checkSDcard();
     void addImages(QMap<QString,QVariantMap> images);
     void removeImagesByBlockdev(const QString &blockdev);
+    void removeImagesBySource(enum ImageSource source);
     void update_window_title();
     bool requireNetwork();
     bool isOnline();
@@ -105,7 +106,6 @@ protected slots:
     void onError(const QString &msg);
     void onCompleted();
     void onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer);
-    void hideDialogIfNoNetwork();
 
 private slots:
     /* UI events */

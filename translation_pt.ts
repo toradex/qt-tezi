@@ -162,14 +162,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Network access is required to use NOOBS without local images. Please select your wifi network in the next screen.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error downloading image list from Internet: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -191,6 +183,10 @@
     </message>
     <message>
         <source>In case recovery mode has been used a power cycle will be necessary.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading image list from Internet...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

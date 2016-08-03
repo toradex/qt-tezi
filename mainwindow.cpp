@@ -65,7 +65,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     ui(new Ui::MainWindow),
     _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
     _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld), _settings(NULL),
-    _hasWifi(false), _netaccess(NULL), _mediaMounted(false)
+    _wasOnline(false), _netaccess(NULL), _mediaMounted(false)
 {
     ui->setupUi(this);
     setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
@@ -127,6 +127,7 @@ void MainWindow::showProgressDialog()
 void MainWindow::addImages(QMap<QString,QVariantMap> images)
 {
     QSize currentsize = ui->list->iconSize();
+    int validImages = 0;
 
     foreach (QVariant v, images.values())
     {
@@ -192,6 +193,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             item->setData(SecondIconRole, _internetIcon);
 
         ui->list->addItem(item);
+        validImages++;
     }
 
     /* Giving items without icon a dummy icon to make them have equal height and text alignment */
@@ -206,13 +208,18 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         }
     }
 
+    if (validImages > 0)
     ui->actionCancel->setEnabled(true);
 
     /* Hide progress dialog since we have images we could use now... */
-    if (_qpd && images.count()) {
-        _qpd->hide();
-        _qpd->deleteLater();
-        _qpd = NULL;
+    if (_qpd) {
+        if (validImages > 0) {
+            _qpd->hide();
+            _qpd->deleteLater();
+            _qpd = NULL;
+        } else {
+            _qpd->setLabelText(tr("Wait for external media or network..."));
+        }
     }
 
     ui->list->setCurrentRow(0);
@@ -226,6 +233,19 @@ void MainWindow::removeImagesByBlockdev(const QString &blockdev)
         QListWidgetItem *item = ui->list->item(i);
         QVariantMap entry = item->data(Qt::UserRole).toMap();
         if (entry.value("image_source_blockdev").toString() == blockdev) {
+            delete item;
+            i--;
+        }
+    }
+}
+
+void MainWindow::removeImagesBySource(enum ImageSource source)
+{
+    for (int i=0; i< ui->list->count(); i++)
+    {
+        QListWidgetItem *item = ui->list->item(i);
+        QVariantMap entry = item->data(Qt::UserRole).toMap();
+        if (entry.value("source") == source) {
             delete item;
             i--;
         }
@@ -346,9 +366,7 @@ void MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
     {
         QMap<QString,QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdevpath, src);
         unmountMedia();
-
-        if (!images.isEmpty())
-            addImages(images);
+        addImages(images);
     }
 }
 
@@ -652,22 +670,22 @@ bool MainWindow::isOnline()
 
 void MainWindow::pollNetworkStatus()
 {
-    if (!_hasWifi && QFile::exists("/sys/class/net/wlan0"))
-    {
-        _hasWifi = true;
-        ui->actionWifi->setEnabled(true);
-    }
-    if (isOnline())
-    {
-        _networkStatusPollTimer.stop();
-        onOnlineStateChanged(true);
+    if (isOnline()) {
+        if (!_wasOnline) {
+            onOnlineStateChanged(true);
+            _wasOnline = true;
+        }
+    } else {
+        if (_wasOnline) {
+            onOnlineStateChanged(false);
+            _wasOnline = false;
+        }
     }
 }
 
 void MainWindow::onOnlineStateChanged(bool online)
 {
-    if (online)
-    {
+    if (online) {
         qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
         if (!_netaccess)
         {
@@ -678,19 +696,24 @@ void MainWindow::onOnlineStateChanged(bool online)
             _netaccess->setCache(_cache);
             QNetworkConfigurationManager manager;
             _netaccess->setConfiguration(manager.defaultConfiguration());
-
-            /* Download list of images from static URLs... */
-            downloadLists();
         }
+
+        /* Download list of images from static URLs... */
+        downloadLists();
+
         //ui->actionBrowser->setEnabled(true);
         emit networkUp();
+    } else {
+        removeImagesBySource(SOURCE_NETWORK);
     }
 }
 
 void MainWindow::downloadLists()
 {
     _numIconsToDownload = 0;
-    QStringList urls = QString(DEFAULT_REPO_SERVER).split(' ', QString::SkipEmptyParts);
+    QStringList urls = QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts);
+    if (_qpd)
+        _qpd->setLabelText(tr("Downloading image list from Internet..."));
 
     foreach (QString url, urls)
     {
@@ -1022,40 +1045,6 @@ void MainWindow::startImageWrite(QVariantMap entry)
     _ld->hide();
     hide();
     _psd->exec();
-}
-
-void MainWindow::hideDialogIfNoNetwork()
-{
-    if (_qpd)
-    {
-        if (!isOnline())
-        {
-            /* No network cable inserted */
-            _qpd->hide();
-            _qpd->deleteLater();
-            _qpd = NULL;
-
-            if (ui->list->count() == 0)
-            {
-                /* No local images either */
-                if (_hasWifi)
-                {
-                    QMessageBox::critical(this,
-                                          tr("No network access"),
-                                          tr("Network access is required to use NOOBS without local images. Please select your wifi network in the next screen."),
-                                          QMessageBox::Close);
-                    on_actionWifi_triggered();
-                }
-                else
-                {
-                    QMessageBox::critical(this,
-                                          tr("No network access"),
-                                          tr("Wired network access is required to use NOOBS without local images. Please insert a network cable into the network port."),
-                                          QMessageBox::Close);
-                }
-            }
-        }
-    }
 }
 
 void MainWindow::on_actionWifi_triggered()
