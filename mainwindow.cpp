@@ -623,43 +623,6 @@ void MainWindow::startBrowser()
 
 void MainWindow::startNetworking()
 {
-    /*
-    QFile f("/settings/wpa_supplicant.conf");
-
-    if ( f.exists() && f.size() == 0 )
-    {
-        // Remove corrupt file
-        f.remove();
-    }
-    if ( !f.exists() )
-    {
-        // If user supplied a wpa_supplicant.conf on the FAT partition copy that one to settings
-        //   otherwise copy the default one stored in the initramfs
-        if (QFile::exists("/mnt/wpa_supplicant.conf"))
-            QFile::copy("/mnt/wpa_supplicant.conf", "/settings/wpa_supplicant.conf");
-        else
-        {
-            qDebug() << "Copying /etc/wpa_supplicant.conf to /settings/wpa_supplicant.conf";
-            QFile::copy("/etc/wpa_supplicant.conf", "/settings/wpa_supplicant.conf");
-        }
-    }
-    QFile::remove("/etc/wpa_supplicant.conf");
-
-    // Enable dbus so that we can use it to talk to wpa_supplicant later
-    qDebug() << "Starting dbus";
-    QProcess::execute("/etc/init.d/S30dbus start");
-*/
-
-    /* Run dhcpcd in background */
-    /*
-    QProcess *proc = new QProcess(this);
-    qDebug() << "Starting dhcpcd";
-    proc->start("/sbin/dhcpcd --noarp -e wpa_supplicant_conf=/settings/wpa_supplicant.conf --denyinterfaces \"*_ap\"");
-    */
-    QProcess *proc = new QProcess(this);
-    qDebug() << "Starting dhcpcd";
-    proc->start("/sbin/udhcpc -i eth0");
-
     _time.start();
 
     /* We could ask Qt's Bearer management to notify us once we are online,
