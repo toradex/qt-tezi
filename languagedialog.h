@@ -35,6 +35,7 @@ protected:
     QString _currentLang;
     static LanguageDialog *_instance;
     virtual void changeEvent(QEvent *event);
+    void updateVersion();
 
 private slots:
     void on_langCombo_currentIndexChanged(int index);

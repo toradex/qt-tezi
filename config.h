@@ -1,8 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-/* Version number displayed in the title bar */
-#define VERSION_NUMBER "0.1"
+/* Version number */
+#define VERSION_NUMBER "0.2"
 
 /* Color of the background */
 #define BACKGROUND_COLOR  Qt::black

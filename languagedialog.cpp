@@ -100,6 +100,8 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
 
     // Set language, keyboard is automatically adjusted too.
     ui->langCombo->setCurrentIndex(ui->langCombo->findData(defaultLang));
+
+    updateVersion();
 }
 
 LanguageDialog::~LanguageDialog()
@@ -225,10 +227,17 @@ void LanguageDialog::on_langCombo_currentIndexChanged(int index)
     changeLanguage(langcode);
 }
 
+void LanguageDialog::updateVersion()
+{
+    ui->version->setText(QString(tr("Tez-i v%1 - Built: %2")).arg(VERSION_NUMBER, QString::fromLocal8Bit(__DATE__)));
+}
+
 void LanguageDialog::changeEvent(QEvent* event)
 {
-    if (event && event->type() == QEvent::LanguageChange)
+    if (event && event->type() == QEvent::LanguageChange) {
         ui->retranslateUi(this);
+        updateVersion();
+    }
 
     QDialog::changeEvent(event);
 }
