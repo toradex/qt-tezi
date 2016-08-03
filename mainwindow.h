@@ -37,7 +37,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
-                        bool allowAutoinstall, QWidget *parent = 0);
+                        QString &serialNumber, bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
     void showProgressDialog();
     void startNetworking();
@@ -46,7 +46,7 @@ protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
-    QString _model, _toradexProductId, _toradexBoardRev;
+    QString _toradexProductId, _toradexBoardRev;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     QSplashScreen *_splash;
     LanguageDialog *_ld;

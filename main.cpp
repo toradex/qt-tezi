@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
 
     QString toradexProductId = getFileContents("/proc/device-tree/toradex,product-id");
     QString toradexBoardRev = getFileContents("/proc/device-tree/toradex,board-rev");
+    QString serialNumber = getFileContents("/proc/device-tree/serial-number");
 
     qDebug() << "Product id is " << toradexProductId;
     qDebug() << "Board revision is " << toradexBoardRev;
@@ -156,7 +157,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Main window in the middle of screen
-    MainWindow mw(splash, ld, toradexProductId, toradexBoardRev, autoinstall);
+    MainWindow mw(splash, ld, toradexProductId, toradexBoardRev, serialNumber, autoinstall);
     //mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();

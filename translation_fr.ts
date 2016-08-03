@@ -197,6 +197,22 @@
         <source>Downloading image list from Internet...</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Module Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Product:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Serial:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>

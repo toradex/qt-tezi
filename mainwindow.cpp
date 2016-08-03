@@ -60,7 +60,7 @@
  */
 
 MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
-                       bool allowAutoinstall, QWidget *parent) :
+                       QString &serialNumber, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
@@ -76,7 +76,11 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     ui->list->setIconSize(QSize(40, 40));
     ui->advToolBar->setVisible(false);
 
-    _model = getFileContents("/proc/device-tree/model");
+    int productId = toradexProductId.toInt();
+    qDebug() << productId;
+    ui->moduleType->setText(tr("Product:") + " " + toradex_modules[productId]);
+    ui->moduleVersion->setText(tr("Version:") + " " + toradexBoardRev);
+    ui->moduleSerial->setText(tr("Serial:") + " " + serialNumber);
 
     QString cmdline = getFileContents("/proc/cmdline");
     if (cmdline.contains("showall"))
