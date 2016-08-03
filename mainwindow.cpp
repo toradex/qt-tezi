@@ -383,11 +383,13 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
     list.append("");
 
     foreach(QString image, list) {
-        qDebug() << "Adding image" << image << "from" << blockdev;
         QString imagefolder = path + QDir::separator() + image;
         QString imagejson = imagefolder + QDir::separator() + "image.json";
         if (!QFile::exists(imagejson))
             continue;
+
+        qDebug() << "Adding image" << image << "from" << blockdev;
+
         QVariantMap imagemap = Json::loadFromFile(imagejson).toMap();
 
         QString basename = imagemap.value("name").toString();
