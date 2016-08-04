@@ -46,7 +46,7 @@ protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
-    QString _toradexProductId, _toradexBoardRev;
+    QString _toradexProductId, _toradexBoardRev, _serialNumber;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
@@ -63,6 +63,7 @@ protected:
     QSet<QString> _blockdevsChecked;
     QSet<QString> _blockdevsChecking;
 
+    void updateModuleInformation();
     int calculateNominalSize(const QVariantMap &imagemap);
     void processMedia(enum ImageSource src, const QString &blockdev);
     QMap<QString,QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);

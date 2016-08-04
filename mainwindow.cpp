@@ -63,7 +63,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
                        QString &serialNumber, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev),
+    _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev), _serialNumber(serialNumber),
     _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld), _settings(NULL),
     _wasOnline(false), _netaccess(NULL), _mediaMounted(false)
 {
@@ -72,15 +72,10 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
     update_window_title();
+    updateModuleInformation();
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
     ui->list->setIconSize(QSize(40, 40));
     ui->advToolBar->setVisible(false);
-
-    int productId = toradexProductId.toInt();
-    qDebug() << productId;
-    ui->moduleType->setText(tr("Product:") + " " + toradex_modules[productId]);
-    ui->moduleVersion->setText(tr("Version:") + " " + toradexBoardRev);
-    ui->moduleSerial->setText(tr("Serial:") + " " + serialNumber);
 
     QString cmdline = getFileContents("/proc/cmdline");
     if (cmdline.contains("showall"))
@@ -114,6 +109,14 @@ MainWindow::~MainWindow()
 {
     QProcess::execute("umount " SRC_MOUNT_FOLDER);
     delete ui;
+}
+
+void MainWindow::updateModuleInformation()
+{
+    int productId = _toradexProductId.toInt();
+    ui->moduleType->setText(tr("Product:") + " " + toradex_modules[productId]);
+    ui->moduleVersion->setText(tr("Version:") + " " + _toradexBoardRev);
+    ui->moduleSerial->setText(tr("Serial:") + " " + _serialNumber);
 }
 
 /* Discover which images we have, and fill in the list */
@@ -573,6 +576,7 @@ void MainWindow::changeEvent(QEvent* event)
     {
         ui->retranslateUi(this);
         update_window_title();
+        updateModuleInformation();
         updateNeeded();
         //repopulate();
     }
