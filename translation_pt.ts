@@ -213,6 +213,26 @@
         <source>Serial:</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>U</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warning</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warning: The mass storage has not been properly removed on the USB host side. Remove USB flash drive anyway?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mass Storage (u)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enables USB Mass Storage emulation to access internal eMMC partitions.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>

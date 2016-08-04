@@ -9,7 +9,7 @@ target.files = tezi
 target.path = /var/volatile
 INSTALLS = target
 TEMPLATE = app
-LIBS += -lqjson
+LIBS += -lqjson -lusbgx
 
 system(sh updateqm.sh 2>/dev/null)
 
@@ -31,7 +31,9 @@ SOURCES += main.cpp\
     filesysteminfo.cpp \
     blockdevinfo.cpp \
     resourcedownload.cpp \
-    scrolltextdialog.cpp
+    scrolltextdialog.cpp \
+    usbgadgethelper.c \
+    usbgadget.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -51,7 +53,9 @@ HEADERS  += mainwindow.h \
     filesysteminfo.h \
     blockdevinfo.h \
     resourcedownload.h \
-    scrolltextdialog.h
+    scrolltextdialog.h \
+    usbgadgethelper.h \
+    usbgadget.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

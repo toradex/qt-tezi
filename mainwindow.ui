@@ -104,11 +104,6 @@
           </layout>
          </item>
         </layout>
-        <zorder>groupBox</zorder>
-        <zorder>groupBox</zorder>
-        <zorder>groupBox</zorder>
-        <zorder>moduleType</zorder>
-        <zorder>horizontalLayoutWidget_2</zorder>
        </widget>
       </item>
      </layout>
@@ -159,6 +154,7 @@
    <addaction name="actionEdit_config"/>
    <addaction name="actionWifi"/>
    <addaction name="actionBrowser"/>
+   <addaction name="actionUsbMassStorage"/>
    <addaction name="actionCancel"/>
   </widget>
   <widget class="QToolBar" name="advToolBar">
@@ -223,6 +219,24 @@
     <string>Advanced</string>
    </property>
   </action>
+  <action name="actionUsbMassStorage">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/flashdisk_logo.png</normaloff>:/icons/flashdisk_logo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Mass Storage (u)</string>
+   </property>
+   <property name="toolTip">
+    <string>Enables USB Mass Storage emulation to access internal eMMC partitions.</string>
+   </property>
+   <property name="shortcut">
+    <string>U</string>
+   </property>
+  </action>
   <action name="actionEdit_config">
    <property name="enabled">
     <bool>false</bool>
@@ -275,6 +289,9 @@
    </property>
    <property name="shortcut">
     <string>W</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

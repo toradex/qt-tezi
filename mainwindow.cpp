@@ -101,6 +101,12 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
 
     _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
 
+    _usbGadget = new UsbGadget();
+    if (_usbGadget->initMassStorage())
+        ui->actionUsbMassStorage->setEnabled(true);
+    else
+        ui->actionUsbMassStorage->setEnabled(false);
+
     connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
     _mediaPollTimer.start(100);
 }
@@ -512,6 +518,24 @@ void MainWindow::installImage(QVariantMap entry)
         _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
         _qpd->show();
     }
+}
+
+void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
+{
+    if (!checked && !_usbGadget->isMassStorageSafeToRemove()) {
+        if (QMessageBox::warning(this,
+                                tr("Warning"),
+                                tr("Warning: The mass storage has not been properly removed on the USB host side. Remove USB flash drive anyway?"),
+                                QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
+            ui->actionUsbMassStorage->setChecked(true);
+            return;
+        }
+    }
+
+    _usbGadget->enableMassStorage(checked);
+
+    /* Disable installation button if USB mass storage is exported */
+    ui->actionInstall->setEnabled(!checked);
 }
 
 void MainWindow::on_actionInstall_triggered()

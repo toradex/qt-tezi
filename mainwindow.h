@@ -13,6 +13,7 @@
 #include "languagedialog.h"
 #include "progressslideshowdialog.h"
 #include "osinfo.h"
+#include "usbgadget.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -62,6 +63,7 @@ protected:
     bool _mediaMounted;
     QSet<QString> _blockdevsChecked;
     QSet<QString> _blockdevsChecking;
+    UsbGadget *_usbGadget;
 
     void updateModuleInformation();
     int calculateNominalSize(const QVariantMap &imagemap);
@@ -113,6 +115,7 @@ private slots:
     void on_actionInstall_triggered();
     void on_actionCancel_triggered();
     void on_actionAdvanced_triggered(bool checked);
+    void on_actionUsbMassStorage_triggered(bool checked);
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();
     void on_list_currentItemChanged();
