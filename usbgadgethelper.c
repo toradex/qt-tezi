@@ -8,6 +8,7 @@
 #include <linux/usb/ch9.h>
 #include <usbg/usbg.h>
 #include <usbg/function/ms.h>
+#include <usbg/function/net.h>
 
 
 usbg_gadget_attrs g_attrs = {
@@ -61,20 +62,34 @@ struct usbg_f_ms_lun_attrs *f_ms_luns[] = {
     NULL,
 };
 
-struct usbg_f_ms_attrs f_attrs = {
+struct usbg_f_ms_attrs f_ms_attrs = {
     .stall = 0,
     .nluns = 2,
     .luns = f_ms_luns,
 };
 
-usbg_config_strs c_strs = {
-        "1xMass Storage"
+usbg_config_strs c_strs_ms = {
+        "Mass Storage"
 };
 
+/* RNDIS */
+struct usbg_f_net_attrs f_net_attrs = {
+    .dev_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xff } },
+    .host_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xfe } },
+    .qmult = 5,
+};
+
+usbg_config_strs c_strs_rndis = {
+    .configuration = "RNDIS"
+};
 
 usbg_state *s;
 usbg_gadget *g_ms;
 usbg_function *f_ms;
+
+usbg_gadget *g_rndis;
+usbg_function *f_rndis;
+
 usbg_error usbg_ret;
 
 int usbgadget_init()
@@ -84,10 +99,23 @@ int usbgadget_init()
         return -1;
 
     /* Delete old states if there... */
+    /*
+     * This is supposed to work, but with more complex configurations there
+     * seems to be a problem in rereading the configuration currenlty:
+     * usbg_parse_state()  unable to parse /sys/kernel/config/usb_gadget
+     *
+     * This is only problematic in development, just get rid of config
+     * manually by using:
+     * rm -rf /sys/kernel/config/usb_gadget/
+     */
+/*
     g_ms = usbg_get_gadget(s, "gms");
     if (g_ms)
         usbg_rm_gadget(g_ms, USBG_RM_RECURSE);
-
+    g_rndis = usbg_get_gadget(s, "grndis");
+    if (g_rndis)
+        usbg_rm_gadget(g_rndis, USBG_RM_RECURSE);
+*/
     return 0;
 }
 
@@ -100,16 +128,16 @@ int usbgadget_ms_init()
         return -1;
 
     usbg_ret = (usbg_error)usbg_create_function(g_ms, F_MASS_STORAGE, "",
-                    &f_attrs, &f_ms);
+                    &f_ms_attrs, &f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
     /* NULL can be passed to use kernel defaults */
-    usbg_ret = usbg_create_config(g_ms, 1, "Single Mass Storage", NULL, &c_strs, &c);
+    usbg_ret = usbg_create_config(g_ms, 1, "Mass Storage", NULL, &c_strs_ms, &c);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = usbg_add_config_function(c, "Single Mass Storage Function", f_ms);
+    usbg_ret = usbg_add_config_function(c, "Mass Storage Function", f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
@@ -216,3 +244,45 @@ const char *usbgadget_strerror()
 {
     return usbg_strerror(usbg_ret);
 }
+
+int usbgadget_rndis_init()
+{
+    usbg_config *c;
+
+    usbg_ret = (usbg_error)usbg_create_gadget(s, "grndis", &g_attrs, &g_strs, &g_rndis);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    usbg_ret = (usbg_error)usbg_create_function(g_rndis, F_RNDIS, "usb0",
+                    &f_net_attrs, &f_rndis);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    /* NULL can be passed to use kernel defaults */
+    usbg_ret = usbg_create_config(g_rndis, 1, "RNDIS", NULL, &c_strs_rndis, &c);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    usbg_ret = usbg_add_config_function(c, "RNDIS Function", f_rndis);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    return 0;
+}
+
+int usbgadget_rndis_enable()
+{
+    usbg_ret = usbg_enable_gadget(g_rndis, DEFAULT_UDC);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+    return 0;
+}
+
+int usbgadget_rndis_disable()
+{
+    usbg_ret = usbg_disable_gadget(g_rndis);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+    return 0;
+}
+

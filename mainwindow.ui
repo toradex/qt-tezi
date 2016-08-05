@@ -155,6 +155,7 @@
    <addaction name="actionWifi"/>
    <addaction name="actionBrowser"/>
    <addaction name="actionUsbMassStorage"/>
+   <addaction name="actionUsbRndis"/>
    <addaction name="actionCancel"/>
   </widget>
   <widget class="QToolBar" name="advToolBar">
@@ -235,6 +236,26 @@
    </property>
    <property name="shortcut">
     <string>U</string>
+   </property>
+  </action>
+  <action name="actionUsbRndis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+    <normaloff>:/icons/disconnect.png</normaloff>
+    <normalon>:/icons/connect.png</normalon>
+    <selectedon>:/icon/connect.png</selectedon>:/icons/disconnect.png</iconset>
+   </property>
+   <property name="text">
+    <string>RNDIS (r)</string>
+   </property>
+   <property name="toolTip">
+    <string>Enables USB RNDIS network connection.</string>
+   </property>
+   <property name="shortcut">
+    <string>R</string>
    </property>
   </action>
   <action name="actionEdit_config">

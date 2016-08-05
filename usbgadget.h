@@ -11,6 +11,9 @@ public:
     bool initMassStorage();
     void enableMassStorage(bool enable);
     bool isMassStorageSafeToRemove();
+
+    bool initRndis();
+    void enableRndis(bool enable);
 signals:
 
 public slots:

@@ -233,6 +233,18 @@
         <source>Enables USB Mass Storage emulation to access internal eMMC partitions.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>RNDIS (r)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Enables USB RNDIS network connection.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>R</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>

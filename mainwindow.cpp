@@ -107,6 +107,14 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     else
         ui->actionUsbMassStorage->setEnabled(false);
 
+    if (_usbGadget->initRndis()) {
+        ui->actionUsbRndis->setEnabled(true);
+        ui->actionUsbRndis->trigger();
+
+    } else {
+        ui->actionUsbRndis->setEnabled(false);
+    }
+
     connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
     _mediaPollTimer.start(100);
 }
@@ -536,6 +544,13 @@ void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
 
     /* Disable installation button if USB mass storage is exported */
     ui->actionInstall->setEnabled(!checked);
+    ui->actionUsbRndis->setEnabled(!checked);
+}
+
+void MainWindow::on_actionUsbRndis_triggered(bool checked)
+{
+    _usbGadget->enableRndis(checked);
+    ui->actionUsbMassStorage->setEnabled(!checked);
 }
 
 void MainWindow::on_actionInstall_triggered()

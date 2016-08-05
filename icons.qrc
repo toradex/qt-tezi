@@ -29,5 +29,7 @@
         <file>icons/flashimage.png</file>
         <file>icons/sd_memory.png</file>
         <file>icons/flashdisk_logo.png</file>
+        <file>icons/connect.png</file>
+        <file>icons/disconnect.png</file>
     </qresource>
 </RCC>
