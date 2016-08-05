@@ -150,6 +150,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
     foreach (QVariant v, images.values())
     {
         QVariantMap m = v.toMap();
+        int config_format = m.value("config_format").toInt();
         QString name = m.value("name").toString();
         QString description = m.value("description").toString();
         QString version = m.value("version").toString();
@@ -197,10 +198,12 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
         item->setData(Qt::UserRole, m);
 
-        if (supportedImage)
+        if (supportedImage && config_format <= IMAGE_CONFIG_FORMAT) {
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-        else
+            validImages++;
+        } else {
             item->setFlags(Qt::NoItemFlags);
+        }
 
         QVariant source = m.value("source");
         if (source == SOURCE_USB)
@@ -211,7 +214,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
             item->setData(SecondIconRole, _internetIcon);
 
         ui->list->addItem(item);
-        validImages++;
     }
 
     /* Giving items without icon a dummy icon to make them have equal height and text alignment */
@@ -227,7 +229,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
     }
 
     if (validImages > 0)
-    ui->actionCancel->setEnabled(true);
+        ui->actionCancel->setEnabled(true);
 
     /* Hide progress dialog since we have images we could use now... */
     if (_qpd) {
@@ -240,7 +242,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         }
     }
 
-    ui->list->setCurrentRow(0);
     updateNeeded();
 }
 
@@ -782,7 +783,13 @@ void MainWindow::downloadListJsonCompleted()
         return;
     }
 
-    QVariantList list = json.toMap().value("images").toList();
+    QVariantMap map = json.toMap();
+    if (map.value("config_format").toInt() > IMAGE_LIST_CONFIG_FORMAT) {
+        QMessageBox::critical(this, tr("Error"), tr("Image list config format not supported!"), QMessageBox::Close);
+        return;
+    }
+
+    QVariantList list = map.value("images").toList();
     QString sourceurlpath = getUrlPath(rd->urlString());
 
     foreach (QVariant image, list)

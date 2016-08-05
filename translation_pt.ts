@@ -249,6 +249,10 @@
         <source>I Agree</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Image list config format not supported!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
