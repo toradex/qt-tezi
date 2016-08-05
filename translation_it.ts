@@ -431,12 +431,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="538"/>
+        <location filename="multiimagewritethread.cpp" line="541"/>
         <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="521"/>
+        <location filename="multiimagewritethread.cpp" line="524"/>
         <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -444,17 +444,17 @@
 <context>
     <name>ProgressSlideshowDialog</name>
     <message>
-        <location filename="progressslideshowdialog.cpp" line="98"/>
+        <location filename="progressslideshowdialog.cpp" line="104"/>
         <source>%1 MB of %2 MB written</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="progressslideshowdialog.cpp" line="106"/>
+        <location filename="progressslideshowdialog.cpp" line="112"/>
         <source>%1 MB written</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="progressslideshowdialog.cpp" line="113"/>
+        <location filename="progressslideshowdialog.cpp" line="119"/>
         <source>(%3 MB/sec)</source>
         <translation type="unfinished"></translation>
     </message>

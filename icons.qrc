@@ -31,5 +31,6 @@
         <file>icons/flashdisk_logo.png</file>
         <file>icons/connect.png</file>
         <file>icons/disconnect.png</file>
+        <file>default_splash.png</file>
     </qresource>
 </RCC>

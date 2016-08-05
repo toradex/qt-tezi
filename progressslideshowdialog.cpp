@@ -47,12 +47,16 @@ ProgressSlideshowDialog::ProgressSlideshowDialog(const QStringList &slidesDirect
 
     if (_slides.isEmpty())
     {
-        /* TODO: Set default slide from resources */
-        ui->imagespace->setPixmap(QPixmap(":/wallpaper.png"));
+        /* Set default slide from resources */
+        ui->imagespace->setPixmap(QPixmap(":/default_splash.png"));
         ui->imagespace->setAlignment(Qt::AlignCenter);
     }
     else
     {
+        /* Set first slide and start timer...*/
+        QPixmap pixmap(_slides.first());
+        ui->imagespace->setPixmap(pixmap);
+
         connect(&_timer, SIGNAL(timeout()), this, SLOT(nextSlide()));
         _timer.start(changeInterval * 1000);
     }

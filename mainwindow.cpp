@@ -499,8 +499,8 @@ void MainWindow::installImage(QVariantMap entry)
         QString folder = entry.value("folder").toString();
         QString url = entry.value("baseurl").toString();
 
-        if (entry.contains("marketing_info"))
-            downloadMetaFile(url + entry.value("marketing_info").toString(), folder+"/marketing.tar");
+        if (entry.contains("marketing"))
+            downloadMetaFile(url + entry.value("marketing").toString(), folder+"/marketing.tar");
 
         if (entry.contains("prepare_script")) {
             QString script = entry.value("prepare_script").toString();
@@ -1078,7 +1078,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
     if (entry.value("source") != SOURCE_NETWORK)
         mountMedia(entry.value("image_source_blockdev").toString());
 
-    if (entry.contains("marketing_info"))
+    if (entry.contains("marketing"))
     {
         folder = entry.value("folder").toString();
 
@@ -1105,7 +1105,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
     imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), (enum ImageSource)entry.value("source").toInt());
 
-    _psd = new ProgressSlideshowDialog(slidesFolders, "", 15, this);
+    _psd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
     connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));
     connect(imageWriteThread, SIGNAL(imageProgress(qint64)), _psd, SLOT(updateIOstats(qint64)));
     connect(imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
