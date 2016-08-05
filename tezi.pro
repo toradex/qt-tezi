@@ -16,7 +16,6 @@ system(sh updateqm.sh 2>/dev/null)
 SOURCES += main.cpp\
         mainwindow.cpp \
     languagedialog.cpp \
-    keydetection.cpp \
     gpioinput.cpp \
     progressslideshowdialog.cpp \
     confeditdialog.cpp \
@@ -38,7 +37,6 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     languagedialog.h \
     config.h \
-    keydetection.h \
     gpioinput.h \
     progressslideshowdialog.h \
     confeditdialog.h \

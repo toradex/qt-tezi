@@ -494,12 +494,12 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="main.cpp" line="146"/>
+        <location filename="main.cpp" line="135"/>
         <source>Reading Product ID failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="147"/>
+        <location filename="main.cpp" line="136"/>
         <source>Reading the Toradex Product ID failed, the Toradex config block might be corrupted.</source>
         <translation type="unfinished"></translation>
     </message>

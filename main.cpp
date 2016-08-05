@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "languagedialog.h"
 #include "config.h"
-#include "keydetection.h"
 #include "gpioinput.h"
 #include "rightbuttonfilter.h"
 #include "longpresshandler.h"
@@ -53,12 +52,6 @@ void reboot()
 
 int main(int argc, char *argv[])
 {
-    bool hasTouchScreen = QFile::exists("/sys/devices/platform/rpi_ft5406");
-
-    // Unless we have a touch screen, wait for keyboard to appear before displaying anything
-    if (!hasTouchScreen)
-        KeyDetection::waitForKeyboard();
-
     QApplication a(argc, argv);
     RightButtonFilter rbf;
     LongPressHandler lph;
@@ -80,15 +73,11 @@ int main(int argc, char *argv[])
     a.installEventFilter(&rbf);
 
     // Treat long holds as double-clicks
-    if (hasTouchScreen)
-        a.installEventFilter(&lph);
+    a.installEventFilter(&lph);
 
 #ifdef Q_WS_QWS
     QWSServer::setCursorVisible(false);
 #endif
-
-    QDir settingsdir;
-    settingsdir.mkdir("/settings");
 
     // Set wallpaper and icon, if we have resource files for that
     if (QFile::exists(":/icons/toradex_icon.png"))
