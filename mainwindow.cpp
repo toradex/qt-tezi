@@ -704,10 +704,11 @@ void MainWindow::startNetworking()
 bool MainWindow::isOnline()
 {
     /* Check if we have an IP-address other than localhost */
-    QList<QHostAddress> addresses = QNetworkInterface::allAddresses();
+    QList<QNetworkAddressEntry> addresses = QNetworkInterface::interfaceFromName("eth0").addressEntries();
 
-    foreach (QHostAddress a, addresses)
+    foreach (QNetworkAddressEntry ae, addresses)
     {
+        QHostAddress a = ae.ip();
         if (a != QHostAddress::LocalHost && a != QHostAddress::LocalHostIPv6 &&
             a.scopeId() == "") {
             return true;
