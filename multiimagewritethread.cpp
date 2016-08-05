@@ -501,14 +501,17 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     while (p.waitForReadyRead(-1))
     {
         QString line = p.readLine();
+        qint64 tmp;
 
         bool ok;
-        bytes = line.toLongLong(&ok);
+        tmp = line.toLongLong(&ok);
 
-        if (ok)
+        if (ok) {
+            bytes = tmp;
             emit imageProgress(_bytesWritten + bytes);
-        else
+        } else {
             break;
+        }
     }
 
     _bytesWritten += bytes;
