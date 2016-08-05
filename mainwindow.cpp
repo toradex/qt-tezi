@@ -513,6 +513,10 @@ void MainWindow::installImage(QVariantMap entry)
             QString script = entry.value("license").toString();
             downloadMetaFile(url + script, folder + "/" + script);
         }
+        if (entry.contains("releasenotes")) {
+            QString script = entry.value("releasenotes").toString();
+            downloadMetaFile(url + script, folder + "/" + script);
+        }
     }
 
     if (_numMetaFilesToDownload == 0)
@@ -1034,13 +1038,28 @@ void MainWindow::startImageWrite(QVariantMap entry)
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
 
-    if (entry.contains("license")) {
+    if (entry.contains("license") && !_isAutoinstall) {
         QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());
         ScrollTextDialog eula(entry.value("license_title").toString(), QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
-        eula.setDefaultButton(QDialogButtonBox::No);
+        eula.setButtonText(QDialogButtonBox::Yes, tr("I Agree"));
+        eula.setDefaultButton(QDialogButtonBox::Abort);
         int ret = eula.exec();
 
         if (ret != QDialogButtonBox::Yes) {
+            _networkStatusPollTimer.start();
+            _mediaPollTimer.start();
+            setEnabled(true);
+            return;
+        }
+    }
+
+    if (entry.contains("releasenotes") && !_isAutoinstall) {
+        QByteArray text = getFileContents(folder + "/" + entry.value("releasenotes").toString());
+        ScrollTextDialog eula(entry.value("releasenotes_title").toString(), QString(text), QDialogButtonBox::Ok | QDialogButtonBox::Abort);
+        eula.setDefaultButton(QDialogButtonBox::Abort);
+        int ret = eula.exec();
+
+        if (ret != QDialogButtonBox::Ok) {
             _networkStatusPollTimer.start();
             _mediaPollTimer.start();
             setEnabled(true);

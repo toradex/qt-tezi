@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QPushButton>
+#include <QString>
 
 class ScrollTextDialog : public QDialog
 {
@@ -16,6 +17,7 @@ public:
                      QString const& text, QDialogButtonBox::StandardButtons buttons,
                      QWidget* parent = 0);
     void setDefaultButton(QDialogButtonBox::StandardButton button);
+    void setButtonText(QDialogButtonBox::StandardButton button, QString text);
 
 private:
     void setDefaultButton(QPushButton *button);

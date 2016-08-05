@@ -245,6 +245,10 @@
         <source>R</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>I Agree</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
@@ -395,13 +399,6 @@
     </message>
     <message>
         <source>Reading the Toradex Product ID failed, the Toradex config block might be corrupted.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ScrollTextDialog</name>
-    <message>
-        <source>I Agree</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

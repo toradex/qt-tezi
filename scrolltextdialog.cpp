@@ -10,7 +10,7 @@
 ScrollTextDialog::ScrollTextDialog(QString const& title,
                                    QString const& text, QDialogButtonBox::StandardButtons buttons,
                                    QWidget* parent /*= 0*/) :
-    QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint)
+    QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint)
 {
     QScrollArea *scroll;
 
@@ -28,7 +28,7 @@ ScrollTextDialog::ScrollTextDialog(QString const& title,
     scroll->setWidgetResizable(true);
 
     buttonBox = new QDialogButtonBox(buttons);
-    buttonBox->button(QDialogButtonBox::Yes)->setText(tr("I Agree"));
+
     buttonBox->setCenterButtons(style()->styleHint(QStyle::SH_MessageBox_CenterButtons, 0, this));
     QObject::connect(buttonBox, SIGNAL(clicked(QAbstractButton*)),
         this, SLOT(handle_buttonClicked(QAbstractButton*)));
@@ -68,4 +68,9 @@ void ScrollTextDialog::handle_buttonClicked(QAbstractButton *button)
 void ScrollTextDialog::setDefaultButton(QDialogButtonBox::StandardButton button)
 {
     setDefaultButton(buttonBox->button(button));
+}
+
+void ScrollTextDialog::setButtonText(QDialogButtonBox::StandardButton button, QString text)
+{
+    buttonBox->button(button)->setText(text);
 }
