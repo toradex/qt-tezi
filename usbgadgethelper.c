@@ -10,8 +10,8 @@
 #include <usbg/function/ms.h>
 #include <usbg/function/net.h>
 
-
-usbg_gadget_attrs g_attrs = {
+/* For mass storage, we can use Toradex product ids... */
+usbg_gadget_attrs g_attrs_ms = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
@@ -22,8 +22,20 @@ usbg_gadget_attrs g_attrs = {
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
+/* For RNDIS, use NetChip RNDIS Gadget */
+const  usbg_gadget_attrs g_attrs_rndis = {
+    .bcdUSB = 0x0200,
+    .bDeviceClass =	USB_CLASS_PER_INTERFACE,
+    .bDeviceSubClass = 0x00,
+    .bDeviceProtocol = 0x00,
+    .bMaxPacketSize0 = 64, /* Max allowed ep0 packet size */
+    .idVendor = 0x0525,
+    .idProduct = 0xa4a2,
+    .bcdDevice = 0x0001, /* Verson of device */
+};
+
 usbg_gadget_strs g_strs = {
-    .str_ser = "0123456789", /* Serial number */
+    .str_ser = "00000000", /* Serial number */
     .str_mnf = "Toradex", /* Manufacturer */
     .str_prd = "Apalis iMX6" /* Product string */
 };
@@ -92,8 +104,12 @@ usbg_function *f_rndis;
 
 usbg_error usbg_ret;
 
-int usbgadget_init()
+int usbgadget_init(const char *serial, const char *productName, uint16_t idProduct)
 {
+    strncpy(g_strs.str_ser, serial, USBG_MAX_STR_LENGTH);
+    strncpy(g_strs.str_prd, productName, USBG_MAX_STR_LENGTH);
+    g_attrs_ms.idProduct = idProduct;
+
     usbg_ret = (usbg_error)usbg_init("/sys/kernel/config", &s);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
@@ -123,7 +139,7 @@ int usbgadget_ms_init()
 {
     usbg_config *c;
 
-    usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs, &g_strs, &g_ms);
+    usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
@@ -249,7 +265,7 @@ int usbgadget_rndis_init()
 {
     usbg_config *c;
 
-    usbg_ret = (usbg_error)usbg_create_gadget(s, "grndis", &g_attrs, &g_strs, &g_rndis);
+    usbg_ret = (usbg_error)usbg_create_gadget(s, "grndis", &g_attrs_rndis, &g_strs, &g_rndis);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 

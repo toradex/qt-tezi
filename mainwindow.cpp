@@ -72,7 +72,11 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
     update_window_title();
+
+    int productId = _toradexProductId.toInt();
+    _productName = toradex_modules[productId];
     updateModuleInformation();
+
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
     ui->list->setIconSize(QSize(40, 40));
     ui->advToolBar->setVisible(false);
@@ -101,7 +105,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
 
     _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
 
-    _usbGadget = new UsbGadget();
+    _usbGadget = new UsbGadget(_serialNumber, _productName, productId);
     if (_usbGadget->initMassStorage())
         ui->actionUsbMassStorage->setEnabled(true);
     else
@@ -127,8 +131,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateModuleInformation()
 {
-    int productId = _toradexProductId.toInt();
-    ui->moduleType->setText(tr("Product:") + " " + toradex_modules[productId]);
+    ui->moduleType->setText(tr("Product:") + " " + _productName);
     ui->moduleVersion->setText(tr("Version:") + " " + _toradexBoardRev);
     ui->moduleSerial->setText(tr("Serial:") + " " + _serialNumber);
 }

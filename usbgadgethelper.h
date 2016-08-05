@@ -6,8 +6,9 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 
-int usbgadget_init();
+int usbgadget_init(const char *serial, const char *productName, uint16_t idProduct);
 int usbgadget_ms_init();
 int usbgadget_ms_enable();
 int usbgadget_ms_disable();

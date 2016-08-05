@@ -47,7 +47,7 @@ protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
-    QString _toradexProductId, _toradexBoardRev, _serialNumber;
+    QString _toradexProductId, _toradexBoardRev, _serialNumber, _productName;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     QSplashScreen *_splash;
     LanguageDialog *_ld;

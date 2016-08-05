@@ -7,9 +7,11 @@
 #include "usbgadgethelper.h"
 #include <usbg/usbg.h>
 
-UsbGadget::UsbGadget(QObject *parent) : QObject(parent), _gadgetInitialized(false)
+UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, QObject *parent) : QObject(parent), _gadgetInitialized(false)
 {
-    if (usbgadget_init()) {
+    uint16_t productId = 0x4000 + idProduct;
+
+    if (usbgadget_init(serial.toStdString().c_str(), productName.toStdString().c_str(), productId)) {
         qDebug() << "USB Gadget: Error initalizing:" << usbgadget_strerror();
         return;
     }
