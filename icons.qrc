@@ -32,5 +32,6 @@
         <file>icons/connect.png</file>
         <file>icons/disconnect.png</file>
         <file>default_splash.png</file>
+        <file>icons/clean_module.png</file>
     </qresource>
 </RCC>

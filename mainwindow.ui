@@ -156,6 +156,7 @@
    <addaction name="actionBrowser"/>
    <addaction name="actionUsbMassStorage"/>
    <addaction name="actionUsbRndis"/>
+   <addaction name="actionCleanModule"/>
    <addaction name="actionCancel"/>
   </widget>
   <widget class="QToolBar" name="advToolBar">
@@ -256,6 +257,24 @@
    </property>
    <property name="shortcut">
     <string>R</string>
+   </property>
+  </action>
+  <action name="actionCleanModule">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+    <normaloff>:/icons/clean_module.png</normaloff>:/icons/clean_module.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clean Module (c)</string>
+   </property>
+   <property name="toolTip">
+    <string>Discards all data on eMMC.</string>
+   </property>
+   <property name="shortcut">
+    <string>C</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionEdit_config">

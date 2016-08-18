@@ -90,6 +90,7 @@ protected:
     void downloadLists();
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap entry);
+    bool discard(QString blkdev, qint64 start, qint64 end);
 
 protected slots:
     void startBrowser();
@@ -117,6 +118,7 @@ private slots:
     void on_actionAdvanced_triggered(bool checked);
     void on_actionUsbMassStorage_triggered(bool checked);
     void on_actionUsbRndis_triggered(bool checked);
+    void on_actionCleanModule_triggered();
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();
     void on_list_currentItemChanged();

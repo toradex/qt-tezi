@@ -561,6 +561,55 @@ void MainWindow::on_actionUsbRndis_triggered(bool checked)
     ui->actionUsbMassStorage->setEnabled(!checked);
 }
 
+bool MainWindow::discard(QString blkdev, qint64 start, qint64 end)
+{
+    QStringList args;
+
+    /* If start and end is zero, blkdiscard will discard the whole eMMC */
+    if (start)
+        args.append(QString("-o %1").arg(start));
+    if (end)
+        args.append(QString("-l %1").arg(end));
+    args.append(blkdev);
+
+    QProcess p;
+    p.setProcessChannelMode(QProcess::MergedChannels);
+    p.start("/usr/sbin/blkdiscard", args);
+    p.waitForFinished(-1);
+
+    if (p.exitCode() != 0) {
+        QMessageBox::critical(this, tr("Error"), tr("Discarding device %1 failed").arg(blkdev) + "\n" + p.readAll(), QMessageBox::Close);
+        return false;
+    }
+    return true;
+}
+
+void MainWindow::on_actionCleanModule_triggered()
+{
+    if (QMessageBox::warning(this,
+                            tr("Confirm"),
+                            tr("This deletes all data on the internal eMMC, including boot loader and boot loader configuration. "
+                               "After this operation you either need to install an image or use the modules recovery mode to boot back into Tez-i. Continue?"),
+                            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+    {
+        /* Ok, lets do it! Spare out config block (last block of boot0) */
+        int size = QString(getFileContents("/sys/block/mmcblk0boot0/size")).toInt();
+        if (!size) {
+            QMessageBox::critical(this, tr("Error"), tr("Reading size of device %1 failed").arg("mmcblk0boot0"), QMessageBox::Close);
+            return;
+        }
+        int eblocksize = QString(getFileContents("/sys/class/mmc_host/mmc0/mmc0:0001/erase_size")).toInt();
+
+        if (!discard("/dev/mmcblk0boot0", 0, size * 512 - eblocksize))
+            return;
+        if (!discard("/dev/mmcblk0boot1", 0, 0))
+            return;
+
+        if (!discard("/dev/mmcblk0", 0, 0))
+            return;
+    }
+}
+
 void MainWindow::on_actionInstall_triggered()
 {
     if (!ui->list->currentItem())

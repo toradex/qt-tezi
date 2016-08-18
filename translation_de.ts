@@ -253,6 +253,30 @@
         <source>Image list config format not supported!</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Clean Module (c)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discards all data on eMMC.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>C</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discarding device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This deletes all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Tez-i. Continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reading size of device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
