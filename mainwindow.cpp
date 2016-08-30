@@ -90,7 +90,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     /* Initialize icons */
     _sdIcon = QIcon(":/icons/sd_memory.png");
     _usbIcon = QIcon(":/icons/flashdisk_logo.png");
-    _internetIcon = QIcon(":/icons/download.png");
+    _internetIcon = QIcon(":/icons/world.png");
 
     QDir dir;
     dir.mkpath(SRC_MOUNT_FOLDER);
