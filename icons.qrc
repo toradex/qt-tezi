@@ -33,5 +33,7 @@
         <file>icons/disconnect.png</file>
         <file>default_splash.png</file>
         <file>icons/clean_module.png</file>
+        <file>LICENSE.txt</file>
+        <file>icons/document_info.png</file>
     </qresource>
 </RCC>

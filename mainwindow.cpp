@@ -610,6 +610,15 @@ void MainWindow::on_actionCleanModule_triggered()
     }
 }
 
+void MainWindow::on_actionShowLicense_triggered()
+{
+    QFile licensefile(":/LICENSE.txt");
+    licensefile.open(QIODevice::ReadOnly);
+    ScrollTextDialog license(tr("License"), QString(licensefile.readAll()), QDialogButtonBox::Ok);
+    license.setDefaultButton(QDialogButtonBox::Ok);
+    license.exec();
+}
+
 void MainWindow::on_actionInstall_triggered()
 {
     if (!ui->list->currentItem())

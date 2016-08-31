@@ -277,6 +277,18 @@
         <source>Reading size of device %1 failed</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>License Info.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>License</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>License (c)</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
