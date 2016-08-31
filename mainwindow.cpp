@@ -64,8 +64,8 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev), _serialNumber(serialNumber),
-    _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld), _settings(NULL),
-    _wasOnline(false), _netaccess(NULL), _mediaMounted(false)
+    _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld),
+    _wasOnline(false), _netaccess(NULL), _mediaMounted(false), _firstMediaPoll(true)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -407,8 +407,12 @@ void MainWindow::pollMedia()
 
     _blockdevsChecked = _blockdevsChecking;
 
-    /* After first poll, set intervall to 1s */
-    _mediaPollTimer.setInterval(1000);
+    /* After first poll, set intervall to 1s and start networking... */
+    if (_firstMediaPoll) {
+        _mediaPollTimer.setInterval(1000);
+        startNetworking();
+        _firstMediaPoll = false;
+    }
 }
 
 QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)

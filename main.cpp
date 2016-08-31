@@ -151,7 +151,6 @@ int main(int argc, char *argv[])
     //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();
     mw.showProgressDialog();
-    mw.startNetworking();
 
     a.exec();
 

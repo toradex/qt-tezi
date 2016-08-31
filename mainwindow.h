@@ -51,7 +51,6 @@ protected:
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
-    QSettings *_settings;
     bool _wasOnline;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numMetaFilesToDownload, _numIconsToDownload;
@@ -60,7 +59,7 @@ protected:
     QTime _time;
     QIcon _sdIcon,_usbIcon, _internetIcon;
     QVariantMap _imageEntry;
-    bool _mediaMounted;
+    bool _mediaMounted, _firstMediaPoll;
     QSet<QString> _blockdevsChecked;
     QSet<QString> _blockdevsChecking;
     UsbGadget *_usbGadget;
