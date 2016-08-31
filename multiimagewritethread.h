@@ -31,6 +31,7 @@ protected:
     bool dd(const QString &imagePath, const QString &device, const QByteArray &dd_options);
     bool partclone_restore(const QString &imagePath, const QString &device);
     bool untar(const QString &tarball);
+    bool copy(const QString &baseurl, const QString &file);
     bool isLabelAvailable(const QByteArray &label);
     QByteArray getLabel(const QString part);
     QByteArray getUUID(const QString part);

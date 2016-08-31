@@ -380,6 +380,10 @@
         <source>%1: Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>%1: Downloading/Copying files</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProgressSlideshowDialog</name>

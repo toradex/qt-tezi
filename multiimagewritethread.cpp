@@ -350,6 +350,7 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
     QByteArray ddopt    = fs->ddOptions();
     QByteArray label = fs->label();
     QString tarball  = fs->filename();
+    QStringList filelist  = fs->filelist();
 
     if (_image->imageSource() == SOURCE_NETWORK && !tarball.isEmpty()) {
         tarball = _image->baseUrl() + tarball;
@@ -389,33 +390,46 @@ bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partde
         if (!mkfs(partdevice, fstype, label, mkfsopt))
             return false;
 
-        /* If there is no tarball/image specified, its an empty partition which is perfectly ok too */
-        if (!tarball.isEmpty())
-        {
-            emit statusUpdate(tr("%1: Mounting file system").arg(os_name));
-            QString mountcmd;
-            if (fstype == "ntfs")
-                mountcmd = "/sbin/mount.ntfs-3g ";
-            else
-                mountcmd = "mount ";
-            if (QProcess::execute(mountcmd + partdevice + " " TEMP_MOUNT_FOLDER) != 0)
-            {
-                emit error(tr("%1: Error mounting file system").arg(os_name));
-                return false;
-            }
+        /* If there is no tarball/filelist specified, its an empty partition which is perfectly ok too */
+        if (tarball.isEmpty() && filelist.isEmpty())
+            return true;
 
+        emit statusUpdate(tr("%1: Mounting file system").arg(os_name));
+        QString mountcmd;
+        if (fstype == "ntfs")
+            mountcmd = "/sbin/mount.ntfs-3g ";
+        else
+            mountcmd = "mount ";
+        if (QProcess::execute(mountcmd + partdevice + " " TEMP_MOUNT_FOLDER) != 0)
+        {
+            emit error(tr("%1: Error mounting file system").arg(os_name));
+            return false;
+        }
+
+        bool resultfile = true;
+        if (!tarball.isEmpty()) {
             if (tarball.startsWith("http"))
                 emit statusUpdate(tr("%1: Downloading and extracting filesystem").arg(os_name));
             else
                 emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
 
-            bool result = untar(tarball);
-
-            QProcess::execute("umount " TEMP_MOUNT_FOLDER);
-
-            if (!result)
-                return false;
+            resultfile = untar(tarball);
         }
+
+        bool resultfilelist = true;
+        if (!filelist.isEmpty()) {
+            emit statusUpdate(tr("%1: Downloading/Copying files").arg(os_name));
+            foreach(QString file,filelist) {
+                if (!copy(_image->baseUrl(), file)) {
+                    resultfilelist = false;
+                    break;
+                }
+            }
+        }
+
+        QProcess::execute("umount " TEMP_MOUNT_FOLDER);
+
+        return resultfile && resultfilelist;
     }
 
     return true;
@@ -528,6 +542,23 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
 
     return true;
 }
+
+bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
+{
+    QString cmd = "sh -o pipefail -c \"";
+    if (!baseurl.isEmpty())
+        cmd += "wget --no-verbose --tries=inf -O- " + baseurl + file;
+    else
+        cmd += "cat " + file;
+
+    /* Use pipe viewer for actual processing speed */
+    cmd += " | pv -b -n";
+    cmd += " | cat > " TEMP_MOUNT_FOLDER "/" + file;
+    cmd += " \"";
+
+    return runwritecmd(cmd);
+}
+
 
 bool MultiImageWriteThread::untar(const QString &tarball)
 {

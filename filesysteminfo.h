@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVariantMap>
+#include <QStringList>
 
 /*
  * File System information model
@@ -18,6 +19,11 @@ public:
     inline QString filename()
     {
         return _filename;
+    }
+
+    inline QStringList filelist()
+    {
+        return _filelist;
     }
 
     inline QByteArray fsType()
@@ -52,6 +58,7 @@ public slots:
 protected:
     QByteArray _fstype, _mkfsOptions, _ddOptions, _label;
     QString _filename;
+    QStringList _filelist;
     int _uncompressedSize;
 };
 

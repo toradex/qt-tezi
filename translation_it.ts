@@ -440,53 +440,58 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="376"/>
+        <location filename="multiimagewritethread.cpp" line="377"/>
         <source>%1: Writing raw image</source>
         <oldsource>%1: Writing OS image</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="382"/>
+        <location filename="multiimagewritethread.cpp" line="383"/>
         <source>%1: Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="388"/>
+        <location filename="multiimagewritethread.cpp" line="389"/>
         <source>%1: Creating filesystem (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="395"/>
+        <location filename="multiimagewritethread.cpp" line="397"/>
         <source>%1: Mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="403"/>
+        <location filename="multiimagewritethread.cpp" line="405"/>
         <source>%1: Error mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="408"/>
+        <location filename="multiimagewritethread.cpp" line="412"/>
         <source>%1: Downloading and extracting filesystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="410"/>
+        <location filename="multiimagewritethread.cpp" line="414"/>
         <source>%1: Extracting filesystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="475"/>
+        <location filename="multiimagewritethread.cpp" line="421"/>
+        <source>%1: Downloading/Copying files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="multiimagewritethread.cpp" line="489"/>
         <source>Error creating file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="541"/>
+        <location filename="multiimagewritethread.cpp" line="572"/>
         <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="524"/>
+        <location filename="multiimagewritethread.cpp" line="538"/>
         <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>
