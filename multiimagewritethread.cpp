@@ -114,10 +114,7 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
 bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
 {
     /* Make sure block device is writeable */
-    QFile f("/sys/block/" + blockdev->name() + "/force_ro");
-    f.open(f.WriteOnly);
-    f.write("0", 1);
-    f.close();
+    disableBlockDevForceRo(blockdev->name());
 
     QList<PartitionInfo *> *partitions = blockdev->partitions();
     if (!partitions->isEmpty())

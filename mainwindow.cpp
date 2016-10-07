@@ -59,11 +59,11 @@
  *
  */
 
-MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
-                       QString &serialNumber, bool allowAutoinstall, QWidget *parent) :
+MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *toradexConfigBlock,
+                       bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _toradexProductId(toradexProductId), _toradexBoardRev(toradexBoardRev), _serialNumber(serialNumber),
+    _qpd(NULL), _toradexConfigBlock(toradexConfigBlock),
     _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld),
     _wasOnline(false), _netaccess(NULL), _mediaMounted(false), _firstMediaPoll(true)
 {
@@ -73,8 +73,10 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
     ui->setupUi(this);
     update_window_title();
 
-    int productId = _toradexProductId.toInt();
-    _productName = toradex_modules[productId];
+    _toradexProductName = toradexConfigBlock->getProductName();
+    _toradexBoardRev = toradexConfigBlock->getBoardRev();
+    _serialNumber = toradexConfigBlock->getSerialNumber();
+    _toradexProductId = toradexConfigBlock->getProductId();
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
@@ -105,7 +107,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &torad
 
     _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
 
-    _usbGadget = new UsbGadget(_serialNumber, _productName, productId);
+    _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId);
     if (_usbGadget->initMassStorage())
         ui->actionUsbMassStorage->setEnabled(true);
     else
@@ -131,7 +133,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateModuleInformation()
 {
-    ui->moduleType->setText(tr("Product:") + " " + _productName);
+    ui->moduleType->setText(tr("Product:") + " " + _toradexProductName);
     ui->moduleVersion->setText(tr("Version:") + " " + _toradexBoardRev);
     ui->moduleSerial->setText(tr("Serial:") + " " + _serialNumber);
 }

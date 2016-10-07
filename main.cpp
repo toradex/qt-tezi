@@ -6,6 +6,7 @@
 #include "longpresshandler.h"
 #include "json.h"
 #include "util.h"
+#include "configblock.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/reboot.h>
@@ -124,16 +125,20 @@ int main(int argc, char *argv[])
     QWSServer::setCursorVisible(true);
 #endif
 
-    QString toradexProductId = getFileContents("/proc/device-tree/toradex,product-id");
-    QString toradexBoardRev = getFileContents("/proc/device-tree/toradex,board-rev");
-    QString serialNumber = getFileContents("/proc/device-tree/serial-number");
 
-    qDebug() << "Product id is " << toradexProductId;
-    qDebug() << "Board revision is " << toradexBoardRev;
+    ConfigBlock *cfgBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+    if (cfgBlock == NULL) {
+        qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
+        cfgBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
+        if (cfgBlock) {
+            qDebug() << "Migrating Config Block";
+            cfgBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+        }
+    }
 
-    if (toradexProductId.isEmpty()) {
-        QMessageBox::critical(NULL, QObject::tr("Reading Product ID failed"),
-                              QObject::tr("Reading the Toradex Product ID failed, the Toradex config block might be corrupted."),
+    if (cfgBlock == NULL) {
+        QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
+                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing."),
                               QMessageBox::Close);
         return 1;
     }
@@ -146,7 +151,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Main window in the middle of screen
-    MainWindow mw(splash, ld, toradexProductId, toradexBoardRev, serialNumber, autoinstall);
+    MainWindow mw(splash, ld, cfgBlock, autoinstall);
     //mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();

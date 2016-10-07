@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     resourcedownload.cpp \
     scrolltextdialog.cpp \
     usbgadgethelper.c \
-    usbgadget.cpp
+    usbgadget.cpp \
+    configblock.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -53,7 +54,8 @@ HEADERS  += mainwindow.h \
     resourcedownload.h \
     scrolltextdialog.h \
     usbgadgethelper.h \
-    usbgadget.h
+    usbgadget.h \
+    configblock.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

@@ -14,6 +14,7 @@
 #include "progressslideshowdialog.h"
 #include "osinfo.h"
 #include "usbgadget.h"
+#include "configblock.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -37,8 +38,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, QString &toradexProductId, QString &toradexBoardRev,
-                        QString &serialNumber, bool allowAutoinstall, QWidget *parent = 0);
+    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *toradexConfigBlock,
+                        bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
     void showProgressDialog();
     void startNetworking();
@@ -47,7 +48,9 @@ protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
-    QString _toradexProductId, _toradexBoardRev, _serialNumber, _productName;
+    ConfigBlock *_toradexConfigBlock;
+    QString _toradexProductName, _toradexBoardRev, _serialNumber;
+    int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
