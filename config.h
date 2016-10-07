@@ -46,12 +46,4 @@
 /* Temporary mount folder */
 #define TEMP_MOUNT_FOLDER "/run/media/tmp"
 
-/* If the image name matches this exactly, mark it as recommended */
-#define RECOMMENDED_IMAGE "Raspbian"
-
-#define FAT_PARTITION_OF_IMAGE  "/dev/mmcblk0p6"
-
-/* Maximum number of partitions */
-#define MAXIMUM_PARTITIONS  32
-
 #endif // CONFIG_H

@@ -715,19 +715,6 @@ void MainWindow::on_actionAdvanced_triggered(bool checked)
 
 void MainWindow::on_actionEdit_config_triggered()
 {
-    /* If no installed OS is selected, default to first extended partition */
-    QString partition = FAT_PARTITION_OF_IMAGE;
-    QListWidgetItem *item = ui->list->currentItem();
-
-    if (item && item->data(Qt::UserRole).toMap().contains("partitions"))
-    {
-        QVariantList l = item->data(Qt::UserRole).toMap().value("partitions").toList();
-        if (!l.isEmpty())
-            partition = l.first().toString();
-    }
-
-    ConfEditDialog d(partition);
-    d.exec();
 }
 
 void MainWindow::on_actionBrowser_triggered()
