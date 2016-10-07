@@ -77,6 +77,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *t
     _toradexBoardRev = toradexConfigBlock->getBoardRev();
     _serialNumber = toradexConfigBlock->getSerialNumber();
     _toradexProductId = toradexConfigBlock->getProductId();
+    _toradexProductNumber = toradexConfigBlock->getProductNumber();
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
@@ -92,16 +93,13 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *t
     /* Initialize icons */
     _sdIcon = QIcon(":/icons/sd_memory.png");
     _usbIcon = QIcon(":/icons/flashdisk_logo.png");
-    _internetIcon = QIcon(":/icons/world.png");
+    _internetIcon = QIcon(":/icons/download_cloud.png");
 
     QDir dir;
     dir.mkpath(SRC_MOUNT_FOLDER);
 
     if (isMounted(SRC_MOUNT_FOLDER))
         unmountMedia();
-
-    /* Disable online help buttons until network is functional */
-    ui->actionBrowser->setEnabled(false);
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -163,7 +161,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QIcon icon = m.value("iconimage").value<QIcon>();
         bool autoinstall = m.value("autoinstall").toBool();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
-        bool supportedImage = supportedProductIds.contains(_toradexProductId);
+        bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
 
         /* We found an auto install image, immediately start flashing it... */
         if (_allowAutoinstall && autoinstall && supportedImage) {
@@ -641,6 +639,13 @@ void MainWindow::on_actionInstall_triggered()
     }
 }
 
+void MainWindow::on_actionRefreshCloud_triggered()
+{
+    showProgressDialog();
+    removeImagesBySource(SOURCE_NETWORK);
+    downloadLists();
+}
+
 void MainWindow::on_actionCancel_triggered()
 {
     close();
@@ -827,16 +832,18 @@ void MainWindow::onOnlineStateChanged(bool online)
 
 void MainWindow::downloadLists()
 {
-    _numIconsToDownload = 0;
+    _numDownloads = 0;
     QStringList urls = QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts);
     if (_qpd)
         _qpd->setLabelText(tr("Downloading image list from Internet..."));
 
     foreach (QString url, urls)
     {
+        _numDownloads++;
         ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
         connect(rd, SIGNAL(failed()), this, SLOT(downloadListJsonFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadListJsonCompleted()));
+        connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
     }
 }
 
@@ -868,9 +875,11 @@ void MainWindow::downloadListJsonCompleted()
         if (!url.startsWith("http"))
             url = sourceurlpath + url;
 
+        _numDownloads++;
         ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
         connect(rd, SIGNAL(failed()), this, SLOT(downloadImageJsonFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadImageJsonCompleted()));
+        connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
     }
 }
 
@@ -879,16 +888,11 @@ void MainWindow::downloadListJsonFailed()
 {
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
-    if (_qpd)
-        _qpd->hide();
-
     if (rd->networkError() != QNetworkReply::NoError) {
         QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: %1").arg(rd->networkErrorString()), QMessageBox::Close);
     } else {
         QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: HTTP status code %1").arg(rd->httpStatusCode()), QMessageBox::Close);
     }
-
-    rd->deleteLater();
 }
 
 void MainWindow::downloadImageJsonCompleted()
@@ -926,12 +930,12 @@ void MainWindow::downloadImageJsonCompleted()
         if (!icon.startsWith("http"))
             iconurl = imagemap["baseurl"].toString() + icon;
 
+        _numDownloads++;
         ResourceDownload *rd = new ResourceDownload(_netaccess, iconurl, icon);
         connect(rd, SIGNAL(failed()), this, SLOT(downloadIconFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadIconCompleted()));
+        connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
     }
-
-    rd->deleteLater();
 }
 
 void MainWindow::downloadImageJsonFailed()
@@ -943,8 +947,6 @@ void MainWindow::downloadImageJsonFailed()
     } else {
         qDebug() << "Getting image JSON failed: HTTP status code" << rd->httpStatusCode();
     }
-
-    rd->deleteLater();
 }
 
 void MainWindow::downloadIconCompleted()
@@ -964,15 +966,6 @@ void MainWindow::downloadIconCompleted()
             ui->list->item(i)->setIcon(icon);
         }
     }
-
-    if (--_numIconsToDownload == 0 && _qpd)
-    {
-        _qpd->hide();
-        _qpd->deleteLater();
-        _qpd = NULL;
-    }
-
-    rd->deleteLater();
 }
 
 void MainWindow::downloadIconFailed()
@@ -980,7 +973,14 @@ void MainWindow::downloadIconFailed()
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
     qDebug() << "Error downloading icon" << rd->urlString();
-    if (--_numIconsToDownload == 0 && _qpd)
+
+}
+
+void MainWindow::downloadFinished()
+{
+    ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
+
+    if (--_numDownloads == 0 && _qpd)
     {
         _qpd->hide();
         _qpd->deleteLater();

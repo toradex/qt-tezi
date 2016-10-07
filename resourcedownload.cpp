@@ -53,6 +53,7 @@ void ResourceDownload::downloadRedirectCheck()
             _data = reply->readAll();
             emit completed();
         }
+        emit finished();
     }
 
     reply->deleteLater();

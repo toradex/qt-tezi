@@ -39,6 +39,7 @@ public:
 signals:
     void completed();
     void failed();
+    void finished();
 
 public slots:
 

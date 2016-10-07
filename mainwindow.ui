@@ -151,7 +151,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionInstall"/>
-   <addaction name="actionEdit_config"/>
+   <addaction name="actionRefreshCloud"/>
    <addaction name="actionWifi"/>
    <addaction name="actionBrowser"/>
    <addaction name="actionUsbMassStorage"/>
@@ -193,6 +193,24 @@
    </property>
    <property name="shortcut">
     <string>I</string>
+   </property>
+  </action>
+  <action name="actionRefreshCloud">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/refresh_cloud.png</normaloff>:/icons/refresh_cloud.png</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh (r)</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh image list from Internet.</string>
+   </property>
+   <property name="shortcut">
+    <string>R</string>
    </property>
   </action>
   <action name="actionCancel">
@@ -251,13 +269,13 @@
     <selectedon>:/icon/connect.png</selectedon>:/icons/disconnect.png</iconset>
    </property>
    <property name="text">
-    <string>RNDIS (r)</string>
+    <string>RNDIS (n)</string>
    </property>
    <property name="toolTip">
     <string>Enables USB RNDIS network connection.</string>
    </property>
    <property name="shortcut">
-    <string>R</string>
+    <string>N</string>
    </property>
   </action>
   <action name="actionCleanModule">

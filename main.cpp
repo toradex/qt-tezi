@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
         qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
         cfgBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
         if (cfgBlock) {
-            qDebug() << "Migrating Config Block";
             cfgBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+            qDebug() << "Config Block migrated to mmcblk0boot0...";
         }
     }
 

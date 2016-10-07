@@ -289,6 +289,14 @@
         <source>License (c)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Refresh (r)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Refresh image list from Internet.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
@@ -438,11 +446,11 @@
 <context>
     <name>QObject</name>
     <message>
-        <source>Reading Product ID failed</source>
+        <source>Reading Config Block failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reading the Toradex Product ID failed, the Toradex config block might be corrupted.</source>
+        <source>Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

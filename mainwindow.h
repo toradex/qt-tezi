@@ -49,14 +49,14 @@ protected:
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
     ConfigBlock *_toradexConfigBlock;
-    QString _toradexProductName, _toradexBoardRev, _serialNumber;
+    QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
     int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
     bool _wasOnline;
     QNetworkAccessManager *_netaccess;
-    int _neededMB, _availableMB, _numMetaFilesToDownload, _numIconsToDownload;
+    int _neededMB, _availableMB, _numDownloads, _numMetaFilesToDownload;
     QTimer _networkStatusPollTimer;
     QTimer _mediaPollTimer;
     QTime _time;
@@ -107,6 +107,7 @@ protected slots:
     void downloadIconFailed();
     void downloadMetaCompleted();
     void downloadMetaFailed();
+    void downloadFinished();
 
     /* Events from ImageWriterThread */
     void onError(const QString &msg);
@@ -116,6 +117,7 @@ protected slots:
 private slots:
     /* UI events */
     void on_actionInstall_triggered();
+    void on_actionRefreshCloud_triggered();
     void on_actionCancel_triggered();
     void on_actionAdvanced_triggered(bool checked);
     void on_actionUsbMassStorage_triggered(bool checked);

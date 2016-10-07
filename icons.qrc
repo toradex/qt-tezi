@@ -35,5 +35,7 @@
         <file>icons/clean_module.png</file>
         <file>LICENSE.txt</file>
         <file>icons/document_info.png</file>
+        <file>icons/download_cloud.png</file>
+        <file>icons/refresh_cloud.png</file>
     </qresource>
 </RCC>
