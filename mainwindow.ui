@@ -284,16 +284,13 @@
     <normaloff>:/icons/clean_module.png</normaloff>:/icons/clean_module.png</iconset>
    </property>
    <property name="text">
-    <string>Clean Module (c)</string>
+    <string>Clean Flash (c)</string>
    </property>
    <property name="toolTip">
     <string>Discards all data on eMMC.</string>
    </property>
    <property name="shortcut">
     <string>C</string>
-   </property>
-   <property name="visible">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionShowLicense">
@@ -302,13 +299,10 @@
     <normaloff>:/icons/document_info.png</normaloff>:/icons/document_info.png</iconset>
    </property>
    <property name="text">
-    <string>License (c)</string>
+    <string>License</string>
    </property>
    <property name="toolTip">
     <string>License Info.</string>
-   </property>
-   <property name="shortcut">
-    <string>C</string>
    </property>
    <property name="visible">
     <bool>true</bool>

@@ -125,24 +125,6 @@ int main(int argc, char *argv[])
     QWSServer::setCursorVisible(true);
 #endif
 
-
-    ConfigBlock *cfgBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
-    if (cfgBlock == NULL) {
-        qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
-        cfgBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
-        if (cfgBlock) {
-            cfgBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
-            qDebug() << "Config Block migrated to mmcblk0boot0...";
-        }
-    }
-
-    if (cfgBlock == NULL) {
-        QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
-                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing."),
-                              QMessageBox::Close);
-        return 1;
-    }
-
 #ifdef ENABLE_LANGUAGE_CHOOSER
      // Language chooser at the bottom center
     LanguageDialog* ld = new LanguageDialog(defaultLang, defaultKeyboard);
@@ -151,11 +133,10 @@ int main(int argc, char *argv[])
 #endif
 
     // Main window in the middle of screen
-    MainWindow mw(splash, ld, cfgBlock, autoinstall);
+    MainWindow mw(splash, ld, autoinstall);
     //mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();
-    mw.showProgressDialog();
 
     a.exec();
 

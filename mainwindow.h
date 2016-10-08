@@ -38,10 +38,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *toradexConfigBlock,
-                        bool allowAutoinstall, QWidget *parent = 0);
+    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
-    void showProgressDialog();
+    void show();
+    void showProgressDialog(const QString &labelText);
     void startNetworking();
 
 protected:
@@ -108,6 +108,8 @@ protected slots:
     void downloadMetaCompleted();
     void downloadMetaFailed();
     void downloadFinished();
+    void discardError(const QString &errorString);
+    void discardFinished();
 
     /* Events from ImageWriterThread */
     void onError(const QString &msg);

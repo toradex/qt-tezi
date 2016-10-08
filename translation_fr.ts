@@ -17,6 +17,13 @@
     </message>
 </context>
 <context>
+    <name>DiscardThread</name>
+    <message>
+        <source>Discarding device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LanguageDialog</name>
     <message>
         <source>Language (l): </source>
@@ -234,10 +241,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>RNDIS (r)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enables USB RNDIS network connection.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -254,27 +257,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clean Module (c)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Discards all data on eMMC.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>C</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Discarding device %1 failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This deletes all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Tez-i. Continue?</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reading size of device %1 failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -286,15 +273,31 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>License (c)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Refresh (r)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Refresh image list from Internet.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discarding all data on internal eMCC...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RNDIS (n)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>N</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Clean Flash (c)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

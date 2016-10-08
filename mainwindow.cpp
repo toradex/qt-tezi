@@ -11,6 +11,7 @@
 #include "util.h"
 #include "twoiconsdelegate.h"
 #include "wifisettingsdialog.h"
+#include "discardthread.h"
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMap>
@@ -59,12 +60,10 @@
  *
  */
 
-MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *toradexConfigBlock,
-                       bool allowAutoinstall, QWidget *parent) :
+MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _toradexConfigBlock(toradexConfigBlock),
-    _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld),
+    _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld),
     _wasOnline(false), _netaccess(NULL), _mediaMounted(false), _firstMediaPoll(true)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -73,11 +72,27 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, ConfigBlock *t
     ui->setupUi(this);
     update_window_title();
 
-    _toradexProductName = toradexConfigBlock->getProductName();
-    _toradexBoardRev = toradexConfigBlock->getBoardRev();
-    _serialNumber = toradexConfigBlock->getSerialNumber();
-    _toradexProductId = toradexConfigBlock->getProductId();
-    _toradexProductNumber = toradexConfigBlock->getProductNumber();
+    _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+    if (_toradexConfigBlock == NULL) {
+        qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
+        _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
+        if (_toradexConfigBlock) {
+            _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+            qDebug() << "Config Block migrated to mmcblk0boot0...";
+        }
+    }
+
+    if (_toradexConfigBlock == NULL) {
+        QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
+                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing."),
+                              QMessageBox::Close);
+    }
+
+    _toradexProductName = _toradexConfigBlock->getProductName();
+    _toradexBoardRev = _toradexConfigBlock->getBoardRev();
+    _serialNumber = _toradexConfigBlock->getSerialNumber();
+    _toradexProductId = _toradexConfigBlock->getProductId();
+    _toradexProductNumber = _toradexConfigBlock->getProductNumber();
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
@@ -137,10 +152,16 @@ void MainWindow::updateModuleInformation()
 }
 
 /* Discover which images we have, and fill in the list */
-void MainWindow::showProgressDialog()
+void MainWindow::show()
+{
+    QWidget::show();
+    showProgressDialog(tr("Wait for external media or network..."));
+}
+
+void MainWindow::showProgressDialog(const QString &labelText)
 {
     /* Ask user to wait while list is populated */
-    _qpd = new QProgressDialog(tr("Wait for external media or network..."), QString(), 0, 0, this);
+    _qpd = new QProgressDialog(labelText, QString(), 0, 0, this);
     _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     _qpd->show();
 }
@@ -565,53 +586,47 @@ void MainWindow::on_actionUsbRndis_triggered(bool checked)
     ui->actionUsbMassStorage->setEnabled(!checked);
 }
 
-bool MainWindow::discard(QString blkdev, qint64 start, qint64 end)
-{
-    QStringList args;
-
-    /* If start and end is zero, blkdiscard will discard the whole eMMC */
-    if (start)
-        args.append(QString("-o %1").arg(start));
-    if (end)
-        args.append(QString("-l %1").arg(end));
-    args.append(blkdev);
-
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-    p.start("/usr/sbin/blkdiscard", args);
-    p.waitForFinished(-1);
-
-    if (p.exitCode() != 0) {
-        QMessageBox::critical(this, tr("Error"), tr("Discarding device %1 failed").arg(blkdev) + "\n" + p.readAll(), QMessageBox::Close);
-        return false;
-    }
-    return true;
-}
-
 void MainWindow::on_actionCleanModule_triggered()
 {
     if (QMessageBox::warning(this,
                             tr("Confirm"),
-                            tr("This deletes all data on the internal eMMC, including boot loader and boot loader configuration. "
-                               "After this operation you either need to install an image or use the modules recovery mode to boot back into Tez-i. Continue?"),
+                            tr("This discards all data on the internal eMMC, including boot loader and boot loader configuration. "
+                               "After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?"),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        /* Ok, lets do it! Spare out config block (last block of boot0) */
-        int size = QString(getFileContents("/sys/block/mmcblk0boot0/size")).toInt();
-        if (!size) {
-            QMessageBox::critical(this, tr("Error"), tr("Reading size of device %1 failed").arg("mmcblk0boot0"), QMessageBox::Close);
-            return;
-        }
-        int eblocksize = QString(getFileContents("/sys/class/mmc_host/mmc0/mmc0:0001/erase_size")).toInt();
+        showProgressDialog(tr("Discarding all data on internal eMCC..."));
+        QStringList blockDevs;
+        blockDevs << "/dev/mmcblk0" << "/dev/mmcblk0boot0" << "/dev/mmcblk0boot1";
+        DiscardThread *thread = new DiscardThread(blockDevs);
 
-        if (!discard("/dev/mmcblk0boot0", 0, size * 512 - eblocksize))
-            return;
-        if (!discard("/dev/mmcblk0boot1", 0, 0))
-            return;
+        connect(thread, SIGNAL (error(QString)), this, SLOT (discardError(QString)));
+        connect(thread, SIGNAL (finished()), this, SLOT (discardFinished()));
 
-        if (!discard("/dev/mmcblk0", 0, 0))
-            return;
+        thread->start();
     }
+}
+
+void MainWindow::discardError(const QString &errorString)
+{
+    DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
+
+    QMessageBox::critical(this, tr("Error"), errorString, QMessageBox::Close);
+
+    thread->deleteLater();
+}
+
+void MainWindow::discardFinished()
+{
+    DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
+
+    /* Restore config block... */
+    if (_toradexConfigBlock)
+        _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+
+    if (_qpd)
+        _qpd->hide();
+
+    thread->deleteLater();
 }
 
 void MainWindow::on_actionShowLicense_triggered()
@@ -641,7 +656,7 @@ void MainWindow::on_actionInstall_triggered()
 
 void MainWindow::on_actionRefreshCloud_triggered()
 {
-    showProgressDialog();
+    showProgressDialog("");
     removeImagesBySource(SOURCE_NETWORK);
     downloadLists();
 }

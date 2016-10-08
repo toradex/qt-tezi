@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     scrolltextdialog.cpp \
     usbgadgethelper.c \
     usbgadget.cpp \
-    configblock.cpp
+    configblock.cpp \
+    discardthread.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -55,7 +56,8 @@ HEADERS  += mainwindow.h \
     scrolltextdialog.h \
     usbgadgethelper.h \
     usbgadget.h \
-    configblock.h
+    configblock.h \
+    discardthread.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \
