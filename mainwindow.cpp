@@ -77,8 +77,8 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
         qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
         _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
         if (_toradexConfigBlock) {
-            _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
-            qDebug() << "Config Block migrated to mmcblk0boot0...";
+            qDebug() << "Config Block found, migration will be executed upon flashing a new image...";
+            _toradexConfigBlock->needsWrite = true;
         }
     }
 
@@ -86,6 +86,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
                               QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing."),
                               QMessageBox::Close);
+        return;
     }
 
     _toradexProductName = _toradexConfigBlock->getProductName();
@@ -1175,6 +1176,11 @@ void MainWindow::startImageWrite(QVariantMap entry)
         slidesFolders.append(folder+"/slides_vga");
     }
 
+    // Write Config Block to default location...
+    _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+    qDebug() << "Config Block migrated to mmcblk0boot0...";
+
+    imageWriteThread->setConfigBlock(_toradexConfigBlock);
     imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), (enum ImageSource)entry.value("source").toInt());
 

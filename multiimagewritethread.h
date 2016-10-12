@@ -2,6 +2,7 @@
 #define MULTIIMAGEWRITETHREAD_H
 
 #include "osinfo.h"
+#include "configblock.h"
 #include <QThread>
 #include <QStringList>
 #include <QMultiMap>
@@ -19,6 +20,7 @@ class MultiImageWriteThread : public QThread
 public:
     explicit MultiImageWriteThread(QObject *parent = 0);
     void setImage(const QString &folder, const QString &fileinfo, const QString &baseurl, enum ImageSource source);
+    void setConfigBlock(ConfigBlock *configBlock);
 
 protected:
     virtual void run();
@@ -42,6 +44,7 @@ protected:
     bool isURL(const QString &s);
 
     OsInfo *_image;
+    ConfigBlock *_configBlock;
 
     int _extraSpacePerPartition, _sectorOffset;
     qint64 _bytesWritten;

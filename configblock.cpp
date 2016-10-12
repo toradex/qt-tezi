@@ -50,7 +50,7 @@ const char* const toradex_modules[] = {
 };
 
 ConfigBlock::ConfigBlock(const QByteArray &cb, QObject *parent) : QObject(parent),
-  _cb(cb)
+  _cb(cb), needsWrite(false)
 {
     qint32 cboffset = 0;
 

@@ -43,6 +43,9 @@ public:
     QString getProductNumber();
     QString getBoardRev();
     QString getProductName();
+
+    bool needsWrite;
+
 private:
     QByteArray _mac, _hw;
     QByteArray _cb;

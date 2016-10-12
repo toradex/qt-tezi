@@ -395,6 +395,10 @@
         <source>%1: Downloading/Copying files</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>No valid config block available</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProgressSlideshowDialog</name>

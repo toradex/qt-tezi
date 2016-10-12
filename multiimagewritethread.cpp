@@ -30,11 +30,20 @@ void MultiImageWriteThread::setImage(const QString &folder, const QString &infof
     _image = new OsInfo(folder, infofile, baseurl, source, this);
 }
 
+void MultiImageWriteThread::setConfigBlock(ConfigBlock *configBlock)
+{
+    _configBlock = configBlock;
+}
 
 void MultiImageWriteThread::run()
 {
     QList<BlockDevInfo *> *blockdevs = _image->blockdevs();
     qDebug() << "Processing Image:" << _image->name();
+
+    if (!_configBlock) {
+        emit error(tr("No valid config block available"));
+        return;
+    }
 
     /* Run prepare script */
     if (!_image->prepareScript().isEmpty()) {
@@ -90,7 +99,16 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
     QProcessEnvironment env;
     QStringList cmd(script);
 
-    /* $1: image folder */
+    /* $1: product id */
+    cmd.append(_configBlock->getProductNumber());
+
+    /* $2: board rev */
+    cmd.append(_configBlock->getBoardRev());
+
+    /* $3: serial */
+    cmd.append(_configBlock->getSerialNumber());
+
+    /* $4: image folder */
     cmd.append(_image->folder());
 
     env.insert("PATH", "/bin:/usr/bin:/sbin:/usr/sbin");
@@ -103,11 +121,11 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
     p.setWorkingDirectory(_image->folder());
     p.start("/bin/sh", cmd);
 
-    p.waitForFinished(-1);
-    qDebug() << "Finished with exit status:" << p.exitStatus();
+    p.waitForFinished(30000);
 
     output = p.readAll();
-    qDebug() << output;
+    qDebug() << "Output:" << output;
+    qDebug() << "Finished with exit status:" << p.exitStatus();
     return p.exitCode() == 0;
 }
 
@@ -259,7 +277,6 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
         offset += partsizeSectors;
     }
 
-    qDebug() << partitionMap;
     emit statusUpdate(tr("Writing partition table"));
     if (!writePartitionTable(blockdev->blockDevice(), partitionMap))
         return false;
