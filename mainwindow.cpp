@@ -688,7 +688,10 @@ void MainWindow::onError(const QString &msg)
     if (_qpd)
         _qpd->hide();
     QMessageBox::critical(this, tr("Error"), msg, QMessageBox::Close);
+    _psd->close();
     setEnabled(true);
+    QWidget::show();
+    _ld->show();
 }
 
 void MainWindow::onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer)
