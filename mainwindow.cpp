@@ -70,7 +70,6 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setWindowState(Qt::WindowMaximized);
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
-    update_window_title();
 
     _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
     if (_toradexConfigBlock == NULL) {
@@ -89,6 +88,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
         return;
     }
 
+    updateVersion();
     _toradexProductName = _toradexConfigBlock->getProductName();
     _toradexBoardRev = _toradexConfigBlock->getBoardRev();
     _serialNumber = _toradexConfigBlock->getSerialNumber();
@@ -692,7 +692,8 @@ void MainWindow::onError(const QString &msg)
     _psd->close();
     setEnabled(true);
     QWidget::show();
-    _ld->show();
+    if (_ld != NULL)
+        _ld->show();
 }
 
 void MainWindow::onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer)
@@ -700,23 +701,25 @@ void MainWindow::onQuery(const QString &msg, const QString &title, QMessageBox::
     *answer = QMessageBox::question(this, title, msg, QMessageBox::Yes|QMessageBox::No);
 }
 
-void MainWindow::update_window_title()
-{
-    setWindowTitle(QString(tr("Tez-i v%1 - Built: %2")).arg(VERSION_NUMBER, QString::fromLocal8Bit(__DATE__)));
-}
-
 void MainWindow::changeEvent(QEvent* event)
 {
     if (event && event->type() == QEvent::LanguageChange)
     {
         ui->retranslateUi(this);
-        update_window_title();
         updateModuleInformation();
         updateNeeded();
+        updateVersion();
         //repopulate();
     }
 
     QMainWindow::changeEvent(event);
+}
+
+void MainWindow::updateVersion()
+{
+    QString version = getVersionString();
+    setWindowTitle(version);
+    ui->version->setText(version);
 }
 
 void MainWindow::inputSequence()
@@ -1191,7 +1194,8 @@ void MainWindow::startImageWrite(QVariantMap entry)
     connect(imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
     imageWriteThread->start();
-    _ld->hide();
+    if (_ld != NULL)
+        _ld->hide();
     hide();
     _psd->exec();
 }

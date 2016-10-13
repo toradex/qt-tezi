@@ -44,11 +44,6 @@
         <source>Keyboard</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="languagedialog.cpp" line="232"/>
-        <source>Tez-i v%1 - Built: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -91,141 +86,146 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="189"/>
-        <source>Install (i)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="192"/>
-        <source>Installs the selected operating system image onto this SD card.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="195"/>
-        <source>I</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="207"/>
-        <source>Refresh (r)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.ui" line="210"/>
-        <source>Refresh image list from Internet.</source>
+        <location filename="mainwindow.ui" line="135"/>
+        <source>Unknown Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="222"/>
-        <source>Exit (Esc)</source>
+        <source>Install (i)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="225"/>
-        <source>Exits and boots the installed operating system.</source>
+        <source>Installs the selected operating system image onto this SD card.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="228"/>
+        <source>I</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="240"/>
-        <source>Advanced</source>
+        <source>Refresh (r)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="252"/>
-        <source>Mass Storage (u)</source>
+        <location filename="mainwindow.ui" line="243"/>
+        <source>Refresh image list from Internet.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="255"/>
-        <source>Enables USB Mass Storage emulation to access internal eMMC partitions.</source>
+        <source>Exit (Esc)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="258"/>
+        <source>Exits and boots the installed operating system.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="273"/>
+        <source>Advanced</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="285"/>
+        <source>Mass Storage (u)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="288"/>
+        <source>Enables USB Mass Storage emulation to access internal eMMC partitions.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.ui" line="291"/>
         <source>U</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="272"/>
+        <location filename="mainwindow.ui" line="305"/>
         <source>RNDIS (n)</source>
         <oldsource>RNDIS (r)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="275"/>
+        <location filename="mainwindow.ui" line="308"/>
         <source>Enables USB RNDIS network connection.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="213"/>
+        <location filename="mainwindow.ui" line="246"/>
         <source>R</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="278"/>
+        <location filename="mainwindow.ui" line="311"/>
         <source>N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="287"/>
+        <location filename="mainwindow.ui" line="320"/>
         <source>Clean Flash (c)</source>
         <oldsource>Clean Module (c)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="290"/>
+        <location filename="mainwindow.ui" line="323"/>
         <source>Discards all data on eMMC.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="293"/>
+        <location filename="mainwindow.ui" line="326"/>
         <source>C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="302"/>
+        <location filename="mainwindow.ui" line="335"/>
         <location filename="mainwindow.cpp" line="637"/>
         <source>License</source>
         <oldsource>License (c)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="305"/>
+        <location filename="mainwindow.ui" line="338"/>
         <source>License Info.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="320"/>
+        <location filename="mainwindow.ui" line="353"/>
         <source>Edit config (e)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="323"/>
+        <location filename="mainwindow.ui" line="356"/>
         <source>Opens the config.txt and cmdline.txt for the installed OS in a text editor.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="335"/>
+        <location filename="mainwindow.ui" line="368"/>
         <source>Online help (h)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="338"/>
+        <location filename="mainwindow.ui" line="371"/>
         <source>Opens a web browser displaying the Raspberry Pi Forum.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="356"/>
+        <location filename="mainwindow.ui" line="389"/>
         <source>Wifi networks (w)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="359"/>
+        <location filename="mainwindow.ui" line="392"/>
         <source>Select a wifi network to connect to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="362"/>
+        <location filename="mainwindow.ui" line="395"/>
         <source>W</source>
         <translation type="unfinished"></translation>
     </message>
@@ -297,8 +297,8 @@
     <message>
         <location filename="mainwindow.cpp" line="614"/>
         <location filename="mainwindow.cpp" line="691"/>
-        <location filename="mainwindow.cpp" line="863"/>
-        <location filename="mainwindow.cpp" line="869"/>
+        <location filename="mainwindow.cpp" line="866"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -313,75 +313,70 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="705"/>
-        <source>Tez-i v%1 - Built: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="749"/>
+        <location filename="mainwindow.cpp" line="752"/>
         <source>No network access</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="750"/>
+        <location filename="mainwindow.cpp" line="753"/>
         <source>Wired network access is required for this feature. Please insert a network cable into the network port.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="844"/>
+        <location filename="mainwindow.cpp" line="847"/>
         <source>Downloading image list from Internet...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="863"/>
+        <location filename="mainwindow.cpp" line="866"/>
         <source>Error parsing list JSON downloaded from server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="869"/>
+        <location filename="mainwindow.cpp" line="872"/>
         <source>Image list config format not supported!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="898"/>
-        <location filename="mainwindow.cpp" line="900"/>
-        <location filename="mainwindow.cpp" line="1082"/>
-        <location filename="mainwindow.cpp" line="1110"/>
+        <location filename="mainwindow.cpp" line="901"/>
+        <location filename="mainwindow.cpp" line="903"/>
+        <location filename="mainwindow.cpp" line="1085"/>
+        <location filename="mainwindow.cpp" line="1113"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="898"/>
+        <location filename="mainwindow.cpp" line="901"/>
         <source>Error downloading image list from Internet: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="900"/>
+        <location filename="mainwindow.cpp" line="903"/>
         <source>Error downloading image list from Internet: HTTP status code %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1046"/>
+        <location filename="mainwindow.cpp" line="1049"/>
         <source>Needed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1047"/>
+        <location filename="mainwindow.cpp" line="1050"/>
         <source>Available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1110"/>
+        <location filename="mainwindow.cpp" line="1113"/>
         <source>Error downloading meta file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1125"/>
+        <location filename="mainwindow.cpp" line="1128"/>
         <source>I Agree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1082"/>
+        <location filename="mainwindow.cpp" line="1085"/>
         <source>Error writing downloaded file to SD card. SD card or file system may be damaged.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -536,42 +531,42 @@
 <context>
     <name>QDialogButtonBox</name>
     <message>
-        <location filename="languagedialog.cpp" line="30"/>
+        <location filename="languagedialog.cpp" line="31"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="31"/>
+        <location filename="languagedialog.cpp" line="32"/>
         <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="32"/>
+        <location filename="languagedialog.cpp" line="33"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="33"/>
+        <location filename="languagedialog.cpp" line="34"/>
         <source>&amp;Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="34"/>
+        <location filename="languagedialog.cpp" line="35"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="35"/>
+        <location filename="languagedialog.cpp" line="36"/>
         <source>&amp;Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="36"/>
+        <location filename="languagedialog.cpp" line="37"/>
         <source>&amp;Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="languagedialog.cpp" line="37"/>
+        <location filename="languagedialog.cpp" line="38"/>
         <source>&amp;No</source>
         <translation type="unfinished"></translation>
     </message>
@@ -579,13 +574,18 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="mainwindow.cpp" line="86"/>
+        <location filename="mainwindow.cpp" line="85"/>
         <source>Reading Config Block failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="87"/>
+        <location filename="mainwindow.cpp" line="86"/>
         <source>Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="util.cpp" line="59"/>
+        <source>Toradex Easy Installer v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

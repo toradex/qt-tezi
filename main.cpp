@@ -125,9 +125,10 @@ int main(int argc, char *argv[])
     QWSServer::setCursorVisible(true);
 #endif
 
+    LanguageDialog* ld = NULL;
 #ifdef ENABLE_LANGUAGE_CHOOSER
-     // Language chooser at the bottom center
-    LanguageDialog* ld = new LanguageDialog(defaultLang, defaultKeyboard);
+    // Language chooser at the bottom center
+    ld = new LanguageDialog(defaultLang, defaultKeyboard);
     ld->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignBottom, ld->size(), a.desktop()->availableGeometry()));
     ld->show();
 #endif

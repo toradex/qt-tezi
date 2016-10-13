@@ -37,10 +37,6 @@
         <source>Unknown Version</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Tez-i v%1 - Built: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -130,10 +126,6 @@
     </message>
     <message>
         <source>Download error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Tez-i v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -300,6 +292,10 @@
         <source>Clean Flash (c)</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Unknown Version</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
@@ -458,6 +454,10 @@
     </message>
     <message>
         <source>Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toradex Easy Installer v%1 - Built: %2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

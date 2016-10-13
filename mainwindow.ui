@@ -27,9 +27,9 @@
      <number>9</number>
     </property>
     <property name="bottomMargin">
-     <number>49</number>
+     <number>9</number>
     </property>
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QListWidget" name="list">
       <property name="font">
        <font>
@@ -41,7 +41,7 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
+    <item row="2" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QGroupBox" name="groupBox">
@@ -104,6 +104,39 @@
           </layout>
          </item>
         </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="version">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Unknown Version</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </item>
      </layout>
@@ -264,9 +297,9 @@
    </property>
    <property name="icon">
     <iconset resource="icons.qrc">
-    <normaloff>:/icons/disconnect.png</normaloff>
-    <normalon>:/icons/connect.png</normalon>
-    <selectedon>:/icon/connect.png</selectedon>:/icons/disconnect.png</iconset>
+     <normaloff>:/icons/disconnect.png</normaloff>
+     <normalon>:/icons/connect.png</normalon>
+     <selectedon>:/icon/connect.png</selectedon>:/icons/disconnect.png</iconset>
    </property>
    <property name="text">
     <string>RNDIS (n)</string>
@@ -281,7 +314,7 @@
   <action name="actionCleanModule">
    <property name="icon">
     <iconset resource="icons.qrc">
-    <normaloff>:/icons/clean_module.png</normaloff>:/icons/clean_module.png</iconset>
+     <normaloff>:/icons/clean_module.png</normaloff>:/icons/clean_module.png</iconset>
    </property>
    <property name="text">
     <string>Clean Flash (c)</string>
@@ -296,7 +329,7 @@
   <action name="actionShowLicense">
    <property name="icon">
     <iconset resource="icons.qrc">
-    <normaloff>:/icons/document_info.png</normaloff>:/icons/document_info.png</iconset>
+     <normaloff>:/icons/document_info.png</normaloff>:/icons/document_info.png</iconset>
    </property>
    <property name="text">
     <string>License</string>

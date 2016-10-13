@@ -17,8 +17,8 @@
 /* Places background.png resource file in center of screen */
 #define CENTER_BACKGROUND_IMAGE
 
-/* Enable language selection */
-#define ENABLE_LANGUAGE_CHOOSER
+/* Disable language selection */
+#undef ENABLE_LANGUAGE_CHOOSER
 
 /* Website launched when launching Arora */
 #define HOMEPAGE  "http://www.raspberrypi.org/help/"

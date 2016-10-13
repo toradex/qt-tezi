@@ -68,6 +68,7 @@ protected:
     UsbGadget *_usbGadget;
 
     void updateModuleInformation();
+    void updateVersion();
     int calculateNominalSize(const QVariantMap &imagemap);
     void processMedia(enum ImageSource src, const QString &blockdev);
     QMap<QString,QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
@@ -81,7 +82,6 @@ protected:
     void addImages(QMap<QString,QVariantMap> images);
     void removeImagesByBlockdev(const QString &blockdev);
     void removeImagesBySource(enum ImageSource source);
-    void update_window_title();
     bool requireNetwork();
     bool isOnline();
     QStringList getFlavours(const QString &folder);

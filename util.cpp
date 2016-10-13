@@ -1,3 +1,4 @@
+#include "config.h"
 #include "util.h"
 #include <sys/ioctl.h>
 #include <stdint.h>
@@ -5,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <QObject>
 #include <QFile>
 #include <QFileInfo>
 #include <QProcess>
@@ -50,4 +52,9 @@ QString getUrlPath(const QString& url)
 {
     int slash = url.lastIndexOf('/');
     return url.left(slash + 1);
+}
+
+QString getVersionString()
+{
+    return QString(QObject::tr("Toradex Easy Installer v%1 - Built: %2")).arg(VERSION_NUMBER, QString::fromLocal8Bit(__DATE__));
 }

@@ -10,6 +10,7 @@
 #include "languagedialog.h"
 #include "ui_languagedialog.h"
 #include "config.h"
+#include "util.h"
 #include <QIcon>
 #include <QDebug>
 #include <QFile>
@@ -229,7 +230,7 @@ void LanguageDialog::on_langCombo_currentIndexChanged(int index)
 
 void LanguageDialog::updateVersion()
 {
-    ui->version->setText(QString(tr("Tez-i v%1 - Built: %2")).arg(VERSION_NUMBER, QString::fromLocal8Bit(__DATE__)));
+    ui->version->setText(getVersionString());
 }
 
 void LanguageDialog::changeEvent(QEvent* event)
