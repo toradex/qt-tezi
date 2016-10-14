@@ -90,6 +90,9 @@ void MultiImageWriteThread::run()
         }
     }
 
+    emit statusUpdate(tr("Finish writing (syncing)"));
+    sync();
+
     emit completed();
 }
 
@@ -147,9 +150,6 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
         if (!processContent(fs, device))
             return false;
     }
-
-    emit statusUpdate(tr("Finish writing (syncing)"));
-    sync();
 
     return true;
 }

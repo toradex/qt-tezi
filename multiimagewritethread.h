@@ -22,6 +22,10 @@ public:
     void setImage(const QString &folder, const QString &fileinfo, const QString &baseurl, enum ImageSource source);
     void setConfigBlock(ConfigBlock *configBlock);
 
+    OsInfo *getImageInfo() {
+        return _image;
+    }
+
 protected:
     virtual void run();
     bool runScript(QString script, QByteArray &output);

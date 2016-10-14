@@ -165,14 +165,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Image installed successfully.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Restart</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>In case recovery mode has been used a power cycle will be necessary.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -302,6 +294,22 @@
     </message>
     <message>
         <source>Erase Flash (c)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Power off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reboot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Image has been installed successfully.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You can now safely power off or reset the system.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

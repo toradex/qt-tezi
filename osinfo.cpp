@@ -13,7 +13,7 @@ OsInfo::OsInfo(const QString &folder, const QString &infofile, const QString &ba
     _version = m.value("version").toString();
     _description = m.value("description").toString();
     _releaseDate = m.value("release_date").toString();
-    _bootable = m.value("bootable", true).toBool();
+    _isInstaller = m.value("isinstaller", false).toBool();
     _prepareScript = m.value("prepare_script").toString();
     _wrapupScript = m.value("wrapup_script").toString();
     QVariantList productids = m.value("supported_product_ids").toList();

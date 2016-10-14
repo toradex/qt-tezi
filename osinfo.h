@@ -64,9 +64,9 @@ public:
         return _wrapupScript;
     }
 
-    inline bool bootable()
+    inline bool isInstaller()
     {
-        return _bootable;
+        return _isInstaller;
     }
 
     inline QList<BlockDevInfo *> *blockdevs()
@@ -89,7 +89,7 @@ public:
 protected:
     QString _folder, _infofile, _baseUrl;
     QString _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript;
-    bool _bootable;
+    bool _bootable, _isInstaller;
     QList<BlockDevInfo *> _blockdevs;
     QList<QString> _supportedProductIds;
     enum ImageSource _imageSource;

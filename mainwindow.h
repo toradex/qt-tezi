@@ -15,6 +15,7 @@
 #include "osinfo.h"
 #include "usbgadget.h"
 #include "configblock.h"
+#include "multiimagewritethread.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -23,6 +24,12 @@
 #include <QTime>
 #include <QUrl>
 #include <QSet>
+
+enum RebootMode {
+    LINUX_UNKNOWN,
+    LINUX_REBOOT,
+    LINUX_POWEROFF
+};
 
 namespace Ui {
 class MainWindow;
@@ -66,6 +73,7 @@ protected:
     QSet<QString> _blockdevsChecked;
     QSet<QString> _blockdevsChecking;
     UsbGadget *_usbGadget;
+    MultiImageWriteThread *_imageWriteThread;
 
     void updateModuleInformation();
     void updateVersion();

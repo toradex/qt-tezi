@@ -732,24 +732,42 @@ void MainWindow::onCompleted()
     _psd->deleteLater();
     _psd = NULL;
 
-    if (!_isAutoinstall) {
-        QMessageBox msgbox(QMessageBox::Information,
-                           tr("Image Installed"),
-                           tr("Image installed successfully.") + "\n\n" + tr("In case recovery mode has been used a power cycle will be necessary."),
-                           QMessageBox::Yes | QMessageBox::No, this);
-        msgbox.button(QMessageBox::Yes)->setText(tr("Restart"));
-        msgbox.button(QMessageBox::No)->setText(tr("Return to menu"));
-        if (msgbox.exec() == QMessageBox::No) {
-            // Return to main menu...
-            reenableImageChoice();
-            QWidget::show();
-            if (_ld != NULL)
-                _ld->show();
-            return;
-        }
+    /* Directly reboot into newer Toradex Easy Installer */
+    if (_imageWriteThread->getImageInfo()->isInstaller()) {
+        close();
+        /* A case for kexec... Anyone? :-) */
+        QApplication::exit(LINUX_REBOOT);
     }
 
-    close();
+    QMessageBox msgbox(QMessageBox::Information,
+                       tr("Image Installed"),
+                       tr("The Image has been installed successfully.") + "<b>" + tr("You can now safely power off or reset the system.") + "</b><br><br>" +
+                       tr("In case recovery mode has been used a power cycle will be necessary."),
+                       QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+    msgbox.button(QMessageBox::Yes)->setText(tr("Power off"));
+    msgbox.button(QMessageBox::No)->setText(tr("Reboot"));
+    msgbox.button(QMessageBox::Cancel)->setText(tr("Return to menu"));
+
+    int value = msgbox.exec();
+    _imageWriteThread->deleteLater();
+
+    switch (value) {
+    case QMessageBox::Yes:
+        close();
+        QApplication::exit(LINUX_POWEROFF);
+        break;
+    case QMessageBox::No:
+        close();
+        QApplication::exit(LINUX_REBOOT);
+        break;
+    case QMessageBox::Cancel:
+        // Return to main menu...
+        reenableImageChoice();
+        QWidget::show();
+        if (_ld != NULL)
+            _ld->show();
+        break;
+    }
 }
 
 void MainWindow::onError(const QString &msg)
@@ -766,6 +784,7 @@ void MainWindow::onError(const QString &msg)
     _psd->deleteLater();
     _psd = NULL;
 
+    _imageWriteThread->deleteLater();
     reenableImageChoice();
     QWidget::show();
     if (_ld != NULL)
@@ -1203,7 +1222,7 @@ void MainWindow::reenableImageChoice()
 void MainWindow::startImageWrite(QVariantMap entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
-    MultiImageWriteThread *imageWriteThread = new MultiImageWriteThread();
+    _imageWriteThread = new MultiImageWriteThread();
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
 
@@ -1259,17 +1278,17 @@ void MainWindow::startImageWrite(QVariantMap entry)
     _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
     qDebug() << "Config Block migrated to mmcblk0boot0...";
 
-    imageWriteThread->setConfigBlock(_toradexConfigBlock);
-    imageWriteThread->setImage(folder, entry.value("image_info").toString(),
+    _imageWriteThread->setConfigBlock(_toradexConfigBlock);
+    _imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), (enum ImageSource)entry.value("source").toInt());
 
     _psd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
-    connect(imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));
-    connect(imageWriteThread, SIGNAL(imageProgress(qint64)), _psd, SLOT(updateIOstats(qint64)));
-    connect(imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
-    connect(imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
-    connect(imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
-    imageWriteThread->start();
+    connect(_imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));
+    connect(_imageWriteThread, SIGNAL(imageProgress(qint64)), _psd, SLOT(updateIOstats(qint64)));
+    connect(_imageWriteThread, SIGNAL(completed()), this, SLOT(onCompleted()));
+    connect(_imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
+    connect(_imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
+    _imageWriteThread->start();
     if (_ld != NULL)
         _ld->hide();
     hide();

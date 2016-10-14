@@ -35,7 +35,7 @@
  *
  */
 
-void reboot()
+void tezi_reboot(int mode)
 {
 #ifdef Q_WS_QWS
     QWSServer::setBackground(BACKGROUND_COLOR);
@@ -48,7 +48,7 @@ void reboot()
     QProcess::execute("umount -ar");
     ::sync();
     // Reboot
-    ::reboot(RB_AUTOBOOT);
+    ::reboot(mode);
 }
 
 int main(int argc, char *argv[])
@@ -139,9 +139,17 @@ int main(int argc, char *argv[])
     //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();
 
-    a.exec();
+    int mode = a.exec();
 
-    reboot();
+    switch (mode) {
+    case LINUX_REBOOT:
+        tezi_reboot(RB_AUTOBOOT);
+        break;
+    case LINUX_POWEROFF:
+    default:
+        tezi_reboot(RB_POWER_OFF);
+        break;
+    }
 
     return 0;
 }
