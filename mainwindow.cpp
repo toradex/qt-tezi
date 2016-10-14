@@ -171,7 +171,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
 {
     QSize currentsize = ui->list->iconSize();
     int validImages = 0;
-    bool newInstallerRequired = true;
     bool isAutoinstall = false;
     QVariantMap autoInstallImage;
 
@@ -185,7 +184,7 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QString version = m.value("version").toString();
         QString releasedate = m.value("release_date").toString();
         QIcon icon = m.value("iconimage").value<QIcon>();
-        bool autoinstall = m.value("autoinstall").toBool();
+        bool autoInstall = m.value("autoinstall").toBool();
         bool isInstaller = m.value("isinstaller").toBool();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
@@ -193,39 +192,48 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QVariant source = m.value("source");
 
         if (source == SOURCE_NETWORK) {
+            /* Do not autoinstall things from the Internet... */
+            autoInstall = false;
+
             /* We don't show incompatible images from network (there will be a lot of them later!) */
             if (!supportedImage)
                 continue;
         }
 
-        /* We found an auto install image, immediately start flashing it... */
-        if (_allowAutoinstall && autoinstall && supportedImage && supportedConfigFormat &&
-            source != SOURCE_NETWORK) {
-            isAutoinstall = true;
-            autoInstallImage = m;
-        }
+        if (supportedImage && supportedConfigFormat) {
+            /* Compare Toradex Easy Installer against current version */
+            if (isInstaller) {
+                bool isNewer = false;
+                QStringList installerversion = QString(VERSION_NUMBER).split('.');
+                QStringList imageversion = version.remove(QRegExp("[^0-9|.]")).split('.');
 
-        if (supportedImage && supportedConfigFormat && isInstaller) {
-            bool isNewer = false;
-            QStringList installerversion = QString(VERSION_NUMBER).split('.');
-            QStringList imageversion = version.remove(QRegExp("[^0-9|.]")).split('.');
+                /* Get minimal version length */
+                int versionl = installerversion.length();
+                if (versionl < imageversion.length())
+                    versionl = imageversion.length();
 
-            /* Get minimal version length */
-            int versionl = installerversion.length();
-            if (versionl < imageversion.length())
-                versionl = imageversion.length();
-
-            /* If we get a longer version, its newer... (0.3 vs. 0.3.1 */
-            if (versionl < imageversion.length())
-                isNewer = true;
-
-            for (int i = 0; i < versionl; i++) {
-                if (imageversion[i].toInt() > installerversion[i].toInt())
+                /* If we get a longer version, its newer... (0.3 vs. 0.3.1 */
+                if (versionl < imageversion.length())
                     isNewer = true;
+
+                for (int i = 0; i < versionl; i++) {
+                    if (imageversion[i].toInt() > installerversion[i].toInt())
+                        isNewer = true;
+                }
+
+                if (isNewer)
+                    _newInstallerAvailable = true;
+
+                /* Only autoInstall newer Toradex Easy Installer Versions */
+                if (!isNewer)
+                    autoInstall = false;
             }
 
-            if (isNewer)
-                _newInstallerAvailable = true;
+            /* We found an auto install image, install it! */
+            if (_allowAutoinstall && autoInstall) {
+                isAutoinstall = true;
+                autoInstallImage = m;
+            }
         }
 
         QString friendlyname = name + "\n";
@@ -262,10 +270,8 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
 
         if (!supportedImage)
             friendlyname += "\n[" + tr("This image is not compatible with the current module") + "]";
-        else if (!supportedConfigFormat) {
+        else if (!supportedConfigFormat)
             friendlyname += "\n[" + tr("This image requires a newer version of the Toradex Easy Installer") + "]";
-            newInstallerRequired = true;
-        }
 
         QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
 
@@ -511,8 +517,6 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
         qDebug() << "Adding image" << image << "from" << blockdev;
 
         QVariantMap imagemap = Json::loadFromFile(imagejson).toMap();
-
-        QString basename = imagemap.value("name").toString();
         imagemap["foldername"] = image;
         imagemap["folder"] = imagefolder;
         imagemap["source"] = source;
@@ -530,7 +534,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
 
         imagemap["image_info"] = "image.json";
         imagemap["image_source_blockdev"] = blockdev;
-        images[basename] = imagemap;
+        images[image] = imagemap;
     }
 
     return images;
@@ -754,6 +758,9 @@ void MainWindow::onError(const QString &msg)
 
     QMessageBox::critical(this, tr("Error"),
                           msg  + "\n\n" + tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system."), QMessageBox::Close);
+
+    if (_mediaMounted)
+        unmountMedia();
 
     _psd->close();
     _psd->deleteLater();
