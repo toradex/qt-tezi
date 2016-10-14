@@ -637,6 +637,7 @@ void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
 
     /* Disable installation button if USB mass storage is exported */
     ui->actionInstall->setEnabled(!checked);
+    ui->actionEraseModule->setEnabled(!checked);
     ui->actionUsbRndis->setEnabled(!checked);
 }
 
@@ -1153,7 +1154,7 @@ void MainWindow::updateNeeded()
         enableOk = false;
     }
 
-    ui->actionInstall->setEnabled(enableOk);
+    ui->actionInstall->setEnabled(enableOk && !_usbGadget->isMassStorage());
     QPalette p = ui->neededLabel->palette();
     if (p.color(QPalette::WindowText) != colorNeededLabel)
     {

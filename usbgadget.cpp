@@ -40,9 +40,11 @@ void UsbGadget::enableMassStorage(bool enable)
             return;
         }
         qDebug() << "USB Gadget: Mass Storage enabled";
+        _gadgetIsMassStorage = true;
     } else {
         usbgadget_ms_disable();
         qDebug() << "USB Gadget: Mass Storage disabled";
+        _gadgetIsMassStorage = false;
     }
 }
 

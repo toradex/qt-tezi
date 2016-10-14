@@ -47,8 +47,8 @@ public:
     bool needsWrite;
 
 private:
-    QByteArray _mac, _hw;
     QByteArray _cb;
+    QByteArray _mac, _hw;
 signals:
 
 public slots:

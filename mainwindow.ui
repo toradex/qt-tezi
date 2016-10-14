@@ -189,7 +189,7 @@
    <addaction name="actionBrowser"/>
    <addaction name="actionUsbMassStorage"/>
    <addaction name="actionUsbRndis"/>
-   <addaction name="actionCleanModule"/>
+   <addaction name="actionEraseModule"/>
    <addaction name="actionCancel"/>
    <addaction name="actionShowLicense"/>
   </widget>
@@ -311,7 +311,7 @@
     <string>N</string>
    </property>
   </action>
-  <action name="actionCleanModule">
+  <action name="actionEraseModule">
    <property name="icon">
     <iconset resource="icons.qrc">
      <normaloff>:/icons/clean_module.png</normaloff>:/icons/clean_module.png</iconset>

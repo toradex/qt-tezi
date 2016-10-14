@@ -14,12 +14,17 @@ public:
 
     bool initRndis();
     void enableRndis(bool enable);
+
+    bool isMassStorage() {
+        return _gadgetIsMassStorage;
+    }
+
 signals:
 
 public slots:
 
 private:
-    bool _gadgetInitialized;
+    bool _gadgetInitialized, _gadgetIsMassStorage;
 };
 
 #endif // USBGADGET_H
