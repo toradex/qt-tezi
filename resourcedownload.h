@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 class ResourceDownload : public QObject
 {
@@ -45,6 +46,7 @@ public slots:
 
 protected slots:
     void downloadRedirectCheck();
+
 private:
     void downloadFile(const QString &urlstring);
 

@@ -45,14 +45,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Needed:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Available:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Install (i)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -153,19 +145,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Needed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Error downloading meta file</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error writing downloaded file to SD card. SD card or file system may be damaged.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -289,11 +273,35 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Clean Flash (c)</source>
+        <source>Unknown Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unknown Version</source>
+        <source>The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error writing downloaded file to initramfs.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Return to menu</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This image is not compatible with the current module</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This image requires a newer version of the Toradex Easy Installer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Required</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Erase Flash (c)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

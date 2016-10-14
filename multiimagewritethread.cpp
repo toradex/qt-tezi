@@ -561,7 +561,7 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
 {
     QString cmd = "sh -o pipefail -c \"";
     if (!baseurl.isEmpty())
-        cmd += "wget --no-verbose --tries=inf -O- " + baseurl + file;
+        cmd += WGET_COMMAND + baseurl + file;
     else
         cmd += "cat " + file;
 
@@ -579,7 +579,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     QString cmd = "sh -o pipefail -c \"";
 
     if (isURL(tarball))
-        cmd += "wget --no-verbose --tries=inf -O- "+tarball+" | ";
+        cmd += WGET_COMMAND + tarball + " | ";
 
     QString uncompresscmd = getUncompressCommand(tarball);
     if (uncompresscmd == NULL) {
@@ -608,7 +608,7 @@ bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device, 
     QString cmd = "sh -o pipefail -c \"";
 
     if (isURL(imagePath))
-        cmd += "wget --no-verbose --tries=inf -O- "+imagePath+" | ";
+        cmd += WGET_COMMAND + imagePath + " | ";
 
     /* For dd images compression is optional */
     QString uncompresscmd = getUncompressCommand(imagePath);
@@ -660,7 +660,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
     QString cmd = "sh -o pipefail -c \"";
 
     if (isURL(imagePath))
-        cmd += "wget --no-verbose --tries=inf -O- "+imagePath+" | ";
+        cmd += WGET_COMMAND + imagePath + " | ";
 
 
     if (!isURL(imagePath))

@@ -51,7 +51,7 @@ protected:
     ConfigBlock *_toradexConfigBlock;
     QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
     int _toradexProductId;
-    bool _allowAutoinstall, _isAutoinstall, _showAll;
+    bool _allowAutoinstall, _isAutoinstall, _showAll, _newInstallerAvailable;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
     bool _wasOnline;
@@ -92,7 +92,7 @@ protected:
     void downloadLists();
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap entry);
-    bool discard(QString blkdev, qint64 start, qint64 end);
+    void reenableImageChoice();
 
 protected slots:
     void startBrowser();

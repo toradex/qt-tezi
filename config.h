@@ -46,4 +46,7 @@
 /* Temporary mount folder */
 #define TEMP_MOUNT_FOLDER "/run/media/tmp"
 
+/* Default wget command line options, wait just 10s then declare a connection as dead */
+#define WGET_COMMAND "wget --no-verbose --tries=10 --read-timeout=10 -O- "
+
 #endif // CONFIG_H

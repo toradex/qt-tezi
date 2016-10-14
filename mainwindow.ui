@@ -58,14 +58,14 @@
          <item row="0" column="0">
           <widget class="QLabel" name="neededLabel">
            <property name="text">
-            <string>Needed:</string>
+            <string>Required</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="availableLabel">
            <property name="text">
-            <string>Available:</string>
+            <string>Available</string>
            </property>
           </widget>
          </item>
@@ -317,7 +317,7 @@
      <normaloff>:/icons/clean_module.png</normaloff>:/icons/clean_module.png</iconset>
    </property>
    <property name="text">
-    <string>Clean Flash (c)</string>
+    <string>Erase Flash (c)</string>
    </property>
    <property name="toolTip">
     <string>Discards all data on eMMC.</string>

@@ -1,7 +1,6 @@
 #include "resourcedownload.h"
 #include <QUrl>
 #include <QNetworkRequest>
-#include <QNetworkReply>
 #include <QDebug>
 #include <QFile>
 
@@ -13,7 +12,7 @@
  *
  */
 ResourceDownload::ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, QObject *parent) : QObject(parent),
-  _netaccess(netaccess), _saveAs(saveAs)
+  _netaccess(netaccess), _saveAs(saveAs), _networkError(QNetworkReply::NoError)
 {
     if (saveAs != NULL)
         qDebug() << "Downloading" << urlstring << "to" << saveAs;
@@ -37,17 +36,18 @@ void ResourceDownload::downloadRedirectCheck()
     int httpstatuscode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     QString redirectionurl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
 
-    if (httpstatuscode > 300 && httpstatuscode < 400) {
+    _networkError = reply->error();
+    if (_networkError != QNetworkReply::NoError) {
+        _networkErrorString = reply->errorString();
+        emit failed();
+        emit finished();
+    } else if (httpstatuscode > 300 && httpstatuscode < 400) {
         qDebug() << "Redirection - Re-trying download from" << redirectionurl;
         downloadFile(redirectionurl);
     } else {
-        _httpStatusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        _networkError = reply->error();
+        _httpStatusCode = httpstatuscode;
 
-        if (_networkError != QNetworkReply::NoError) {
-            _networkErrorString = reply->errorString();
-            emit failed();
-        } else if (_httpStatusCode < 200 || _httpStatusCode > 399) {
+        if (_httpStatusCode < 200 || _httpStatusCode > 399) {
             emit failed();
         } else {
             _data = reply->readAll();

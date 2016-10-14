@@ -63,8 +63,8 @@
 MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _splash(splash), _ld(ld),
-    _wasOnline(false), _netaccess(NULL), _mediaMounted(false), _firstMediaPoll(true)
+    _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
+    _splash(splash), _ld(ld), _wasOnline(false), _netaccess(NULL), _mediaMounted(false), _firstMediaPoll(true)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -171,36 +171,75 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
 {
     QSize currentsize = ui->list->iconSize();
     int validImages = 0;
+    bool newInstallerRequired = true;
+    bool isAutoinstall = false;
+    QVariantMap autoInstallImage;
 
     foreach (QVariant v, images.values())
     {
         QVariantMap m = v.toMap();
         int config_format = m.value("config_format").toInt();
         QString name = m.value("name").toString();
+        QString foldername = m.value("foldername").toString();
         QString description = m.value("description").toString();
         QString version = m.value("version").toString();
         QString releasedate = m.value("release_date").toString();
         QIcon icon = m.value("iconimage").value<QIcon>();
         bool autoinstall = m.value("autoinstall").toBool();
+        bool isInstaller = m.value("isinstaller").toBool();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
+        bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
+        QVariant source = m.value("source");
+
+        if (source == SOURCE_NETWORK) {
+            /* We don't show incompatible images from network (there will be a lot of them later!) */
+            if (!supportedImage)
+                continue;
+        }
 
         /* We found an auto install image, immediately start flashing it... */
-        if (_allowAutoinstall && autoinstall && supportedImage) {
-            _isAutoinstall = true;
-            installImage(m);
-            return;
+        if (_allowAutoinstall && autoinstall && supportedImage && supportedConfigFormat &&
+            source != SOURCE_NETWORK) {
+            isAutoinstall = true;
+            autoInstallImage = m;
         }
 
-        QString friendlyname = name;
-        if (!version.isEmpty()) {
-            friendlyname += " (" + version;
-            if (!releasedate.isEmpty())
-                friendlyname += ", " + releasedate;
-            friendlyname += ")";
+        if (supportedImage && supportedConfigFormat && isInstaller) {
+            bool isNewer = false;
+            QStringList installerversion = QString(VERSION_NUMBER).split('.');
+            QStringList imageversion = version.remove(QRegExp("[^0-9|.]")).split('.');
+
+            /* Get minimal version length */
+            int versionl = installerversion.length();
+            if (versionl < imageversion.length())
+                versionl = imageversion.length();
+
+            /* If we get a longer version, its newer... (0.3 vs. 0.3.1 */
+            if (versionl < imageversion.length())
+                isNewer = true;
+
+            for (int i = 0; i < versionl; i++) {
+                if (imageversion[i].toInt() > installerversion[i].toInt())
+                    isNewer = true;
+            }
+
+            if (isNewer)
+                _newInstallerAvailable = true;
         }
-        if (!description.isEmpty())
-            friendlyname += "\n"+description;
+
+        QString friendlyname = name + "\n";
+        if (!version.isEmpty())
+            friendlyname += version;
+        else
+            friendlyname += "Unknown Version";
+        if (!releasedate.isEmpty())
+            friendlyname += ", " + releasedate;
+
+        if (source == SOURCE_USB)
+            friendlyname += ", usb:/" + foldername;
+        else if (source == SOURCE_SDCARD)
+            friendlyname += ", sdcard:/" + foldername;
 
         if (icon.isNull()) {
             icon = QIcon();
@@ -220,17 +259,26 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
                 }
             }
         }
-        QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
-        item->setData(Qt::UserRole, m);
 
-        if (supportedImage && config_format <= IMAGE_CONFIG_FORMAT) {
+        if (!supportedImage)
+            friendlyname += "\n[" + tr("This image is not compatible with the current module") + "]";
+        else if (!supportedConfigFormat) {
+            friendlyname += "\n[" + tr("This image requires a newer version of the Toradex Easy Installer") + "]";
+            newInstallerRequired = true;
+        }
+
+        QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
+
+        item->setData(Qt::UserRole, m);
+        item->setToolTip(description);
+
+        if (supportedImage && supportedConfigFormat) {
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
             validImages++;
         } else {
             item->setFlags(Qt::NoItemFlags);
         }
 
-        QVariant source = m.value("source");
         if (source == SOURCE_USB)
             item->setData(SecondIconRole, _usbIcon);
         else if (source == SOURCE_SDCARD)
@@ -265,6 +313,12 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         } else {
             _qpd->setLabelText(tr("Wait for external media or network..."));
         }
+    }
+
+    if (isAutoinstall) {
+        _isAutoinstall = isAutoinstall;
+        installImage(autoInstallImage);
+        return;
     }
 
     updateNeeded();
@@ -459,6 +513,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
         QVariantMap imagemap = Json::loadFromFile(imagejson).toMap();
 
         QString basename = imagemap.value("name").toString();
+        imagemap["foldername"] = image;
         imagemap["folder"] = imagefolder;
         imagemap["source"] = source;
 
@@ -669,28 +724,42 @@ void MainWindow::on_actionCancel_triggered()
 
 void MainWindow::onCompleted()
 {
-    _psd->hide();
+    _psd->close();
+    _psd->deleteLater();
+    _psd = NULL;
 
     if (!_isAutoinstall) {
         QMessageBox msgbox(QMessageBox::Information,
                            tr("Image Installed"),
-                           tr("Image installed successfully.") + "\n\n" + tr("In case recovery mode has been used a power cycle will be necessary."), QMessageBox::Ok, this);
-        msgbox.button(QMessageBox::Ok)->setText(tr("Restart"));
-        msgbox.exec();
+                           tr("Image installed successfully.") + "\n\n" + tr("In case recovery mode has been used a power cycle will be necessary."),
+                           QMessageBox::Yes | QMessageBox::No, this);
+        msgbox.button(QMessageBox::Yes)->setText(tr("Restart"));
+        msgbox.button(QMessageBox::No)->setText(tr("Return to menu"));
+        if (msgbox.exec() == QMessageBox::No) {
+            // Return to main menu...
+            reenableImageChoice();
+            QWidget::show();
+            if (_ld != NULL)
+                _ld->show();
+            return;
+        }
     }
-    _psd->deleteLater();
-    _psd = NULL;
+
     close();
 }
 
 void MainWindow::onError(const QString &msg)
 {
     qDebug() << "Error:" << msg;
-    if (_qpd)
-        _qpd->hide();
-    QMessageBox::critical(this, tr("Error"), msg, QMessageBox::Close);
+
+    QMessageBox::critical(this, tr("Error"),
+                          msg  + "\n\n" + tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system."), QMessageBox::Close);
+
     _psd->close();
-    setEnabled(true);
+    _psd->deleteLater();
+    _psd = NULL;
+
+    reenableImageChoice();
     QWidget::show();
     if (_ld != NULL)
         _ld->show();
@@ -835,6 +904,7 @@ void MainWindow::onOnlineStateChanged(bool online)
         //ui->actionBrowser->setEnabled(true);
         emit networkUp();
     } else {
+        qDebug() << "Network went down";
         removeImagesBySource(SOURCE_NETWORK);
     }
 }
@@ -1046,7 +1116,7 @@ void MainWindow::updateNeeded()
         enableOk = true;
     }
 
-    ui->neededLabel->setText(QString("%1: %2 MB").arg(tr("Needed"), QString::number(_neededMB)));
+    ui->neededLabel->setText(QString("%1: %2 MB").arg(tr("Required"), QString::number(_neededMB)));
     ui->availableLabel->setText(QString("%1: %2 MB").arg(tr("Available"), QString::number(_availableMB)));
 
     if (_neededMB > _availableMB)
@@ -1082,7 +1152,7 @@ void MainWindow::downloadMetaCompleted()
     ResourceDownload *fd = qobject_cast<ResourceDownload *>(sender());
 
     if (fd->saveToFile() < 0) {
-        QMessageBox::critical(this, tr("Download error"), tr("Error writing downloaded file to SD card. SD card or file system may be damaged."), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Download error"), tr("Error writing downloaded file to initramfs."), QMessageBox::Close);
         setEnabled(true);
     } else {
         _numMetaFilesToDownload--;
@@ -1111,8 +1181,16 @@ void MainWindow::downloadMetaFailed()
         _qpd = NULL;
     }
     QMessageBox::critical(this, tr("Download error"), tr("Error downloading meta file")+"\n"+fd->urlString(), QMessageBox::Close);
-    setEnabled(true);
+    reenableImageChoice();
+
     fd->deleteLater();
+}
+
+void MainWindow::reenableImageChoice()
+{
+    _networkStatusPollTimer.start();
+    _mediaPollTimer.start();
+    setEnabled(true);
 }
 
 void MainWindow::startImageWrite(QVariantMap entry)
@@ -1130,9 +1208,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
         int ret = eula.exec();
 
         if (ret != QDialogButtonBox::Yes) {
-            _networkStatusPollTimer.start();
-            _mediaPollTimer.start();
-            setEnabled(true);
+            reenableImageChoice();
             return;
         }
     }
@@ -1144,9 +1220,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
         int ret = eula.exec();
 
         if (ret != QDialogButtonBox::Ok) {
-            _networkStatusPollTimer.start();
-            _mediaPollTimer.start();
-            setEnabled(true);
+            reenableImageChoice();
             return;
         }
     }
@@ -1168,11 +1242,6 @@ void MainWindow::startImageWrite(QVariantMap entry)
         }
     }
 
-    //QRect s = QApplication::desktop()->screenGeometry();
-    //if (s.width() > 640 && QFile::exists(folder+"/slides"))
-    //{
-    //    slidesFolder = folder+"/slides";
-    //}
     slidesFolders.clear();
     if (QFile::exists(folder+"/slides_vga"))
     {
