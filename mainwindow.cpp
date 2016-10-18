@@ -734,7 +734,7 @@ void MainWindow::onCompleted()
     _psd = NULL;
 
     /* Directly reboot into newer Toradex Easy Installer */
-    if (_imageWriteThread->getImageInfo()->isInstaller()) {
+    if (_imageWriteThread->getImageInfo()->isInstaller() && _isAutoinstall) {
         close();
         /* A case for kexec... Anyone? :-) */
         QApplication::exit(LINUX_REBOOT);
@@ -742,7 +742,7 @@ void MainWindow::onCompleted()
 
     QMessageBox msgbox(QMessageBox::Information,
                        tr("Image Installed"),
-                       tr("The Image has been installed successfully.") + "<b>" + tr("You can now safely power off or reset the system.") + "</b><br><br>" +
+                       tr("The Image has been installed successfully.") + " <b>" + tr("You can now safely power off or reset the system.") + "</b><br><br>" +
                        tr("In case recovery mode has been used a power cycle will be necessary."),
                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
     msgbox.button(QMessageBox::Yes)->setText(tr("Power off"));
