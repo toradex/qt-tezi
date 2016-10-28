@@ -132,7 +132,7 @@ private slots:
     void on_actionAdvanced_triggered(bool checked);
     void on_actionUsbMassStorage_triggered(bool checked);
     void on_actionUsbRndis_triggered(bool checked);
-    void on_actionCleanModule_triggered();
+    void on_actionEraseModule_triggered();
     void on_actionShowLicense_triggered();
     void on_actionEdit_config_triggered();
     void on_actionBrowser_triggered();

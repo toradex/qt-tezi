@@ -647,13 +647,13 @@ void MainWindow::on_actionUsbRndis_triggered(bool checked)
     ui->actionUsbMassStorage->setEnabled(!checked);
 }
 
-void MainWindow::on_actionCleanModule_triggered()
+void MainWindow::on_actionEraseModule_triggered()
 {
     if (QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("This discards all data on the internal eMMC, including boot loader and boot loader configuration. "
                                "After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?"),
-                            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
         showProgressDialog(tr("Discarding all data on internal eMCC..."));
         QStringList blockDevs;
