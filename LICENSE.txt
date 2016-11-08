@@ -2,6 +2,8 @@ Copyright (c) 2016, Toradex
 Copyright (c) 2013, Raspberry Pi
 All rights reserved.
 
+FatCow Icons CC BY 3.0 (http://www.fatcow.com/free-icons)
+
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
 Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
