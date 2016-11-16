@@ -192,9 +192,6 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
         QVariant source = m.value("source");
 
         if (source == SOURCE_NETWORK) {
-            /* Do not autoinstall things from the Internet... */
-            autoInstall = false;
-
             /* We don't show incompatible images from network (there will be a lot of them later!) */
             if (!supportedImage)
                 continue;
