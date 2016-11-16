@@ -11,6 +11,8 @@
  * be a partition (/dev/mmcblk0p0) or a bare block device (/dev/mmcblk0).
  */
 
+class RawFileInfo;
+
 class BlockDevContentInfo : public QObject
 {
     Q_OBJECT
@@ -37,11 +39,6 @@ public:
         return _mkfsOptions;
     }
 
-    inline QByteArray ddOptions()
-    {
-        return _ddOptions;
-    }
-
     inline QByteArray label()
     {
         return _label;
@@ -52,14 +49,20 @@ public:
         return _uncompressedSize;
     }
 
+    inline QList<RawFileInfo *> *rawFiles()
+    {
+        return &_rawFiles;
+    }
+
 signals:
 
 public slots:
 
 protected:
-    QByteArray _fstype, _mkfsOptions, _ddOptions, _label;
+    QByteArray _fstype, _mkfsOptions, _label;
     QString _filename;
     QStringList _filelist;
+    QList<RawFileInfo *> _rawFiles;
     int _uncompressedSize;
 };
 

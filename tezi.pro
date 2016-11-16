@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     dto/imageinfo.cpp \
     dto/blockdevinfo.cpp \
     dto/partitioninfo.cpp \
-    dto/blockdevcontent.cpp
+    dto/blockdevcontent.cpp \
+    dto/rawfileinfo.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -57,7 +58,8 @@ HEADERS  += mainwindow.h \
     dto/imageinfo.h \
     dto/blockdevinfo.h \
     dto/partitioninfo.h \
-    dto/blockdevcontent.h
+    dto/blockdevcontent.h \
+    dto/rawfileinfo.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

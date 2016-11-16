@@ -1,7 +1,7 @@
 #include "partitioninfo.h"
 
 PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
-    QObject(parent)
+    QObject(parent), _content(NULL)
 {
     _wantMaximised = m.value("want_maximised", false).toBool();
     _offset        = m.value("offset_in_sectors").toInt();

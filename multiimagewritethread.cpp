@@ -1,6 +1,7 @@
 #include "multiimagewritethread.h"
 #include "dto/blockdevinfo.h"
 #include "dto/partitioninfo.h"
+#include "dto/rawfileinfo.h"
 #include "config.h"
 #include "json.h"
 #include "util.h"
@@ -169,12 +170,13 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
 
     foreach (PartitionInfo *partition, *partitions)
     {
-        qDebug() << numparts << partition->partitionType();
+        qDebug() << "Partition:" << numparts << "Type:" << partition->partitionType();
         numparts++;
         if ( partition->wantMaximised() )
             numexpandparts++;
         totalnominalsize += partition->partitionSizeNominal();
         BlockDevContentInfo *content = partition->content();
+        if (content != NULL)
             totaluncompressedsize += content->uncompressedSize();
 
         int reqPart = partition->requiresPartitionNumber();
@@ -293,9 +295,11 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
     foreach (PartitionInfo *p, *partitions)
     {
         BlockDevContentInfo *content = p->content();
-        QByteArray partdevice = p->partitionDevice();
-        if (!processContent(content, partdevice))
-            return false;
+        if (content != NULL) {
+            QByteArray partdevice = p->partitionDevice();
+            if (!processContent(content, partdevice))
+                return false;
+        }
     }
 
     return true;
@@ -361,10 +365,11 @@ bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteAr
     QString os_name = _image->name();
     QByteArray fstype   = content->fsType();
     QByteArray mkfsopt  = content->mkfsOptions();
-    QByteArray ddopt    = content->ddOptions();
     QByteArray label = content->label();
     QString tarball  = content->filename();
     QStringList filelist  = content->filelist();
+    QList<RawFileInfo *> *rawFiles = content->rawFiles();
+
 
     if (_image->imageSource() == SOURCE_NETWORK && !tarball.isEmpty()) {
         tarball = _image->baseUrl() + tarball;
@@ -388,9 +393,19 @@ bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteAr
 
     if (fstype == "raw")
     {
-        emit statusUpdate(tr("%1: Writing raw image").arg(os_name));
-        if (!dd(tarball, partdevice, ddopt))
-            return false;
+        emit statusUpdate(tr("%1: Writing raw files").arg(os_name));
+        QString productNumber = _configBlock->getProductNumber();
+
+        foreach (RawFileInfo *rawFile, *rawFiles) {
+            /* Only check against product id if specified */
+            if (!rawFile->productIds().isEmpty()) {
+                if (!rawFile->productIds().contains(productNumber))
+                    continue;
+            }
+
+            if (!dd(_image->baseUrl(), partdevice, rawFile))
+                return false;
+        }
     }
     else if (fstype.startsWith("partclone"))
     {
@@ -603,25 +618,24 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     return runwritecmd(cmd);
 }
 
-bool MultiImageWriteThread::dd(const QString &imagePath, const QString &device, const QByteArray &dd_options)
+bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
 {
     QString cmd = "sh -o pipefail -c \"";
-
-    if (isURL(imagePath))
-        cmd += WGET_COMMAND + imagePath + " | ";
+    const QString& file = rawFile->filename();
+    if (!baseurl.isEmpty())
+        cmd += WGET_COMMAND + baseurl + file;
+    else
+        cmd += "cat " + file;
 
     /* For dd images compression is optional */
-    QString uncompresscmd = getUncompressCommand(imagePath);
+    QString uncompresscmd = getUncompressCommand(file);
     if (uncompresscmd != NULL)
-        cmd += uncompresscmd;
-
-    if (!isURL(imagePath))
-        cmd += " "+imagePath;
+        cmd += " | " + uncompresscmd;
 
     /* Use pipe viewer for actual processing speed */
     cmd += " | pv -b -n";
 
-    cmd += " | dd of=" + device + " " + dd_options; // BusyBox can't do this: +" conv=fsync obs=4M\"";
+    cmd += " | dd of=" + device + " " + rawFile->ddOptions(); // BusyBox can't do this: +" conv=fsync obs=4M\"";
 
     return runwritecmd(cmd);
 }

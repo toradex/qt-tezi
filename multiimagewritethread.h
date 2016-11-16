@@ -12,6 +12,7 @@
 class BlockDevInfo;
 class PartitionInfo;
 class BlockDevContentInfo;
+class RawFileInfo;
 
 class MultiImageWriteThread : public QThread
 {
@@ -33,7 +34,7 @@ protected:
     bool processContent(BlockDevContentInfo *fs, QByteArray partdevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool runwritecmd(const QString &cmd);
-    bool dd(const QString &imagePath, const QString &device, const QByteArray &dd_options);
+    bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool partclone_restore(const QString &imagePath, const QString &device);
     bool untar(const QString &tarball);
     bool copy(const QString &baseurl, const QString &file);

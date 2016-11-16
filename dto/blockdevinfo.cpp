@@ -2,7 +2,7 @@
 #include "partitioninfo.h"
 
 BlockDevInfo::BlockDevInfo(const QVariantMap &blockdev, QObject *parent) :
-    QObject(parent)
+    QObject(parent), _content(NULL)
 {
     _name = blockdev.value("name").toString();
 
