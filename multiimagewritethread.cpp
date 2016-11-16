@@ -541,12 +541,13 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
 
     /* Parse pipe viewer output for progress */
     qint64 bytes = 0;
+    QByteArray line;
+    bool ok;
     while (p.waitForReadyRead(-1))
     {
-        QString line = p.readLine();
+        line = p.readLine();
         qint64 tmp;
 
-        bool ok;
         tmp = line.toLongLong(&ok);
 
         if (ok) {
@@ -563,7 +564,10 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
 
     if (p.exitCode() != 0)
     {
-        QByteArray msg = p.readAll();
+        QByteArray msg;
+        if (!ok)
+            msg = line;
+        msg += p.readAll();
         emit error(tr("Error downloading or writing image")+"\n" + msg);
         return false;
     }
