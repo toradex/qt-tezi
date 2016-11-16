@@ -1,20 +1,21 @@
-#ifndef FILESYSTEMINFO_H
-#define FILESYSTEMINFO_H
+#ifndef BLOCKDEVCONTENTINFO_H
+#define BLOCKDEVCONTENTINFO_H
 
 #include <QObject>
 #include <QVariantMap>
 #include <QStringList>
 
 /*
- * File System information model
- * Contains information about the content of a block device (e.g. partition)
+ * Block device content information
+ * Contains information about the content of a block device. This can
+ * be a partition (/dev/mmcblk0p0) or a bare block device (/dev/mmcblk0).
  */
 
-class FileSystemInfo : public QObject
+class BlockDevContentInfo : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileSystemInfo(const QVariantMap &m, QObject *parent = 0);
+    explicit BlockDevContentInfo(const QVariantMap &m, QObject *parent = 0);
 
     inline QString filename()
     {
@@ -62,4 +63,4 @@ protected:
     int _uncompressedSize;
 };
 
-#endif // FILESYSTEMINFO_H
+#endif // BLOCKDEVCONTENTINFO_H

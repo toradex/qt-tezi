@@ -1,6 +1,6 @@
-#include "filesysteminfo.h"
+#include "blockdevcontent.h"
 
-FileSystemInfo::FileSystemInfo(const QVariantMap &m, QObject *parent) :
+BlockDevContentInfo::BlockDevContentInfo(const QVariantMap &m, QObject *parent) :
   QObject(parent)
 {
 

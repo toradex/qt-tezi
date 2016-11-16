@@ -1,11 +1,11 @@
 #include <QDir>
 #include <QDebug>
 #include "blockdevinfo.h"
-#include "osinfo.h"
+#include "imageinfo.h"
 #include "partitioninfo.h"
 #include "json.h"
 
-OsInfo::OsInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent) :
+ImageInfo::ImageInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent) :
     QObject(parent), _folder(folder), _infofile(infofile), _baseUrl(baseUrl), _imageSource(source)
 {
     QVariantMap m = Json::loadFromFile(folder + QDir::separator() + infofile).toMap();

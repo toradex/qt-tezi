@@ -7,7 +7,7 @@
  * and runtime information like the partition device (/dev/mmcblk0pX) it was assigned
  */
 
-#include "filesysteminfo.h"
+#include "blockdevcontent.h"
 #include <QObject>
 #include <QVariantMap>
 
@@ -40,7 +40,7 @@ public:
         return _requiresPartitionNumber;
     }
 
-    inline FileSystemInfo *content()
+    inline BlockDevContentInfo *content()
     {
         return _content;
     }
@@ -93,7 +93,7 @@ public:
 protected:
     QByteArray _partitionDevice, _partitionType;
     QString _tarball;
-    FileSystemInfo *_content;
+    BlockDevContentInfo *_content;
     int _partitionSizeNominal, _requiresPartitionNumber, _offset, _partitionSizeSectors;
     bool _wantMaximised, _active;
 };

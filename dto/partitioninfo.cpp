@@ -12,7 +12,7 @@ PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
     QByteArray defaultPartType;
     if (m.contains("content")) {
         QVariantMap contentm = m.value("content").toMap();
-        _content = new FileSystemInfo(contentm, this);
+        _content = new BlockDevContentInfo(contentm, this);
 
         /* Get partiton type from filesystem type of content */
         QByteArray fstype = _content->fsType();

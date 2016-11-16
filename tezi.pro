@@ -24,17 +24,17 @@ SOURCES += main.cpp\
     multiimagewritethread.cpp \
     util.cpp \
     twoiconsdelegate.cpp \
-    osinfo.cpp \
-    partitioninfo.cpp \
     longpresshandler.cpp \
-    filesysteminfo.cpp \
-    blockdevinfo.cpp \
     resourcedownload.cpp \
     scrolltextdialog.cpp \
     usbgadgethelper.c \
     usbgadget.cpp \
     configblock.cpp \
-    discardthread.cpp
+    discardthread.cpp \
+    dto/imageinfo.cpp \
+    dto/blockdevinfo.cpp \
+    dto/partitioninfo.cpp \
+    dto/blockdevcontent.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -47,17 +47,17 @@ HEADERS  += mainwindow.h \
     multiimagewritethread.h \
     util.h \
     twoiconsdelegate.h \
-    osinfo.h \
-    partitioninfo.h \
     longpresshandler.h \
-    filesysteminfo.h \
-    blockdevinfo.h \
     resourcedownload.h \
     scrolltextdialog.h \
     usbgadgethelper.h \
     usbgadget.h \
     configblock.h \
-    discardthread.h
+    discardthread.h \
+    dto/imageinfo.h \
+    dto/blockdevinfo.h \
+    dto/partitioninfo.h \
+    dto/blockdevcontent.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

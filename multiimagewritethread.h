@@ -1,7 +1,7 @@
 #ifndef MULTIIMAGEWRITETHREAD_H
 #define MULTIIMAGEWRITETHREAD_H
 
-#include "osinfo.h"
+#include "dto/imageinfo.h"
 #include "configblock.h"
 #include <QThread>
 #include <QStringList>
@@ -9,10 +9,9 @@
 #include <QVariantList>
 #include <QList>
 
-class OsInfo;
 class BlockDevInfo;
 class PartitionInfo;
-class FileSystemInfo;
+class BlockDevContentInfo;
 
 class MultiImageWriteThread : public QThread
 {
@@ -22,7 +21,7 @@ public:
     void setImage(const QString &folder, const QString &fileinfo, const QString &baseurl, enum ImageSource source);
     void setConfigBlock(ConfigBlock *configBlock);
 
-    OsInfo *getImageInfo() {
+    ImageInfo *getImageInfo() {
         return _image;
     }
 
@@ -31,7 +30,7 @@ protected:
     bool runScript(QString script, QByteArray &output);
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions);
-    bool processContent(FileSystemInfo *fs, QByteArray partdevice);
+    bool processContent(BlockDevContentInfo *fs, QByteArray partdevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool runwritecmd(const QString &cmd);
     bool dd(const QString &imagePath, const QString &device, const QByteArray &dd_options);
@@ -47,7 +46,7 @@ protected:
     bool writePartitionTable(QByteArray blockdevpath, const QMap<int, PartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
 
-    OsInfo *_image;
+    ImageInfo *_image;
     ConfigBlock *_configBlock;
 
     int _extraSpacePerPartition, _sectorOffset;

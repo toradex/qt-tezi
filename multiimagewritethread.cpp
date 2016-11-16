@@ -1,9 +1,9 @@
 #include "multiimagewritethread.h"
-#include "blockdevinfo.h"
+#include "dto/blockdevinfo.h"
+#include "dto/partitioninfo.h"
 #include "config.h"
 #include "json.h"
 #include "util.h"
-#include "partitioninfo.h"
 #include <QDir>
 #include <QFile>
 #include <QDebug>
@@ -27,7 +27,7 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
 
 void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile, const QString &baseurl, enum ImageSource source)
 {
-    _image = new OsInfo(folder, infofile, baseurl, source, this);
+    _image = new ImageInfo(folder, infofile, baseurl, source, this);
 }
 
 void MultiImageWriteThread::setConfigBlock(ConfigBlock *configBlock)
@@ -145,9 +145,9 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
             return false;
     } else {
         /* Writing content without a parition table to this blockdev */
-        FileSystemInfo *fs = blockdev->content();
+        BlockDevContentInfo *content = blockdev->content();
         QByteArray device = blockdev->blockDevice();
-        if (!processContent(fs, device))
+        if (!processContent(content, device))
             return false;
     }
 
@@ -174,8 +174,8 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
         if ( partition->wantMaximised() )
             numexpandparts++;
         totalnominalsize += partition->partitionSizeNominal();
-        FileSystemInfo *fs = partition->content();
-            totaluncompressedsize += fs->uncompressedSize();
+        BlockDevContentInfo *content = partition->content();
+            totaluncompressedsize += content->uncompressedSize();
 
         int reqPart = partition->requiresPartitionNumber();
         if (reqPart)
@@ -292,9 +292,9 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
     /* Install each partition */
     foreach (PartitionInfo *p, *partitions)
     {
-        FileSystemInfo *fs = p->content();
+        BlockDevContentInfo *content = p->content();
         QByteArray partdevice = p->partitionDevice();
-        if (!processContent(fs, partdevice))
+        if (!processContent(content, partdevice))
             return false;
     }
 
@@ -356,15 +356,15 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     return true;
 }
 
-bool MultiImageWriteThread::processContent(FileSystemInfo *fs, QByteArray partdevice)
+bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteArray partdevice)
 {
     QString os_name = _image->name();
-    QByteArray fstype   = fs->fsType();
-    QByteArray mkfsopt  = fs->mkfsOptions();
-    QByteArray ddopt    = fs->ddOptions();
-    QByteArray label = fs->label();
-    QString tarball  = fs->filename();
-    QStringList filelist  = fs->filelist();
+    QByteArray fstype   = content->fsType();
+    QByteArray mkfsopt  = content->mkfsOptions();
+    QByteArray ddopt    = content->ddOptions();
+    QByteArray label = content->label();
+    QString tarball  = content->filename();
+    QStringList filelist  = content->filelist();
 
     if (_image->imageSource() == SOURCE_NETWORK && !tarball.isEmpty()) {
         tarball = _image->baseUrl() + tarball;

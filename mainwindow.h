@@ -12,7 +12,7 @@
 
 #include "languagedialog.h"
 #include "progressslideshowdialog.h"
-#include "osinfo.h"
+#include "dto/imageinfo.h"
 #include "usbgadget.h"
 #include "configblock.h"
 #include "multiimagewritethread.h"

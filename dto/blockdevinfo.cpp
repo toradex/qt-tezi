@@ -19,6 +19,6 @@ BlockDevInfo::BlockDevInfo(const QVariantMap &blockdev, QObject *parent) :
     /* Writing an image directly to blockdev */
     if (blockdev.contains("content")) {
         QVariantMap contentm = blockdev.value("content").toMap();
-        _content = new FileSystemInfo(contentm, this);
+        _content = new BlockDevContentInfo(contentm, this);
     }
 }

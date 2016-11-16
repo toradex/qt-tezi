@@ -1,5 +1,5 @@
-#ifndef OSINFO_H
-#define OSINFO_H
+#ifndef IMAGEINFO_H
+#define IMAGEINFO_H
 
 /**
  * OS info model
@@ -17,12 +17,12 @@ enum ImageSource {
 
 class BlockDevInfo;
 
-class OsInfo : public QObject
+class ImageInfo : public QObject
 {
     Q_OBJECT
 public:
     /* Constructor parses the json files in <folder>, and stores information in local variables */
-    explicit OsInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent = 0);
+    explicit ImageInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent = 0);
 
     inline QString folder()
     {
@@ -96,4 +96,4 @@ protected:
 
 };
 
-#endif // OSINFO_H
+#endif // IMAGEINFO_H
