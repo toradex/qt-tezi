@@ -733,6 +733,9 @@ void MainWindow::onCompleted()
     _psd->deleteLater();
     _psd = NULL;
 
+    if (_mediaMounted)
+        unmountMedia();
+
     /* Directly reboot into newer Toradex Easy Installer */
     if (_imageWriteThread->getImageInfo()->isInstaller() && _isAutoinstall) {
         close();
@@ -1227,6 +1230,10 @@ void MainWindow::startImageWrite(QVariantMap entry)
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
 
+    /* Re-mount local media */
+    if (entry.value("source") != SOURCE_NETWORK)
+        mountMedia(entry.value("image_source_blockdev").toString());
+
     if (entry.contains("license") && !_isAutoinstall) {
         QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());
         ScrollTextDialog eula(entry.value("license_title").toString(), QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
@@ -1236,6 +1243,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
 
         if (ret != QDialogButtonBox::Yes) {
             reenableImageChoice();
+            unmountMedia();
             return;
         }
     }
@@ -1248,13 +1256,10 @@ void MainWindow::startImageWrite(QVariantMap entry)
 
         if (ret != QDialogButtonBox::Ok) {
             reenableImageChoice();
+            unmountMedia();
             return;
         }
     }
-
-    /* Re-mount local media */
-    if (entry.value("source") != SOURCE_NETWORK)
-        mountMedia(entry.value("image_source_blockdev").toString());
 
     if (entry.contains("marketing"))
     {
