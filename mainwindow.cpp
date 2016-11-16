@@ -778,11 +778,13 @@ void MainWindow::onError(const QString &msg)
 {
     qDebug() << "Error:" << msg;
 
-    QMessageBox::critical(this, tr("Error"),
-                          msg  + "\n\n" + tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system."), QMessageBox::Close);
-
     if (_mediaMounted)
         unmountMedia();
+
+    QMessageBox::critical(this, tr("Error"),
+                          msg  + "\n\n" +
+                          tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system."),
+                          QMessageBox::Ok);
 
     _psd->close();
     _psd->deleteLater();
