@@ -7,7 +7,8 @@
 #include "usbgadgethelper.h"
 #include <usbg/usbg.h>
 
-UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, QObject *parent) : QObject(parent), _gadgetInitialized(false)
+UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, QObject *parent) : QObject(parent),
+    _gadgetInitialized(false), _gadgetIsMassStorage(false)
 {
     uint16_t productId = 0x4000 + idProduct;
 
