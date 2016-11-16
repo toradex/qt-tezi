@@ -144,9 +144,11 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
         /* Writing partition table to this blockdev */
         if (!processPartitions(blockdev, partitions))
             return false;
-    } else {
-        /* Writing content without a parition table to this blockdev */
-        BlockDevContentInfo *content = blockdev->content();
+    }
+
+    /* Writing raw content ignoring parition layout to this blockdev */
+    BlockDevContentInfo *content = blockdev->content();
+    if (content != NULL) {
         QByteArray device = blockdev->blockDevice();
         if (!processContent(content, device))
             return false;
@@ -309,8 +311,6 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
 bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const QMap<int, PartitionInfo *> &partitionMap)
 {
     /* Write partition table using sfdisk */
-    qDebug() << "Partition map:" << partitionMap;
-
     QByteArray partitionTable;
     for (int i=1; i <= partitionMap.keys().last(); i++)
     {
