@@ -13,6 +13,9 @@ LIBS += -lqjson -lusbgx
 
 system(sh updateqm.sh 2>/dev/null)
 
+GIT_VERSION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD describe --always)
+DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     languagedialog.cpp \
