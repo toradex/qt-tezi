@@ -548,7 +548,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
         line = p.readLine();
         qint64 tmp;
 
-        tmp = line.toLongLong(&ok);
+        tmp = line.trimmed().toLongLong(&ok);
 
         if (ok) {
             bytes = tmp;
