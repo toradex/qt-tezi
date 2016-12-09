@@ -174,9 +174,8 @@ void MainWindow::addImages(QMap<QString,QVariantMap> images)
     bool isAutoinstall = false;
     QVariantMap autoInstallImage;
 
-    foreach (QVariant v, images.values())
+    foreach (QVariantMap m, images.values())
     {
-        QVariantMap m = v.toMap();
         int config_format = m.value("config_format").toInt();
         QString name = m.value("name").toString();
         QString foldername = m.value("foldername").toString();
@@ -958,6 +957,7 @@ void MainWindow::downloadLists()
 void MainWindow::downloadListJsonCompleted()
 {
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
+    int index = 0;
 
     QVariant json = Json::parse(rd->data());
     rd->deleteLater();
@@ -984,10 +984,11 @@ void MainWindow::downloadListJsonCompleted()
             url = sourceurlpath + url;
 
         _numDownloads++;
-        ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
+        ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL, index);
         connect(rd, SIGNAL(failed()), this, SLOT(downloadImageJsonFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadImageJsonCompleted()));
         connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
+        index++;
     }
 }
 
@@ -1027,10 +1028,7 @@ void MainWindow::downloadImageJsonCompleted()
     imageinfo.close();
     imagemap["image_info"] = "image.json";
     imagemap["baseurl"] = getUrlPath(rd->urlString());
-    QMap<QString,QVariantMap> images;
-    images[basename] = imagemap;
-
-    addImages(images);
+    _netImages[basename] = imagemap;
 
     QString icon = imagemap.value("icon").toString();
     if (!icon.isNull()) {
@@ -1065,14 +1063,13 @@ void MainWindow::downloadIconCompleted()
     pix.loadFromData(rd->data());
     QIcon icon(pix);
 
-    for (int i=0; i<ui->list->count(); i++)
+    foreach (QString str, _netImages.keys())
     {
-        QVariantMap m = ui->list->item(i)->data(Qt::UserRole).toMap();
-        ui->list->setIconSize(QSize(40, 40));
-        if (m.value("icon") == rd->saveAs() && m.value("source") == SOURCE_NETWORK)
-        {
-            ui->list->item(i)->setIcon(icon);
-        }
+        QVariantMap &m = _netImages[str];
+
+        // Assign icon...
+        if (m.value("icon") == rd->saveAs())
+            m["iconimage"] = icon;
     }
 }
 
@@ -1088,11 +1085,20 @@ void MainWindow::downloadFinished()
 {
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
-    if (--_numDownloads == 0 && _qpd)
+    _numDownloads--;
+
+    if (!_numDownloads)
     {
-        _qpd->hide();
-        _qpd->deleteLater();
-        _qpd = NULL;
+        // Add all images at once, in the right order...
+        addImages(_netImages);
+        _netImages.clear();
+
+        if (_qpd)
+        {
+            _qpd->hide();
+            _qpd->deleteLater();
+            _qpd = NULL;
+        }
     }
 
     rd->deleteLater();

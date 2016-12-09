@@ -9,7 +9,7 @@ class ResourceDownload : public QObject
 {
     Q_OBJECT
 public:
-    explicit ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, QObject *parent = 0);
+    explicit ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, int index = 0, QObject *parent = 0);
     int saveToFile();
 
     inline QString saveAs()
@@ -36,7 +36,10 @@ public:
     {
         return _httpStatusCode;
     }
-
+    inline int index()
+    {
+        return _index;
+    }
 signals:
     void completed();
     void failed();
@@ -52,6 +55,7 @@ private:
 
     QNetworkAccessManager *_netaccess;
     QString _saveAs;
+    int _index;
     QString _urlString;
     QByteArray _data;
     int _networkError;

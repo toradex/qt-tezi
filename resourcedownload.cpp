@@ -11,8 +11,8 @@
  * See LICENSE.txt for license details
  *
  */
-ResourceDownload::ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, QObject *parent) : QObject(parent),
-  _netaccess(netaccess), _saveAs(saveAs), _networkError(QNetworkReply::NoError)
+ResourceDownload::ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, int index, QObject *parent) : QObject(parent),
+  _netaccess(netaccess), _saveAs(saveAs), _index(index), _networkError(QNetworkReply::NoError)
 {
     if (saveAs != NULL)
         qDebug() << "Downloading" << urlstring << "to" << saveAs;

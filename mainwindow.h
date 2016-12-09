@@ -74,6 +74,7 @@ protected:
     QSet<QString> _blockdevsChecking;
     UsbGadget *_usbGadget;
     MultiImageWriteThread *_imageWriteThread;
+    QMap<QString,QVariantMap> _netImages;
 
     void updateModuleInformation();
     void updateVersion();
