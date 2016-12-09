@@ -54,7 +54,7 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="68"/>
-        <location filename="mainwindow.cpp" line="1147"/>
+        <location filename="mainwindow.cpp" line="1180"/>
         <source>Available</source>
         <oldsource>Available:</oldsource>
         <translation type="unfinished"></translation>
@@ -66,19 +66,19 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="84"/>
-        <location filename="mainwindow.cpp" line="150"/>
+        <location filename="mainwindow.cpp" line="154"/>
         <source>Product:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="93"/>
-        <location filename="mainwindow.cpp" line="151"/>
+        <location filename="mainwindow.cpp" line="155"/>
         <source>Version:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="100"/>
-        <location filename="mainwindow.cpp" line="152"/>
+        <location filename="mainwindow.cpp" line="156"/>
         <source>Serial:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -160,7 +160,7 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="61"/>
-        <location filename="mainwindow.cpp" line="1146"/>
+        <location filename="mainwindow.cpp" line="1179"/>
         <source>Required</source>
         <translation type="unfinished"></translation>
     </message>
@@ -187,7 +187,7 @@
     </message>
     <message>
         <location filename="mainwindow.ui" line="335"/>
-        <location filename="mainwindow.cpp" line="697"/>
+        <location filename="mainwindow.cpp" line="724"/>
         <source>License</source>
         <oldsource>License (c)</oldsource>
         <translation type="unfinished"></translation>
@@ -233,178 +233,171 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="159"/>
-        <location filename="mainwindow.cpp" line="320"/>
+        <location filename="mainwindow.cpp" line="163"/>
+        <location filename="mainwindow.cpp" line="324"/>
         <source>Wait for external media or network...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="430"/>
+        <location filename="mainwindow.cpp" line="434"/>
         <source>Error mounting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="431"/>
+        <location filename="mainwindow.cpp" line="435"/>
         <source>Error mounting external device (%1)</source>
         <oldsource>Error mounting external media (%1)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="465"/>
+        <location filename="mainwindow.cpp" line="469"/>
         <source>Reading images from device %1...</source>
         <oldsource>Reading images from media %1...</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="653"/>
-        <location filename="mainwindow.cpp" line="708"/>
+        <location filename="mainwindow.cpp" line="680"/>
+        <location filename="mainwindow.cpp" line="735"/>
         <source>Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="709"/>
+        <location filename="mainwindow.cpp" line="736"/>
         <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="618"/>
+        <location filename="mainwindow.cpp" line="645"/>
         <source>The install process will begin shortly.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="628"/>
+        <location filename="mainwindow.cpp" line="655"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="629"/>
+        <location filename="mainwindow.cpp" line="656"/>
         <source>Warning: The mass storage has not been properly removed on the USB host side. Remove USB flash drive anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="744"/>
+        <location filename="mainwindow.cpp" line="783"/>
         <source>Image Installed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="674"/>
-        <location filename="mainwindow.cpp" line="778"/>
-        <location filename="mainwindow.cpp" line="963"/>
-        <location filename="mainwindow.cpp" line="969"/>
+        <location filename="mainwindow.cpp" line="701"/>
+        <location filename="mainwindow.cpp" line="820"/>
+        <location filename="mainwindow.cpp" line="972"/>
+        <location filename="mainwindow.cpp" line="978"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="272"/>
+        <location filename="mainwindow.cpp" line="276"/>
         <source>This image is not compatible with the current module</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="274"/>
+        <location filename="mainwindow.cpp" line="278"/>
         <source>This image requires a newer version of the Toradex Easy Installer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="654"/>
+        <location filename="mainwindow.cpp" line="681"/>
         <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="658"/>
+        <location filename="mainwindow.cpp" line="685"/>
         <source>Discarding all data on internal eMCC...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="745"/>
+        <location filename="mainwindow.cpp" line="784"/>
         <source>The Image has been installed successfully.</source>
         <oldsource>The Image has been installed successfully. &lt;b&gt;You can now safely power off or reset the system.&lt;/b&gt;</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="745"/>
+        <location filename="mainwindow.cpp" line="784"/>
         <source>You can now safely power off or reset the system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="748"/>
+        <location filename="mainwindow.cpp" line="787"/>
         <source>Power off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="749"/>
+        <location filename="mainwindow.cpp" line="788"/>
         <source>Reboot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="750"/>
+        <location filename="mainwindow.cpp" line="789"/>
         <source>Return to menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="779"/>
+        <location filename="mainwindow.cpp" line="822"/>
         <source>The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="848"/>
-        <source>No network access</source>
+        <location filename="mainwindow.cpp" line="941"/>
+        <source>Downloading image list ...</source>
+        <oldsource>Downloading image list from Internet...</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="849"/>
-        <source>Wired network access is required for this feature. Please insert a network cable into the network port.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="944"/>
-        <source>Downloading image list from Internet...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="963"/>
+        <location filename="mainwindow.cpp" line="972"/>
         <source>Error parsing list JSON downloaded from server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="969"/>
+        <location filename="mainwindow.cpp" line="978"/>
         <source>Image list config format not supported!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="998"/>
-        <location filename="mainwindow.cpp" line="1000"/>
-        <location filename="mainwindow.cpp" line="1182"/>
-        <location filename="mainwindow.cpp" line="1210"/>
+        <location filename="mainwindow.cpp" line="1008"/>
+        <location filename="mainwindow.cpp" line="1010"/>
+        <location filename="mainwindow.cpp" line="1215"/>
+        <location filename="mainwindow.cpp" line="1243"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="998"/>
-        <source>Error downloading image list from Internet: %1</source>
+        <location filename="mainwindow.cpp" line="1008"/>
+        <source>Error downloading image list: %1
+URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1000"/>
-        <source>Error downloading image list from Internet: HTTP status code %1</source>
+        <location filename="mainwindow.cpp" line="1010"/>
+        <source>Error downloading image list: HTTP status code %1
+URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1182"/>
+        <location filename="mainwindow.cpp" line="1215"/>
         <source>Error writing downloaded file to initramfs.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1210"/>
+        <location filename="mainwindow.cpp" line="1243"/>
         <source>Error downloading meta file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1233"/>
+        <location filename="mainwindow.cpp" line="1271"/>
         <source>I Agree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="746"/>
+        <location filename="mainwindow.cpp" line="785"/>
         <source>In case recovery mode has been used a power cycle will be necessary.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -412,123 +405,122 @@
 <context>
     <name>MultiImageWriteThread</name>
     <message>
-        <location filename="multiimagewritethread.cpp" line="44"/>
+        <location filename="multiimagewritethread.cpp" line="45"/>
         <source>No valid config block available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="52"/>
+        <location filename="multiimagewritethread.cpp" line="53"/>
         <source>Prepare script &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="58"/>
+        <location filename="multiimagewritethread.cpp" line="59"/>
         <source>Error executing prepare script</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="68"/>
+        <location filename="multiimagewritethread.cpp" line="69"/>
         <source>Block device &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="82"/>
+        <location filename="multiimagewritethread.cpp" line="83"/>
         <source>Wrap-up script &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="88"/>
+        <location filename="multiimagewritethread.cpp" line="89"/>
         <source>Error executing wrap-up script</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="93"/>
+        <location filename="multiimagewritethread.cpp" line="94"/>
         <source>Finish writing (syncing)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="185"/>
+        <location filename="multiimagewritethread.cpp" line="189"/>
         <source>More than one content requires partition number %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="208"/>
+        <location filename="multiimagewritethread.cpp" line="212"/>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="235"/>
+        <location filename="multiimagewritethread.cpp" line="239"/>
         <source>Fixed partition offset too low</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="280"/>
+        <location filename="multiimagewritethread.cpp" line="284"/>
         <source>Writing partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="285"/>
+        <location filename="multiimagewritethread.cpp" line="289"/>
         <source>Zero&apos;ing start of each partition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="343"/>
+        <location filename="multiimagewritethread.cpp" line="347"/>
         <source>Error creating partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="391"/>
-        <source>%1: Writing raw image</source>
-        <oldsource>%1: Writing OS image</oldsource>
+        <location filename="multiimagewritethread.cpp" line="396"/>
+        <source>%1: Writing raw files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="397"/>
+        <location filename="multiimagewritethread.cpp" line="412"/>
         <source>%1: Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="403"/>
+        <location filename="multiimagewritethread.cpp" line="418"/>
         <source>%1: Creating filesystem (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="411"/>
+        <location filename="multiimagewritethread.cpp" line="426"/>
         <source>%1: Mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="419"/>
+        <location filename="multiimagewritethread.cpp" line="434"/>
         <source>%1: Error mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="426"/>
+        <location filename="multiimagewritethread.cpp" line="441"/>
         <source>%1: Downloading and extracting filesystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="428"/>
+        <location filename="multiimagewritethread.cpp" line="443"/>
         <source>%1: Extracting filesystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="435"/>
+        <location filename="multiimagewritethread.cpp" line="450"/>
         <source>%1: Downloading/Copying files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="503"/>
+        <location filename="multiimagewritethread.cpp" line="518"/>
         <source>Error creating file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="586"/>
+        <location filename="multiimagewritethread.cpp" line="606"/>
         <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="552"/>
+        <location filename="multiimagewritethread.cpp" line="571"/>
         <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -597,18 +589,19 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="mainwindow.cpp" line="85"/>
+        <location filename="mainwindow.cpp" line="86"/>
         <source>Reading Config Block failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="86"/>
+        <location filename="mainwindow.cpp" line="87"/>
         <source>Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="util.cpp" line="59"/>
-        <source>Toradex Easy Installer v%1 - Built: %2</source>
+        <source>Toradex Easy Installer v%1 (g%2) - Built: %3</source>
+        <oldsource>Toradex Easy Installer v%1 - Built: %2</oldsource>
         <translation type="unfinished"></translation>
     </message>
 </context>

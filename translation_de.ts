@@ -109,14 +109,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>No network access</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wired network access is required for this feature. Please insert a network cable into the network port.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -153,23 +145,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error downloading image list from Internet: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error downloading image list from Internet: HTTP status code %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error parsing list JSON downloaded from server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>In case recovery mode has been used a power cycle will be necessary.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Downloading image list from Internet...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -312,6 +292,20 @@
         <source>You can now safely power off or reset the system.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Downloading image list ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading image list: %1
+URL: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading image list: HTTP status code %1
+URL: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>
@@ -396,10 +390,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1: Writing raw image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1: Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -409,6 +399,10 @@
     </message>
     <message>
         <source>No valid config block available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: Writing raw files</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -473,7 +467,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Toradex Easy Installer v%1 - Built: %2</source>
+        <source>Toradex Easy Installer v%1 (g%2) - Built: %3</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
