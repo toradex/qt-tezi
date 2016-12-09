@@ -53,6 +53,7 @@ void ResourceDownload::downloadRedirectCheck()
             _data = reply->readAll();
             emit completed();
         }
+        // This gets always called, no matter wheter a download succeeded or failed.
         emit finished();
     }
 

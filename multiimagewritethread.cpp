@@ -371,7 +371,7 @@ bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteAr
     QList<RawFileInfo *> *rawFiles = content->rawFiles();
 
 
-    if (_image->imageSource() == SOURCE_NETWORK && !tarball.isEmpty()) {
+    if (ImageInfo::isNetwork(_image->imageSource()) && !tarball.isEmpty()) {
         tarball = _image->baseUrl() + tarball;
     }
 
@@ -533,7 +533,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     t1.start();
 
     QProcess p;
-    if (_image->imageSource() != SOURCE_NETWORK)
+    if (!ImageInfo::isNetwork(_image->imageSource()))
         p.setWorkingDirectory(_image->folder());
     p.start(cmd);
     p.closeWriteChannel();

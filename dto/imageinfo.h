@@ -13,6 +13,7 @@ enum ImageSource {
     SOURCE_USB,
     SOURCE_SDCARD,
     SOURCE_NETWORK,
+    SOURCE_RNDIS,
 };
 
 class BlockDevInfo;
@@ -21,8 +22,14 @@ class ImageInfo : public QObject
 {
     Q_OBJECT
 public:
+
     /* Constructor parses the json files in <folder>, and stores information in local variables */
     explicit ImageInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent = 0);
+
+    static bool isNetwork(enum ImageSource source)
+    {
+        return source == SOURCE_NETWORK || source == SOURCE_RNDIS;
+    }
 
     inline QString folder()
     {

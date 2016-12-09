@@ -64,7 +64,8 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
-    _splash(splash), _ld(ld), _wasOnline(false), _netaccess(NULL), _mediaMounted(false), _firstMediaPoll(true)
+    _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _netaccess(NULL), _numDownloads(0), _mediaMounted(false),
+    _firstMediaPoll(true)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -136,7 +137,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     }
 
     // Add static server list
-    _httpUrlList.append(QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts));
+    _networkUrlList.append(QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts));
 
     connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
     _mediaPollTimer.start(100);
@@ -191,7 +192,7 @@ void MainWindow::addImages(QList<QVariantMap> images)
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
-        QVariant source = m.value("source");
+        enum ImageSource source = (enum ImageSource)m.value("source").value<int>();
 
         if (source == SOURCE_NETWORK) {
             /* We don't show incompatible images from network (there will be a lot of them later!) */
@@ -247,7 +248,7 @@ void MainWindow::addImages(QList<QVariantMap> images)
             friendlyname += ", usb:/" + foldername;
         else if (source == SOURCE_SDCARD)
             friendlyname += ", sdcard:/" + foldername;
-        else if (source == SOURCE_NETWORK) {
+        else {
             QString url = m.value("baseurl").value<QString>();
             friendlyname += ", " + url;
         }
@@ -292,7 +293,7 @@ void MainWindow::addImages(QList<QVariantMap> images)
             item->setData(SecondIconRole, _usbIcon);
         else if (source == SOURCE_SDCARD)
             item->setData(SecondIconRole, _sdIcon);
-        else if (source == SOURCE_NETWORK)
+        else if (ImageInfo::isNetwork(source))
             item->setData(SecondIconRole, _internetIcon);
 
         ui->list->addItem(item);
@@ -512,7 +513,13 @@ void MainWindow::parseTeziConfig(const QString &path)
     QVariantMap teziconfig = Json::loadFromFile(configjson).toMap();
     QStringList imagelisturls = teziconfig["image_lists"].value<QStringList>();
     qDebug() << "Adding URLs to URL list" << imagelisturls;
-    _httpUrlList.append(url);
+
+    foreach (QString url, imagelisturls) {
+        if (url.contains(RNDIS_ADDRESS))
+            _rndisUrlList.append(url);
+        else
+            _networkUrlList.append(url);
+    }
 }
 
 QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
@@ -591,6 +598,8 @@ void MainWindow::on_list_itemDoubleClicked()
 
 void MainWindow::installImage(QVariantMap entry)
 {
+    enum ImageSource imageSource = (enum ImageSource)entry.value("source").value<int>();
+
     setEnabled(false);
     _numMetaFilesToDownload = 0;
 
@@ -598,12 +607,12 @@ void MainWindow::installImage(QVariantMap entry)
     _networkStatusPollTimer.stop();
     _mediaPollTimer.stop();
 
-    if (entry.value("source") == SOURCE_NETWORK)
+    if (ImageInfo::isNetwork(imageSource))
     {
         _imageEntry = entry;
 
-        QString folder = entry.value("folder").toString();
-        QString url = entry.value("baseurl").toString();
+        QString folder = entry.value("folder").value<QString>();
+        QString url = entry.value("baseurl").value<QString>();
 
         if (entry.contains("marketing"))
             downloadMetaFile(url + entry.value("marketing").toString(), folder+"/marketing.tar");
@@ -737,7 +746,16 @@ void MainWindow::on_actionRefreshCloud_triggered()
 {
     showProgressDialog("");
     removeImagesBySource(SOURCE_NETWORK);
-    downloadLists(_httpUrlList);
+    if (hasAddress("eth0")) {
+        if (!_networkUrlList.empty())
+            downloadLists(_networkUrlList);
+    }
+
+    removeImagesBySource(SOURCE_RNDIS);
+    if (hasAddress("usb0")) {
+        if (!_rndisUrlList.empty())
+            downloadLists(_rndisUrlList);
+    }
 }
 
 void MainWindow::on_actionCancel_triggered()
@@ -858,36 +876,6 @@ void MainWindow::on_actionEdit_config_triggered()
 {
 }
 
-void MainWindow::on_actionBrowser_triggered()
-{
-    startBrowser();
-}
-
-bool MainWindow::requireNetwork()
-{
-    if (!isOnline())
-    {
-        QMessageBox::critical(this,
-                              tr("No network access"),
-                              tr("Wired network access is required for this feature. Please insert a network cable into the network port."),
-                              QMessageBox::Close);
-        return false;
-    }
-
-    return true;
-}
-
-void MainWindow::startBrowser()
-{
-    if (!requireNetwork())
-        return;
-    QProcess *proc = new QProcess(this);
-    QString lang = LanguageDialog::instance("en", "gb")->currentLanguage();
-    if (lang == "gb" || lang == "us" || lang == "")
-        lang = "en";
-    proc->start("arora -lang "+lang+" "+HOMEPAGE);
-}
-
 void MainWindow::startNetworking()
 {
     _time.start();
@@ -901,10 +889,10 @@ void MainWindow::startNetworking()
     _networkStatusPollTimer.start(100);
 }
 
-bool MainWindow::isOnline()
+bool MainWindow::hasAddress(const QString &iface)
 {
     /* Check if we have an IP-address other than localhost */
-    QList<QNetworkAddressEntry> addresses = QNetworkInterface::interfaceFromName("eth0").addressEntries();
+    QList<QNetworkAddressEntry> addresses = QNetworkInterface::interfaceFromName(iface).addressEntries();
 
     foreach (QNetworkAddressEntry ae, addresses)
     {
@@ -920,50 +908,48 @@ bool MainWindow::isOnline()
 
 void MainWindow::pollNetworkStatus()
 {
-    if (isOnline()) {
+    if (hasAddress("eth0")) {
         if (!_wasOnline) {
-            onOnlineStateChanged(true);
+            qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
+            downloadLists(_networkUrlList);
             _wasOnline = true;
         }
     } else {
         if (_wasOnline) {
-            onOnlineStateChanged(false);
+            removeImagesBySource(SOURCE_NETWORK);
             _wasOnline = false;
         }
     }
-}
 
-void MainWindow::onOnlineStateChanged(bool online)
-{
-    if (online) {
-        qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
-        if (!_netaccess)
-        {
-            _netaccess = new QNetworkAccessManager(this);
-            QNetworkDiskCache *_cache = new QNetworkDiskCache(this);
-            _cache->setCacheDirectory("/tmp/");
-            _cache->setMaximumCacheSize(8 * 1024 * 1024);
-            _netaccess->setCache(_cache);
-            QNetworkConfigurationManager manager;
-            _netaccess->setConfiguration(manager.defaultConfiguration());
+    if (hasAddress("usb0")) {
+        if (!_wasRndis) {
+            qDebug() << "RNDIS up in" << _time.elapsed()/1000.0 << "seconds";
+            downloadLists(_rndisUrlList);
+            _wasRndis = true;
         }
-
-        /* Download list of images from static URLs... */
-        downloadLists(_httpUrlList);
-
-        //ui->actionBrowser->setEnabled(true);
-        emit networkUp();
     } else {
-        qDebug() << "Network went down";
-        removeImagesBySource(SOURCE_NETWORK);
+        if (_wasRndis) {
+            removeImagesBySource(SOURCE_RNDIS);
+            _wasRndis = false;
+        }
     }
 }
 
 void MainWindow::downloadLists(const QStringList &urls)
 {
-    _numDownloads = 0;
     if (_qpd)
         _qpd->setLabelText(tr("Downloading image list ..."));
+
+    if (!_netaccess)
+    {
+        _netaccess = new QNetworkAccessManager(this);
+        QNetworkDiskCache *_cache = new QNetworkDiskCache(this);
+        _cache->setCacheDirectory("/tmp/");
+        _cache->setMaximumCacheSize(8 * 1024 * 1024);
+        _netaccess->setCache(_cache);
+        QNetworkConfigurationManager manager;
+        _netaccess->setConfiguration(manager.defaultConfiguration());
+    }
 
     foreach (QString url, urls)
     {
@@ -1019,9 +1005,9 @@ void MainWindow::downloadListJsonFailed()
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
     if (rd->networkError() != QNetworkReply::NoError) {
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list: %1").arg(rd->networkErrorString()), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list: %1\nURL: %2").arg(rd->networkErrorString(), rd->urlString()), QMessageBox::Close);
     } else {
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list: HTTP status code %1").arg(rd->httpStatusCode()), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list: HTTP status code %1\nURL: %2").arg(rd->httpStatusCode() + "", rd->urlString()), QMessageBox::Close);
     }
 }
 
@@ -1038,7 +1024,6 @@ void MainWindow::downloadImageJsonCompleted()
     if (!d.exists(folder))
         d.mkpath(folder);
     imagemap["folder"] = folder;
-    imagemap["source"] = SOURCE_NETWORK;
     imagemap["index"] = rd->index();
 
     if (!imagemap.contains("nominal_size"))
@@ -1049,7 +1034,12 @@ void MainWindow::downloadImageJsonCompleted()
     imageinfo.write(json);
     imageinfo.close();
     imagemap["image_info"] = "image.json";
-    imagemap["baseurl"] = getUrlPath(rd->urlString());
+    QString baseurl = getUrlPath(rd->urlString());
+    imagemap["baseurl"] = baseurl;
+    if (baseurl.contains(RNDIS_ADDRESS))
+        imagemap["source"] = SOURCE_RNDIS;
+    else
+        imagemap["source"] = SOURCE_NETWORK;
     _netImages.append(imagemap);
 
     QString icon = imagemap.value("icon").toString();
@@ -1117,6 +1107,8 @@ void MainWindow::downloadFinished()
 {
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
+    // We can rely on this to get always called, no matter whether there
+    // has been an error or not...
     _numDownloads--;
 
     if (!_numDownloads)
@@ -1265,11 +1257,12 @@ void MainWindow::startImageWrite(QVariantMap entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     _imageWriteThread = new MultiImageWriteThread();
+    enum ImageSource imageSource = (enum ImageSource)entry.value("source").toInt();
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
 
     /* Re-mount local media */
-    if (entry.value("source") != SOURCE_NETWORK)
+    if (!ImageInfo::isNetwork(imageSource))
         mountMedia(entry.value("image_source_blockdev").toString());
 
     if (entry.contains("license") && !_isAutoinstall) {
@@ -1324,7 +1317,7 @@ void MainWindow::startImageWrite(QVariantMap entry)
 
     _imageWriteThread->setConfigBlock(_toradexConfigBlock);
     _imageWriteThread->setImage(folder, entry.value("image_info").toString(),
-                               entry.value("baseurl").toString(), (enum ImageSource)entry.value("source").toInt());
+                               entry.value("baseurl").toString(), imageSource);
 
     _psd = new ProgressSlideshowDialog(slidesFolders, "", 20, this);
     connect(_imageWriteThread, SIGNAL(parsedImagesize(qint64)), _psd, SLOT(setMaximum(qint64)));

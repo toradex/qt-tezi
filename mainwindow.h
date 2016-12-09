@@ -61,7 +61,7 @@ protected:
     bool _allowAutoinstall, _isAutoinstall, _showAll, _newInstallerAvailable;
     QSplashScreen *_splash;
     LanguageDialog *_ld;
-    bool _wasOnline;
+    bool _wasOnline, _wasRndis;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numDownloads, _numMetaFilesToDownload;
     QTimer _networkStatusPollTimer;
@@ -75,7 +75,8 @@ protected:
     UsbGadget *_usbGadget;
     MultiImageWriteThread *_imageWriteThread;
     QList<QVariantMap> _netImages;
-    QStringList _httpUrlList;
+    QStringList _networkUrlList;
+    QStringList _rndisUrlList;
 
     void updateModuleInformation();
     void updateVersion();
@@ -94,8 +95,7 @@ protected:
     void addImages(QList<QVariantMap> images);
     void removeImagesByBlockdev(const QString &blockdev);
     void removeImagesBySource(enum ImageSource source);
-    bool requireNetwork();
-    bool isOnline();
+    bool hasAddress(const QString &iface);
     QStringList getFlavours(const QString &folder);
     QListWidgetItem *findItem(const QVariant &name);
     QList<QListWidgetItem *> selectedItems();
@@ -107,10 +107,8 @@ protected:
     void reenableImageChoice();
 
 protected slots:
-    void startBrowser();
     void pollMedia();
     void pollNetworkStatus();
-    void onOnlineStateChanged(bool online);
     void downloadListJsonCompleted();
     void downloadListJsonFailed();
     void downloadImageJsonCompleted();
@@ -139,13 +137,9 @@ private slots:
     void on_actionEraseModule_triggered();
     void on_actionShowLicense_triggered();
     void on_actionEdit_config_triggered();
-    void on_actionBrowser_triggered();
     void on_list_currentItemChanged();
     void on_list_itemDoubleClicked();
     void on_actionWifi_triggered();
-
-signals:
-    void networkUp();
 };
 
 #endif // MAINWINDOW_H

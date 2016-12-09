@@ -49,4 +49,7 @@
 /* Default wget command line options, wait just 10s then declare a connection as dead */
 #define WGET_COMMAND "wget --no-verbose --tries=10 --read-timeout=10 -O- "
 
+/* RNDIS network */
+#define RNDIS_ADDRESS "192.168.11"
+
 #endif // CONFIG_H
