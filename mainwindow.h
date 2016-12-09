@@ -74,13 +74,13 @@ protected:
     QSet<QString> _blockdevsChecking;
     UsbGadget *_usbGadget;
     MultiImageWriteThread *_imageWriteThread;
-    QMap<QString,QVariantMap> _netImages;
+    QList<QVariantMap> _netImages;
 
     void updateModuleInformation();
     void updateVersion();
     int calculateNominalSize(const QVariantMap &imagemap);
     void processMedia(enum ImageSource src, const QString &blockdev);
-    QMap<QString,QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
+    QList<QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
     void inputSequence();
     bool isMounted(const QString &path);
@@ -88,7 +88,8 @@ protected:
     bool unmountMedia();
     void checkRemovableBlockdev(const QString &nameFilter);
     void checkSDcard();
-    void addImages(QMap<QString,QVariantMap> images);
+    static bool orderByIndex(const QVariantMap &m1, const QVariantMap &m2);
+    void addImages(QList<QVariantMap> images);
     void removeImagesByBlockdev(const QString &blockdev);
     void removeImagesBySource(enum ImageSource source);
     bool requireNetwork();

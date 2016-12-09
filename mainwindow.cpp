@@ -167,14 +167,14 @@ void MainWindow::showProgressDialog(const QString &labelText)
     _qpd->show();
 }
 
-void MainWindow::addImages(QMap<QString,QVariantMap> images)
+void MainWindow::addImages(QList<QVariantMap> images)
 {
     QSize currentsize = ui->list->iconSize();
     int validImages = 0;
     bool isAutoinstall = false;
     QVariantMap autoInstallImage;
 
-    foreach (QVariantMap m, images.values())
+    foreach (QVariantMap m, images)
     {
         int config_format = m.value("config_format").toInt();
         QString name = m.value("name").toString();
@@ -464,7 +464,7 @@ void MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
 
     if (mountMedia(blockdevpath))
     {
-        QMap<QString,QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdevpath, src);
+        QList<QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdevpath, src);
         unmountMedia();
         addImages(images);
     }
@@ -493,9 +493,9 @@ void MainWindow::pollMedia()
     }
 }
 
-QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
+QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
 {
-    QMap<QString,QVariantMap> images;
+    QList<QVariantMap> images;
 
     /* Local image folders, search all subfolders... */
     QDir dir(path, "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
@@ -530,7 +530,7 @@ QMap<QString, QVariantMap> MainWindow::listMediaImages(const QString &path, cons
 
         imagemap["image_info"] = "image.json";
         imagemap["image_source_blockdev"] = blockdev;
-        images[image] = imagemap;
+        images.append(imagemap);
     }
 
     return images;
@@ -1018,6 +1018,7 @@ void MainWindow::downloadImageJsonCompleted()
         d.mkpath(folder);
     imagemap["folder"] = folder;
     imagemap["source"] = SOURCE_NETWORK;
+    imagemap["index"] = rd->index();
 
     if (!imagemap.contains("nominal_size"))
         imagemap["nominal_size"] = calculateNominalSize(imagemap);
@@ -1028,7 +1029,7 @@ void MainWindow::downloadImageJsonCompleted()
     imageinfo.close();
     imagemap["image_info"] = "image.json";
     imagemap["baseurl"] = getUrlPath(rd->urlString());
-    _netImages[basename] = imagemap;
+    _netImages.append(imagemap);
 
     QString icon = imagemap.value("icon").toString();
     if (!icon.isNull()) {
@@ -1063,13 +1064,11 @@ void MainWindow::downloadIconCompleted()
     pix.loadFromData(rd->data());
     QIcon icon(pix);
 
-    foreach (QString str, _netImages.keys())
+    for (QList<QVariantMap>::iterator i = _netImages.begin(); i != _netImages.end(); ++i)
     {
-        QVariantMap &m = _netImages[str];
-
         // Assign icon...
-        if (m.value("icon") == rd->saveAs())
-            m["iconimage"] = icon;
+        if (i->value("icon") == rd->saveAs())
+            i->insert("iconimage", icon);
     }
 }
 
@@ -1081,6 +1080,18 @@ void MainWindow::downloadIconFailed()
 
 }
 
+bool MainWindow::orderByIndex(const QVariantMap &m1, const QVariantMap &m2)
+{
+    QVariant v1 = m1.value("index");
+    QVariant v2 = m2.value("index");
+    if (v1.isNull() || v2.isNull())
+        return false;
+
+    int i1 = v1.value<int>();
+    int i2 = v2.value<int>();
+    return i1 < i2;
+}
+
 void MainWindow::downloadFinished()
 {
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
@@ -1090,6 +1101,7 @@ void MainWindow::downloadFinished()
     if (!_numDownloads)
     {
         // Add all images at once, in the right order...
+        qSort(_netImages.begin(), _netImages.end(), orderByIndex);
         addImages(_netImages);
         _netImages.clear();
 
