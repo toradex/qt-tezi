@@ -135,6 +135,9 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
         ui->actionUsbRndis->setEnabled(false);
     }
 
+    // Add static server list
+    _httpUrlList.append(QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts));
+
     connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
     _mediaPollTimer.start(100);
 }
@@ -244,6 +247,10 @@ void MainWindow::addImages(QList<QVariantMap> images)
             friendlyname += ", usb:/" + foldername;
         else if (source == SOURCE_SDCARD)
             friendlyname += ", sdcard:/" + foldername;
+        else if (source == SOURCE_NETWORK) {
+            QString url = m.value("baseurl").value<QString>();
+            friendlyname += ", " + url;
+        }
 
         if (icon.isNull()) {
             icon = QIcon();
@@ -464,6 +471,9 @@ void MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
 
     if (mountMedia(blockdevpath))
     {
+        // Check for HTTP server urls
+        parseTeziConfig(SRC_MOUNT_FOLDER);
+
         QList<QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdevpath, src);
         unmountMedia();
         addImages(images);
@@ -491,6 +501,18 @@ void MainWindow::pollMedia()
         startNetworking();
         _firstMediaPoll = false;
     }
+}
+
+void MainWindow::parseTeziConfig(const QString &path)
+{
+    QString configjson = path + QDir::separator() + "tezi_config.json";
+    if (!QFile::exists(configjson))
+        return;
+
+    QVariantMap teziconfig = Json::loadFromFile(configjson).toMap();
+    QStringList imagelisturls = teziconfig["image_lists"].value<QStringList>();
+    qDebug() << "Adding URLs to URL list" << imagelisturls;
+    _httpUrlList.append(url);
 }
 
 QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
@@ -715,7 +737,7 @@ void MainWindow::on_actionRefreshCloud_triggered()
 {
     showProgressDialog("");
     removeImagesBySource(SOURCE_NETWORK);
-    downloadLists();
+    downloadLists(_httpUrlList);
 }
 
 void MainWindow::on_actionCancel_triggered()
@@ -927,7 +949,7 @@ void MainWindow::onOnlineStateChanged(bool online)
         }
 
         /* Download list of images from static URLs... */
-        downloadLists();
+        downloadLists(_httpUrlList);
 
         //ui->actionBrowser->setEnabled(true);
         emit networkUp();
@@ -937,12 +959,11 @@ void MainWindow::onOnlineStateChanged(bool online)
     }
 }
 
-void MainWindow::downloadLists()
+void MainWindow::downloadLists(const QStringList &urls)
 {
     _numDownloads = 0;
-    QStringList urls = QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts);
     if (_qpd)
-        _qpd->setLabelText(tr("Downloading image list from Internet..."));
+        _qpd->setLabelText(tr("Downloading image list ..."));
 
     foreach (QString url, urls)
     {
@@ -998,9 +1019,9 @@ void MainWindow::downloadListJsonFailed()
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
     if (rd->networkError() != QNetworkReply::NoError) {
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: %1").arg(rd->networkErrorString()), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list: %1").arg(rd->networkErrorString()), QMessageBox::Close);
     } else {
-        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list from Internet: HTTP status code %1").arg(rd->httpStatusCode()), QMessageBox::Close);
+        QMessageBox::critical(this, tr("Download error"), tr("Error downloading image list: HTTP status code %1").arg(rd->httpStatusCode()), QMessageBox::Close);
     }
 }
 

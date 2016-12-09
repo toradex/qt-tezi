@@ -75,11 +75,13 @@ protected:
     UsbGadget *_usbGadget;
     MultiImageWriteThread *_imageWriteThread;
     QList<QVariantMap> _netImages;
+    QStringList _httpUrlList;
 
     void updateModuleInformation();
     void updateVersion();
     int calculateNominalSize(const QVariantMap &imagemap);
     void processMedia(enum ImageSource src, const QString &blockdev);
+    void parseTeziConfig(const QString &path);
     QList<QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
     void inputSequence();
@@ -99,7 +101,7 @@ protected:
     QList<QListWidgetItem *> selectedItems();
     void updateNeeded();
     void downloadMetaFile(const QString &url, const QString &saveAs);
-    void downloadLists();
+    void downloadLists(const QStringList &urls);
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap entry);
     void reenableImageChoice();
