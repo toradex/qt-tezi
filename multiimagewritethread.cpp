@@ -571,7 +571,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
         emit error(tr("Error downloading or writing image")+"\n" + msg);
         return false;
     }
-    qDebug() << "finished writing filesystem in" << (t1.elapsed()/1000.0) << "seconds";
+    qDebug() << "Finished writing" << _bytesWritten << "bytes in" << (t1.elapsed()/1000.0) << "seconds";
 
     return true;
 }
@@ -589,6 +589,7 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
     cmd += " | cat > " TEMP_MOUNT_FOLDER "/" + file;
     cmd += " \"";
 
+    qDebug() << "Copying file" << file;
     return runwritecmd(cmd);
 }
 
@@ -619,6 +620,7 @@ bool MultiImageWriteThread::untar(const QString &tarball)
     cmd += " | tar x -C " TEMP_MOUNT_FOLDER;
     cmd += " \"";
 
+    qDebug() << "Uncompress file" << tarball;
     return runwritecmd(cmd);
 }
 
@@ -641,6 +643,7 @@ bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, Ra
 
     cmd += " | dd of=" + device + " " + rawFile->ddOptions(); // BusyBox can't do this: +" conv=fsync obs=4M\"";
 
+    qDebug() << "Raw dd file" << file;
     return runwritecmd(cmd);
 }
 
