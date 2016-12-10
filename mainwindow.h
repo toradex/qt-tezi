@@ -85,7 +85,6 @@ protected:
     void parseTeziConfig(const QString &path);
     QList<QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
-    void inputSequence();
     bool isMounted(const QString &path);
     bool mountMedia(const QString &blockdev);
     bool unmountMedia();

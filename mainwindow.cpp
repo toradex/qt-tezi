@@ -859,14 +859,6 @@ void MainWindow::updateVersion()
     ui->version->setText(version);
 }
 
-void MainWindow::inputSequence()
-{
-    QLabel* info = new QLabel(this);
-    info->setPixmap(QPixmap("/usr/data"));
-    info->setGeometry(0,0,640,480);
-    info->show();
-}
-
 void MainWindow::on_actionAdvanced_triggered(bool checked)
 {
     ui->advToolBar->setVisible(checked);
@@ -911,6 +903,10 @@ void MainWindow::pollNetworkStatus()
     if (hasAddress("eth0")) {
         if (!_wasOnline) {
             qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
+
+            if (_qpd)
+                _qpd->setLabelText(tr("Downloading image list ..."));
+
             downloadLists(_networkUrlList);
             _wasOnline = true;
         }
@@ -937,9 +933,6 @@ void MainWindow::pollNetworkStatus()
 
 void MainWindow::downloadLists(const QStringList &urls)
 {
-    if (_qpd)
-        _qpd->setLabelText(tr("Downloading image list ..."));
-
     if (!_netaccess)
     {
         _netaccess = new QNetworkAccessManager(this);
