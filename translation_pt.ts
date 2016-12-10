@@ -41,10 +41,6 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <source>Disk space</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Install (i)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -154,18 +150,6 @@
     </message>
     <message>
         <source>Module Version</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Product:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Version:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Serial:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -304,6 +288,42 @@ URL: %2</source>
     <message>
         <source>Error downloading image list: HTTP status code %1
 URL: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ethernet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>USB RNDIS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No address assigned</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Product</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Network Information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Flash Space</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

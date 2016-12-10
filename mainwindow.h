@@ -38,6 +38,7 @@ class QProgressDialog;
 class QSettings;
 class QListWidgetItem;
 class QNetworkAccessManager;
+class QNetworkAddressEntry;
 class QMessageBox;
 
 class MainWindow : public QMainWindow
@@ -94,7 +95,7 @@ protected:
     void addImages(QList<QVariantMap> images);
     void removeImagesByBlockdev(const QString &blockdev);
     void removeImagesBySource(enum ImageSource source);
-    bool hasAddress(const QString &iface);
+    bool hasAddress(const QString &iface, QNetworkAddressEntry *currAddress = NULL);
     QStringList getFlavours(const QString &folder);
     QListWidgetItem *findItem(const QVariant &name);
     QList<QListWidgetItem *> selectedItems();

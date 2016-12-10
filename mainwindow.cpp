@@ -151,9 +151,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::updateModuleInformation()
 {
-    ui->moduleType->setText(tr("Product:") + " " + _toradexProductName);
-    ui->moduleVersion->setText(tr("Version:") + " " + _toradexBoardRev);
-    ui->moduleSerial->setText(tr("Serial:") + " " + _serialNumber);
+    ui->moduleType->setText(_toradexProductName);
+    ui->moduleVersion->setText(_toradexBoardRev);
+    ui->moduleSerial->setText(_serialNumber);
 }
 
 /* Discover which images we have, and fill in the list */
@@ -881,7 +881,7 @@ void MainWindow::startNetworking()
     _networkStatusPollTimer.start(100);
 }
 
-bool MainWindow::hasAddress(const QString &iface)
+bool MainWindow::hasAddress(const QString &iface, QNetworkAddressEntry *currAddress)
 {
     /* Check if we have an IP-address other than localhost */
     QList<QNetworkAddressEntry> addresses = QNetworkInterface::interfaceFromName(iface).addressEntries();
@@ -891,6 +891,8 @@ bool MainWindow::hasAddress(const QString &iface)
         QHostAddress a = ae.ip();
         if (a != QHostAddress::LocalHost && a != QHostAddress::LocalHostIPv6 &&
             a.scopeId() == "") {
+            if (currAddress != NULL)
+                *currAddress = ae;
             return true;
         }
     }
@@ -900,9 +902,12 @@ bool MainWindow::hasAddress(const QString &iface)
 
 void MainWindow::pollNetworkStatus()
 {
-    if (hasAddress("eth0")) {
+    QNetworkAddressEntry ae;
+    if (hasAddress("eth0", &ae)) {
         if (!_wasOnline) {
             qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
+            ui->labelEthernetAddress->setText(
+                        QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 
             if (_qpd)
                 _qpd->setLabelText(tr("Downloading image list ..."));
@@ -912,19 +917,25 @@ void MainWindow::pollNetworkStatus()
         }
     } else {
         if (_wasOnline) {
+            ui->labelEthernetAddress->setText(tr("No address assigned"));
             removeImagesBySource(SOURCE_NETWORK);
             _wasOnline = false;
         }
     }
 
-    if (hasAddress("usb0")) {
+    if (hasAddress("usb0", &ae)) {
+
         if (!_wasRndis) {
             qDebug() << "RNDIS up in" << _time.elapsed()/1000.0 << "seconds";
+            ui->labelRNDISAddress->setText(
+                        QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
+
             downloadLists(_rndisUrlList);
             _wasRndis = true;
         }
     } else {
         if (_wasRndis) {
+            ui->labelRNDISAddress->setText(tr("No address assigned"));
             removeImagesBySource(SOURCE_RNDIS);
             _wasRndis = false;
         }
@@ -1169,8 +1180,8 @@ void MainWindow::updateNeeded()
         enableOk = true;
     }
 
-    ui->neededLabel->setText(QString("%1: %2 MB").arg(tr("Required"), QString::number(_neededMB)));
-    ui->availableLabel->setText(QString("%1: %2 MB").arg(tr("Available"), QString::number(_availableMB)));
+    ui->labelAmountRequired->setText(QString("%2 MB").arg(_neededMB));
+    ui->labelAmountAvailable->setText(QString("%2 MB").arg(_availableMB));
 
     if (_neededMB > _availableMB)
     {
@@ -1181,15 +1192,15 @@ void MainWindow::updateNeeded()
     }
 
     ui->actionInstall->setEnabled(enableOk && !_usbGadget->isMassStorage());
-    QPalette p = ui->neededLabel->palette();
+    QPalette p = ui->labelAmountRequired->palette();
     if (p.color(QPalette::WindowText) != colorNeededLabel)
     {
         p.setColor(QPalette::WindowText, colorNeededLabel);
-        ui->neededLabel->setPalette(p);
+        ui->labelAmountRequired->setPalette(p);
     }
-    QFont font = ui->neededLabel->font();
+    QFont font = ui->labelAmountRequired->font();
     font.setBold(bold);
-    ui->neededLabel->setFont(font);
+    ui->labelAmountRequired->setFont(font);
 }
 
 void MainWindow::downloadMetaFile(const QString &urlstring, const QString &saveAs)
