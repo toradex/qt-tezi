@@ -64,7 +64,9 @@ bool UsbGadget::initRndis()
         return false;
     }
 
-    QProcess::execute("/usr/sbin/ifplugd -u 1 -f -i usb0 -r /etc/ifplugd/ifplugd.usb.action");
+    int code = QProcess::execute("/usr/sbin/ifplugd -u 1 -M -f -i usb0 -r /etc/ifplugd/ifplugd.usb.action");
+    if (code)
+        qDebug() << "RNDIS ifplugd exited with exit code" << code;
 
     return true;
 }
