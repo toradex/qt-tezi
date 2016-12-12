@@ -168,6 +168,7 @@ void MainWindow::showProgressDialog(const QString &labelText)
     /* Ask user to wait while list is populated */
     _qpd = new QProgressDialog(labelText, QString(), 0, 0, this);
     _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    _qpd->setModal(true);
     _qpd->show();
 }
 
