@@ -133,10 +133,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Available</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Error downloading meta file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -324,6 +320,10 @@ URL: %2</source>
     </message>
     <message>
         <source>Flash Space</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Capacity</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
