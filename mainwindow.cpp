@@ -197,8 +197,10 @@ void MainWindow::addImages(QList<QVariantMap> images)
 
         if (source == SOURCE_NETWORK) {
             /* We don't show incompatible images from network (there will be a lot of them later!) */
-            if (!supportedImage)
+            if (!supportedImage) {
+                removeTemporaryFiles(m);
                 continue;
+            }
         }
 
         if (supportedImage && supportedConfigFormat) {
@@ -335,6 +337,18 @@ void MainWindow::addImages(QList<QVariantMap> images)
     updateNeeded();
 }
 
+void MainWindow::removeTemporaryFiles(const QVariantMap entry)
+{
+    QString folder = entry["folder"].toString();
+    QDir dir(folder);
+    if (dir.exists()) {
+        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
+            QFile::remove(info.absoluteFilePath());
+        }
+        QDir().rmdir(folder);
+    }
+}
+
 void MainWindow::removeImagesByBlockdev(const QString &blockdev)
 {
     for (int i=0; i< ui->list->count(); i++)
@@ -354,7 +368,10 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
     {
         QListWidgetItem *item = ui->list->item(i);
         QVariantMap entry = item->data(Qt::UserRole).toMap();
-        if (entry.value("source") == source) {
+        QVariant entrysource = entry["source"];
+        if (entrysource == source) {
+            if (entrysource == SOURCE_NETWORK || entrysource == SOURCE_RNDIS)
+                removeTemporaryFiles(entry);
             delete item;
             i--;
         }
@@ -1023,11 +1040,13 @@ void MainWindow::downloadImageJsonCompleted()
     QByteArray json = rd->data();
     QVariantMap imagemap = Json::parse(json).toMap();
 
-    QString basename = imagemap.value("name").toString();
+    QString baseurl = getUrlPath(rd->urlString());
+    QString basename = getUrlTopDir(baseurl);
+    QString folder = "/var/volatile/" + basename;
     QDir d;
-    QString folder = "/var/volatile/" + basename.replace(' ', '_');
-    if (!d.exists(folder))
-        d.mkpath(folder);
+    while (d.exists(folder))
+        folder += '_';
+    d.mkpath(folder);
     imagemap["folder"] = folder;
     imagemap["index"] = rd->index();
 
@@ -1039,7 +1058,6 @@ void MainWindow::downloadImageJsonCompleted()
     imageinfo.write(json);
     imageinfo.close();
     imagemap["image_info"] = "image.json";
-    QString baseurl = getUrlPath(rd->urlString());
     imagemap["baseurl"] = baseurl;
     if (baseurl.contains(RNDIS_ADDRESS))
         imagemap["source"] = SOURCE_RNDIS;

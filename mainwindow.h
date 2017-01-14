@@ -93,6 +93,7 @@ protected:
     void checkSDcard();
     static bool orderByIndex(const QVariantMap &m1, const QVariantMap &m2);
     void addImages(QList<QVariantMap> images);
+    void removeTemporaryFiles(const QVariantMap entry);
     void removeImagesByBlockdev(const QString &blockdev);
     void removeImagesBySource(enum ImageSource source);
     bool hasAddress(const QString &iface, QNetworkAddressEntry *currAddress = NULL);

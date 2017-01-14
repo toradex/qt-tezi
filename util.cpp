@@ -54,6 +54,18 @@ QString getUrlPath(const QString& url)
     return url.left(slash + 1);
 }
 
+QString getUrlTopDir(const QString& url)
+{
+    // Process URL, get top dir from a URL such as
+    // http://server/Folder//image.json
+    int pos = url.lastIndexOf('/');
+    while (url[pos] == '/')
+        pos--;
+    QString dir = url.left(pos + 1);
+    int slash = dir.lastIndexOf('/');
+    return dir.right(pos - slash);
+}
+
 QString getVersionString()
 {
     return QString(QObject::tr("Toradex Easy Installer v%1 (g%2) - Built: %3"))
