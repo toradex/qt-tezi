@@ -762,17 +762,31 @@ void MainWindow::on_actionInstall_triggered()
 
 void MainWindow::on_actionRefreshCloud_triggered()
 {
+    bool downloading = false;
+
     showProgressDialog("");
     removeImagesBySource(SOURCE_NETWORK);
     if (hasAddress("eth0")) {
-        if (!_networkUrlList.empty())
+        if (!_networkUrlList.empty()) {
             downloadLists(_networkUrlList);
+            downloading = true;
+        }
     }
 
     removeImagesBySource(SOURCE_RNDIS);
     if (hasAddress("usb0")) {
-        if (!_rndisUrlList.empty())
+        if (!_rndisUrlList.empty()) {
             downloadLists(_rndisUrlList);
+            downloading = true;
+        }
+    }
+
+    // Hide dialog
+    if (_qpd && !downloading)
+    {
+        _qpd->hide();
+        _qpd->deleteLater();
+        _qpd = NULL;
     }
 }
 
