@@ -10,7 +10,7 @@
 #include <usbg/function/ms.h>
 #include <usbg/function/net.h>
 
-/* For mass storage, we can use Toradex product ids... */
+/* Set Toradex product id at runtime... */
 usbg_gadget_attrs g_attrs_ms = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
@@ -18,19 +18,18 @@ usbg_gadget_attrs g_attrs_ms = {
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = 64, /* Max allowed ep0 packet size */
     .idVendor = 0x1B67,
-    .idProduct = 0x401B,
+    .idProduct = 0x4000,
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
-/* For RNDIS, use NetChip RNDIS Gadget */
-const  usbg_gadget_attrs g_attrs_rndis = {
+usbg_gadget_attrs g_attrs_rndis = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = 64, /* Max allowed ep0 packet size */
-    .idVendor = 0x0525,
-    .idProduct = 0xa4a2,
+    .idVendor = 0x1B67,
+    .idProduct = 0x4000,
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
@@ -91,8 +90,19 @@ struct usbg_f_net_attrs f_net_attrs = {
     .qmult = 5,
 };
 
-usbg_config_strs c_strs_rndis = {
+const usbg_config_strs c_strs_rndis = {
     .configuration = "RNDIS"
+};
+
+const usbg_gadget_os_descs os_desc_rndis = {
+    .use = 1,
+    .b_vendor_code = 0xcd,
+    .qw_sign = "MSFT100",
+};
+
+const usbg_function_os_desc os_desc_f_rndis = {
+    .compatible_id = "RNDIS",
+    .sub_compatible_id = "5162001",
 };
 
 usbg_state *s;
@@ -101,6 +111,7 @@ usbg_function *f_ms;
 
 usbg_gadget *g_rndis;
 usbg_function *f_rndis;
+usbg_f_net *f_net_rndis;
 
 usbg_error usbg_ret;
 
@@ -109,6 +120,7 @@ int usbgadget_init(const char *serial, const char *productName, uint16_t idProdu
     strncpy(g_strs.str_ser, serial, USBG_MAX_STR_LENGTH);
     strncpy(g_strs.str_prd, productName, USBG_MAX_STR_LENGTH);
     g_attrs_ms.idProduct = idProduct;
+    g_attrs_rndis.idProduct = idProduct;
 
     usbg_ret = (usbg_error)usbg_init("/sys/kernel/config", &s);
     if (usbg_ret != USBG_SUCCESS)
@@ -269,8 +281,16 @@ int usbgadget_rndis_init()
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
+    usbg_ret = (usbg_error)usbg_set_gadget_os_descs(g_rndis, &os_desc_rndis);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
     usbg_ret = (usbg_error)usbg_create_function(g_rndis, F_RNDIS, "usb0",
                     &f_net_attrs, &f_rndis);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    usbg_ret = (usbg_error)usbg_set_interf_os_desc(f_rndis, &os_desc_f_rndis);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
@@ -282,6 +302,11 @@ int usbgadget_rndis_init()
     usbg_ret = usbg_add_config_function(c, "RNDIS Function", f_rndis);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
+
+    /* Bind RNDIS to be the OS Descriptor configuration */
+    usbg_ret = usbg_set_os_desc_config(g_rndis, c);
+            if (usbg_ret != USBG_SUCCESS)
+                return -1;
 
     return 0;
 }
