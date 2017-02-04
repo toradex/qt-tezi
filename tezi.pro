@@ -9,7 +9,9 @@ target.files = tezi
 target.path = /var/volatile
 INSTALLS = target
 TEMPLATE = app
-LIBS += -lqjson -lusbgx
+LIBS += -lqjson
+CONFIG += link_pkgconfig
+PKGCONFIG += libusbgx
 
 system(sh updateqm.sh 2>/dev/null)
 
