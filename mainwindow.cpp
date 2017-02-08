@@ -299,6 +299,8 @@ void MainWindow::addImages(QList<QVariantMap> images)
         else if (ImageInfo::isNetwork(source))
             item->setData(SecondIconRole, _internetIcon);
 
+        // Limit width of item so that we always see the right icon and don't get a horizontal scrollbar
+        item->setSizeHint(QSize(ui->list->width() - 24, ui->list->iconSize().height()));
         ui->list->addItem(item);
     }
 
