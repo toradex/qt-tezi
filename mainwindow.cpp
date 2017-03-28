@@ -403,19 +403,17 @@ void MainWindow::checkRemovableBlockdev(const QString &nameFilter)
 
     foreach(QString blockdev, list) {
         QByteArray removable = getFileContents("/sys/block/" + blockdev + "/removable");
-        if (removable.startsWith("1")) {
-            /* Get partitions of this device */
-            QDir devdir("/dev", blockdev + "?*", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
-            QStringList devfiles = devdir.entryList();
-            if (devfiles.isEmpty()) {
-                /* Raw blockdev without any partition table? Try to use that... */
-                processMedia(SOURCE_USB, blockdev);
-            } else {
-                /* Everything else... */
-                foreach (QString devfile, devfiles) {
-                    processMedia(SOURCE_USB, devfile);
-                }
-            }
+        if (!removable.startsWith("1"))
+            continue;
+
+        /* Try raw blockdev without any partition table... */
+        processMedia(SOURCE_USB, blockdev);
+
+        /* Get partitions of this device */
+        QDir devdir("/dev", blockdev + "?*", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
+        QStringList devfiles = devdir.entryList();
+        foreach (QString devfile, devfiles) {
+            processMedia(SOURCE_USB, devfile);
         }
     }
 }
@@ -430,18 +428,14 @@ void MainWindow::checkSDcard()
         if (blockdev.startsWith("mmcblk0"))
             continue;
 
-        /* Get first partition of this device */
+        /* Try raw blockdev without any partition table... */
+        processMedia(SOURCE_SDCARD, blockdev);
+
+        /* Get partitions of this device */
         QDir devdir("/dev", blockdev + "p?", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
         QStringList devfiles = devdir.entryList();
-        if (devfiles.isEmpty()) {
-            /* Raw blockdev without any partition table? Try to use that... */
-            processMedia(SOURCE_SDCARD, blockdev);
-        } else {
-            /* Everything else... */
-            foreach (QString devfile, devfiles) {
-                processMedia(SOURCE_SDCARD, devfile);
-            }
-        }
+        foreach (QString devfile, devfiles)
+            processMedia(SOURCE_SDCARD, devfile);
     }
 }
 
@@ -482,6 +476,10 @@ void MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
 
     /* Did we already checked this block device? */
     if (_blockdevsChecked.contains(blockdevpath))
+        return;
+
+    /* Ignore blockdev if it has not a valid file system */
+    if (MultiImageWriteThread::getFsType(blockdevpath).length() <= 0)
         return;
 
     qDebug() << "Reading images from media" << blockdevpath;

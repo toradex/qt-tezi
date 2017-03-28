@@ -695,11 +695,11 @@ bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QS
     return runwritecmd(cmd);
 }
 
-QByteArray MultiImageWriteThread::getLabel(const QString part)
+QByteArray MultiImageWriteThread::getBlkId(const QString &part, const QString &tag)
 {
     QByteArray result;
     QProcess p;
-    p.start("/sbin/blkid -s LABEL -o value "+part);
+    p.start("/sbin/blkid -s " + tag + " -o value " + part);
     p.waitForFinished();
 
     if (p.exitCode() == 0)
@@ -708,17 +708,19 @@ QByteArray MultiImageWriteThread::getLabel(const QString part)
     return result;
 }
 
-QByteArray MultiImageWriteThread::getUUID(const QString part)
+QByteArray MultiImageWriteThread::getLabel(const QString &part)
 {
-    QByteArray result;
-    QProcess p;
-    p.start("/sbin/blkid -s UUID -o value "+part);
-    p.waitForFinished();
+    return getBlkId(part, "LABEL");
+}
 
-    if (p.exitCode() == 0)
-        result = p.readAll().trimmed();
+QByteArray MultiImageWriteThread::getUUID(const QString &part)
+{
+    return getBlkId(part, "UUID");
+}
 
-    return result;
+QByteArray MultiImageWriteThread::getFsType(const QString &part)
+{
+    return getBlkId(part, "TYPE");
 }
 
 QString MultiImageWriteThread::getDescription(const QString &folder, const QString &flavour)

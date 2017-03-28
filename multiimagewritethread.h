@@ -22,6 +22,11 @@ public:
     void setImage(const QString &folder, const QString &fileinfo, const QString &baseurl, enum ImageSource source);
     void setConfigBlock(ConfigBlock *configBlock);
 
+    static QByteArray getBlkId(const QString &part, const QString &tag);
+    static QByteArray getLabel(const QString &part);
+    static QByteArray getUUID(const QString &part);
+    static QByteArray getFsType(const QString &part);
+
     ImageInfo *getImageInfo() {
         return _image;
     }
@@ -39,8 +44,6 @@ protected:
     bool untar(const QString &tarball);
     bool copy(const QString &baseurl, const QString &file);
     bool isLabelAvailable(const QByteArray &label);
-    QByteArray getLabel(const QString part);
-    QByteArray getUUID(const QString part);
     void patchConfigTxt();
     QString getDescription(const QString &folder, const QString &flavour);
     QString getUncompressCommand(const QString &file);
