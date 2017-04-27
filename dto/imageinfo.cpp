@@ -1,6 +1,7 @@
 #include <QDir>
 #include <QDebug>
 #include "blockdevinfo.h"
+#include "mtddevinfo.h"
 #include "imageinfo.h"
 #include "partitioninfo.h"
 #include "json.h"
@@ -26,5 +27,12 @@ ImageInfo::ImageInfo(const QString &folder, const QString &infofile, const QStri
         QVariantMap blockdev = bd.toMap();
 
         _blockdevs.append(new BlockDevInfo(blockdev, this));
+    }
+
+    QVariantList mtddevs = m.value("mtddevs").toList();
+    foreach (QVariant md, mtddevs) {
+        QVariantMap mtddev = md.toMap();
+
+        _mtddevs.append(new MtdDevInfo(mtddev, this));
     }
 }

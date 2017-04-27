@@ -40,7 +40,12 @@ SOURCES += main.cpp\
     dto/blockdevinfo.cpp \
     dto/partitioninfo.cpp \
     dto/blockdevcontent.cpp \
-    dto/rawfileinfo.cpp
+    dto/rawfileinfo.cpp \
+    dto/mtddevinfo.cpp \
+    dto/mtdpartitioninfo.cpp \
+    dto/mtddevcontentinfo.cpp \
+    mtdnamedevicetranslator.cpp \
+    dto/ubivolumeinfo.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -64,7 +69,12 @@ HEADERS  += mainwindow.h \
     dto/blockdevinfo.h \
     dto/partitioninfo.h \
     dto/blockdevcontent.h \
-    dto/rawfileinfo.h
+    dto/rawfileinfo.h \
+    dto/mtddevinfo.h \
+    dto/mtdpartitioninfo.h \
+    dto/mtddevcontentinfo.h \
+    mtdnamedevicetranslator.h \
+    dto/ubivolumeinfo.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

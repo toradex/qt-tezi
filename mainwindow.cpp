@@ -72,6 +72,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
 
+#if 0
     _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
     if (_toradexConfigBlock == NULL) {
         qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
@@ -81,6 +82,8 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
             _toradexConfigBlock->needsWrite = true;
         }
     }
+#endif
+    _toradexConfigBlock = ConfigBlock::readConfigBlockFromMtd(QString("mtd0"), Q_INT64_C(0x800));
 
     if (_toradexConfigBlock == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
@@ -425,8 +428,10 @@ void MainWindow::checkSDcard()
 
     // Unfortunately we can't rely on removable property for SD card... just ignore mmcblk0 and take everything else
     foreach(QString blockdev, list) {
+#if 0
         if (blockdev.startsWith("mmcblk0"))
             continue;
+#endif
 
         /* Try raw blockdev without any partition table... */
         processMedia(SOURCE_SDCARD, blockdev);

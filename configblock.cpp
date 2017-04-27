@@ -130,7 +130,7 @@ void ConfigBlock::writeToBlockdev(const QString &dev, qint64 offset)
     disableBlockDevForceRo(dev);
 
     QFile blockDev("/dev/" + dev);
-    blockDev.open(blockDev.ReadWrite);
+    blockDev.open(QFile::ReadWrite);
     blockDev.seek(calculateAbsoluteOffset(blockDev.handle(), offset));
 
     blockDev.write(_cb);
@@ -142,10 +142,29 @@ ConfigBlock *ConfigBlock::readConfigBlockFromBlockdev(const QString &dev, qint64
     qDebug() << "Trying to read configblock from" << dev << "at" << offset;
 
     QFile blockDev("/dev/" + dev);
-    blockDev.open(blockDev.ReadOnly);
+    blockDev.open(QFile::ReadOnly);
     blockDev.seek(calculateAbsoluteOffset(blockDev.handle(), offset));
 
     QByteArray cb = blockDev.read(512);
+    blockDev.close();
+    struct ConfigBlockTag *tag = (struct ConfigBlockTag *)cb.data();
+
+    if (tag->flags != TAG_FLAG_VALID || tag->id != TAG_VALID)
+        return NULL;
+
+    return new ConfigBlock(cb);
+}
+
+ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offset)
+{
+    qDebug() << "Trying to read configblock from" << dev << "at" << offset;
+
+    QFile mtdDev("/dev/" + dev);
+    mtdDev.open(QFile::ReadOnly);
+    mtdDev.seek(offset);
+
+    QByteArray cb = mtdDev.read(512);
+    mtdDev.close();
     struct ConfigBlockTag *tag = (struct ConfigBlockTag *)cb.data();
 
     if (tag->flags != TAG_FLAG_VALID || tag->id != TAG_VALID)

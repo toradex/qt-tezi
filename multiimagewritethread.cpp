@@ -1,10 +1,15 @@
 #include "multiimagewritethread.h"
 #include "dto/blockdevinfo.h"
+#include "dto/mtddevcontentinfo.h"
+#include "dto/mtddevinfo.h"
+#include "dto/mtdpartitioninfo.h"
 #include "dto/partitioninfo.h"
 #include "dto/rawfileinfo.h"
+#include "dto/ubivolumeinfo.h"
 #include "config.h"
 #include "json.h"
 #include "util.h"
+#include "mtdnamedevicetranslator.h"
 #include <QDir>
 #include <QFile>
 #include <QDebug>
@@ -39,6 +44,8 @@ void MultiImageWriteThread::setConfigBlock(ConfigBlock *configBlock)
 void MultiImageWriteThread::run()
 {
     QList<BlockDevInfo *> *blockdevs = _image->blockdevs();
+    QList<MtdDevInfo *> *mtddevs = _image->mtddevs();
+
     qDebug() << "Processing Image:" << _image->name();
 
     if (!_configBlock) {
@@ -75,6 +82,25 @@ void MultiImageWriteThread::run()
             return;
     }
 
+    if (mtddevs) {
+        MtdNameDeviceTranslator mtdNameDev;
+
+        foreach (MtdDevInfo *mtddev, *mtddevs) {
+            QString mtdname = mtddev->name();
+            QString mtddevname = mtdNameDev.translate(mtdname);
+            qDebug() << "Processing mtddev: " << mtddevname;
+
+            QByteArray mtdDevice = "/dev/" + mtddevname.toAscii();
+            if (!QFile::exists(mtdDevice)) {
+                emit error(tr("Mtd device '%1' does not exist").arg(QString(mtdDevice)));
+                return;
+            }
+            mtddev->setMtdDevice(mtdDevice);
+
+            if (!processMtdDev(mtddev))
+                return;
+        }
+    }
 
     /* Run wrap-up script */
     if (!_image->wrapupScript().isEmpty()) {
@@ -129,8 +155,44 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
 
     output = p.readAll();
     qDebug() << "Output:" << output;
-    qDebug() << "Finished with exit status:" << p.exitStatus();
+    qDebug() << "Finished with exit code:" << p.exitCode();
     return p.exitCode() == 0;
+}
+
+bool MultiImageWriteThread::runCommand(QString cmd, QStringList args, QByteArray &output)
+{
+    QProcess p;
+
+    qDebug() << "Executing: " << cmd << args;
+    p.setProcessChannelMode(QProcess::MergedChannels);
+    p.setWorkingDirectory(_image->folder());
+    p.start(cmd, args);
+
+    p.waitForFinished(30000);
+
+    output = p.readAll();
+    qDebug() << "Output:" << output;
+    qDebug() << "Finished with exit code:" << p.exitCode();
+    return p.exitCode() == 0;
+}
+
+bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
+{
+    QByteArray device = mtddev->mtdDevice();
+
+    MtdDevContentInfo *content = mtddev->content();
+    if (content != NULL) {
+        if (!processMtdContent(content, device))
+            return false;
+    }
+
+    QList<UbiVolumeInfo *> *volumes = mtddev->ubiVolumes();
+    if (volumes->length() > 0) {
+        if (!processUbi(volumes, device))
+            return false;
+    }
+
+    return true;
 }
 
 bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
@@ -357,6 +419,96 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
         }
     }
 
+    return true;
+}
+
+bool MultiImageWriteThread::eraseMtdDevice(QByteArray mtddevice)
+{
+    QStringList eraseargs;
+    QByteArray output;
+    eraseargs << "--quiet" << mtddevice << "0" << "0";
+
+    return runCommand("/usr/sbin/flash_erase", eraseargs, output);
+}
+
+bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice)
+{
+    // Do not recreate UBI if not necessary (preserves erase counters...)
+    QByteArray output;
+    QStringList ubiattachargs;
+    ubiattachargs << "-p" << mtddevice;
+
+    if (!runCommand("/usr/sbin/ubiattach", ubiattachargs, output)) {
+        qDebug() << "Attaching UBI failed, erasing partition first";
+        // Best effort...
+        eraseMtdDevice(mtddevice);
+
+        if (!runCommand("/usr/sbin/ubiattach", ubiattachargs, output)) {
+            emit error(tr("Attaching UBI failed even after erasing the MTD partition!") + "\n" + output);
+            return false;
+        }
+    }
+
+    // At this point UBI should be attached, check Volumes...
+    int ubivolid = 0;
+    foreach (UbiVolumeInfo *ubivol, *volumes) {
+        QByteArray output;
+        QStringList ubimkvolargs;
+        ubimkvolargs << "/dev/ubi0" << "-N" << ubivol->name();
+
+        if (ubivol->size() > 0)
+            ubimkvolargs << "-s" << QString("%1KiB").arg(ubivol->size());
+        else
+            ubimkvolargs << "-m";
+
+
+        runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output);
+
+        MtdDevContentInfo *contentInfo = ubivol->content();
+        if (contentInfo->fsType() == "raw") {
+            QStringList ubiupdatevolargs;
+            ubiupdatevolargs << QString("/dev/ubi0_%1").arg(ubivolid);
+            ubiupdatevolargs << contentInfo->rawFiles()->first()->filename();
+            runCommand("/usr/sbin/ubiupdatevol", ubiupdatevolargs, output);
+        } else if(contentInfo->fsType() == "ubi") {
+            QStringList mkfsargs;
+            mkfsargs << QString("/dev/ubi0_%1").arg(ubivolid);
+            runCommand("/usr/sbin/mkfs.ubifs", mkfsargs, output);
+        }
+
+        ubivolid++;
+    }
+
+    runCommand("/usr/sbin/ubidetach", ubiattachargs, output);
+
+    return true;
+}
+
+bool MultiImageWriteThread::processMtdContent(MtdDevContentInfo *content, QByteArray mtddevice)
+{
+    QString os_name = _image->name();
+    QByteArray fstype = content->fsType();
+
+    if (fstype == "raw" && content->rawFiles()->length() > 0)
+    {
+        RawFileInfo *rawFileInfo = content->rawFiles()->first();
+        QString filename = rawFileInfo->filename();
+
+        emit statusUpdate(tr("%1: Writing raw file").arg(os_name));
+        if (!eraseMtdDevice(mtddevice)) {
+            emit error(tr("Erasing flash failed"));
+            return false;
+        }
+
+        QByteArray output;
+        QStringList flashargs;
+        flashargs << filename << mtddevice;
+
+        if (!runCommand("/usr/sbin/flashcp", flashargs, output)) {
+            emit error(tr("Flashing failed") + "\n" + output);
+            return false;
+        }
+    }
     return true;
 }
 

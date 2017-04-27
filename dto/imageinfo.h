@@ -17,6 +17,7 @@ enum ImageSource {
 };
 
 class BlockDevInfo;
+class MtdDevInfo;
 
 class ImageInfo : public QObject
 {
@@ -81,6 +82,11 @@ public:
         return &_blockdevs;
     }
 
+    inline QList<MtdDevInfo *> *mtddevs()
+    {
+        return &_mtddevs;
+    }
+
     inline QList<QString> supportedProductIds() {
         return _supportedProductIds;
     }
@@ -98,6 +104,7 @@ protected:
     QString _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript;
     bool _bootable, _isInstaller;
     QList<BlockDevInfo *> _blockdevs;
+    QList<MtdDevInfo *> _mtddevs;
     QList<QString> _supportedProductIds;
     enum ImageSource _imageSource;
 

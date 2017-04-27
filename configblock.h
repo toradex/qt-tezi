@@ -36,6 +36,7 @@ class ConfigBlock : public QObject
 public:
     explicit ConfigBlock(const QByteArray &cb, QObject *parent = 0);
     static ConfigBlock *readConfigBlockFromBlockdev(const QString &dev, qint64 offset);
+    static ConfigBlock *readConfigBlockFromMtd(const QString &dev, qint64 offset);
     static qint64 calculateAbsoluteOffset(int blockdevHandle, qint64 offset);
     void writeToBlockdev(const QString &dev, qint64 offset);
     QString getSerialNumber();

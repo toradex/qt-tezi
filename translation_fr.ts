@@ -425,6 +425,26 @@ URL: %2</source>
         <source>%1: Writing raw files</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Mtd device &apos;%1&apos; does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: Writing raw file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Erasing flash failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Flashing failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attaching UBI failed even after erasing the MTD partition!</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProgressSlideshowDialog</name>
