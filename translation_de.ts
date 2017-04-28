@@ -358,38 +358,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1: Creating filesystem (%2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Mounting file system</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Error mounting file system</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Downloading and extracting filesystem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Extracting filesystem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error creating file system</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error downloading or writing image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Prepare script &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
@@ -407,14 +375,6 @@ URL: %2</source>
     </message>
     <message>
         <source>Error executing wrap-up script</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Writing partition clone image</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Downloading/Copying files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -451,6 +411,46 @@ URL: %2</source>
     </message>
     <message>
         <source>Creating UBI volume failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error updateing UBI volume</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading and extracting filesystem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extracting filesystem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading/Copying files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Writing partition clone image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Creating filesystem (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mounting file system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error creating file system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading or writing image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

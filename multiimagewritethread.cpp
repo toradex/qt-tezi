@@ -41,6 +41,11 @@ void MultiImageWriteThread::setConfigBlock(ConfigBlock *configBlock)
     _configBlock = configBlock;
 }
 
+void MultiImageWriteThread::updateStatus(QString status)
+{
+    emit statusUpdate(QString("%1: %2").arg(_image->name(), status));
+}
+
 void MultiImageWriteThread::run()
 {
     QList<BlockDevInfo *> *blockdevs = _image->blockdevs();
@@ -438,7 +443,7 @@ bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString 
     QByteArray output;
 
     if (fstype == "raw") {
-        emit statusUpdate(tr("Writing raw files"));
+        updateStatus(tr("Writing raw files"));
         QList<RawFileInfo *> rawFiles = filterRawFileInfo(contentInfo->rawFiles());
 
         if (rawFiles.count() > 1)
@@ -449,11 +454,12 @@ bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString 
         ubiupdatevolargs << ubivoldev << rawFiles.first()->filename();
         if (!runCommand("/usr/sbin/ubiupdatevol", ubiupdatevolargs, output))
         {
-            emit error(tr("Error mounting file system") + "\n" + output);
+            emit error(tr("Error updateing UBI volume") + "\n" + output);
             return false;
         }
     } else if(fstype == "ubifs") {
         /* Typically the rootfs */
+        updateStatus(tr("Creating filesystem (%2)").arg(QString(fstype)));
         QStringList mkfsargs;
         mkfsargs << ubivoldev;
         runCommand("/usr/sbin/mkfs.ubifs", mkfsargs, output);
@@ -547,17 +553,15 @@ QList<RawFileInfo *> MultiImageWriteThread::filterRawFileInfo(QList<RawFileInfo 
 
 bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray mtddevice)
 {
-    QString os_name = _image->name();
     QByteArray fstype = content->fsType();
 
     if (fstype == "raw")
     {
-        emit statusUpdate(tr("Writing raw files"));
+        updateStatus(tr("Writing raw files"));
         QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
 
-        if (rawFiles.count() > 1) {
+        if (rawFiles.count() > 1)
             qDebug() << "Warning: MTD partitions support only one raw file per partition";
-        }
 
         RawFileInfo *rawFileInfo = rawFiles.first();
         QString filename = rawFileInfo->filename();
@@ -581,21 +585,20 @@ bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray m
 
 bool MultiImageWriteThread::processFileCopy(QString tarball, QStringList filelist)
 {
-    QString os_name = _image->name();
     bool resultfile = true;
     bool resultfilelist = true;
 
     if (!tarball.isEmpty()) {
         if (tarball.startsWith("http"))
-            emit statusUpdate(tr("%1: Downloading and extracting filesystem").arg(os_name));
+            updateStatus(tr("Downloading and extracting filesystem"));
         else
-            emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
+            updateStatus(tr("Extracting filesystem"));
 
         resultfile = untar(tarball);
     }
 
     if (!filelist.isEmpty()) {
-        emit statusUpdate(tr("%1: Downloading/Copying files").arg(os_name));
+        updateStatus(tr("Downloading/Copying files"));
         foreach(QString file,filelist) {
             if (!copy(_image->baseUrl(), file)) {
                 resultfilelist = false;
@@ -609,7 +612,6 @@ bool MultiImageWriteThread::processFileCopy(QString tarball, QStringList filelis
 
 bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray partdevice)
 {
-    QString os_name = _image->name();
     QByteArray fstype   = content->fsType();
     QByteArray mkfsopt  = content->mkfsOptions();
     QByteArray label = content->label();
@@ -639,7 +641,7 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
 
     if (fstype == "raw")
     {
-        emit statusUpdate(tr("Writing raw files"));
+        updateStatus(tr("Writing raw files"));
         QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
 
         foreach (RawFileInfo *rawFile, rawFiles) {
@@ -649,13 +651,13 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
     }
     else if (fstype.startsWith("partclone"))
     {
-        emit statusUpdate(tr("%1: Writing partition clone image").arg(os_name));
+        emit statusUpdate(tr("Writing partition clone image"));
         if (!partclone_restore(tarball, partdevice))
             return false;
     }
     else if (fstype != "unformatted")
     {
-        emit statusUpdate(tr("%1: Creating filesystem (%2)").arg(os_name, QString(fstype)));
+        emit statusUpdate(tr("Creating filesystem (%2)").arg(QString(fstype)));
         if (!mkfs(partdevice, fstype, label, mkfsopt))
             return false;
 
@@ -663,15 +665,21 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
         if (tarball.isEmpty() && filelist.isEmpty())
             return true;
 
-        emit statusUpdate(tr("%1: Mounting file system").arg(os_name));
+        emit statusUpdate(tr("Mounting file system"));
+
+        QStringList mountargs;
+        mountargs << partdevice << TEMP_MOUNT_FOLDER;
+
         QString mountcmd;
         if (fstype == "ntfs")
             mountcmd = "/sbin/mount.ntfs-3g ";
         else
             mountcmd = "mount ";
-        if (QProcess::execute(mountcmd + partdevice + " " TEMP_MOUNT_FOLDER) != 0)
+
+        QByteArray output;
+        if (!runCommand(mountcmd, mountargs, output))
         {
-            emit error(tr("%1: Error mounting file system").arg(os_name));
+            emit error(tr("Error mounting file system") + "\n" + output);
             return false;
         }
 
@@ -942,31 +950,6 @@ QByteArray MultiImageWriteThread::getUUID(const QString &part)
 QByteArray MultiImageWriteThread::getFsType(const QString &part)
 {
     return getBlkId(part, "TYPE");
-}
-
-QString MultiImageWriteThread::getDescription(const QString &folder, const QString &flavour)
-{
-    if (QFile::exists(folder+"/flavours.json"))
-    {
-        QVariantMap v = Json::loadFromFile(folder+"/flavours.json").toMap();
-        QVariantList fl = v.value("flavours").toList();
-
-        foreach (QVariant f, fl)
-        {
-            QVariantMap fm  = f.toMap();
-            if (fm.value("name").toString() == flavour)
-            {
-                return fm.value("description").toString();
-            }
-        }
-    }
-    else if (QFile::exists(folder+"/os.json"))
-    {
-        QVariantMap v = Json::loadFromFile(folder+"/os.json").toMap();
-        return v.value("description").toString();
-    }
-
-    return "";
 }
 
 bool MultiImageWriteThread::isURL(const QString &s)

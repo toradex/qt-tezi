@@ -35,6 +35,7 @@ public:
 
 protected:
     virtual void run();
+    void updateStatus(QString status);
     bool runScript(QString script, QByteArray &output);
     bool runCommand(QString cmd, QStringList args, QByteArray &output);
     QList<RawFileInfo *> filterRawFileInfo(QList<RawFileInfo *> *rawFiles);
@@ -55,7 +56,6 @@ protected:
     bool copy(const QString &baseurl, const QString &file);
     bool isLabelAvailable(const QByteArray &label);
     void patchConfigTxt();
-    QString getDescription(const QString &folder, const QString &flavour);
     QString getUncompressCommand(const QString &file);
     bool writePartitionTable(QByteArray blockdevpath, const QMap<int, BlockDevPartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
