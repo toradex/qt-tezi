@@ -499,77 +499,87 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="499"/>
+        <location filename="multiimagewritethread.cpp" line="442"/>
+        <source>Formatting UBI partition failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="multiimagewritethread.cpp" line="450"/>
+        <source>Attaching UBI failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="multiimagewritethread.cpp" line="488"/>
+        <source>Error mounting file system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="multiimagewritethread.cpp" line="523"/>
         <source>Erasing flash failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="497"/>
+        <location filename="multiimagewritethread.cpp" line="521"/>
         <source>%1: Writing raw file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="508"/>
+        <location filename="multiimagewritethread.cpp" line="532"/>
         <source>Flashing failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="447"/>
-        <source>Attaching UBI failed even after erasing the MTD partition!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="multiimagewritethread.cpp" line="548"/>
+        <location filename="multiimagewritethread.cpp" line="600"/>
         <source>%1: Writing raw files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="564"/>
+        <location filename="multiimagewritethread.cpp" line="616"/>
         <source>%1: Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="570"/>
+        <location filename="multiimagewritethread.cpp" line="622"/>
         <source>%1: Creating filesystem (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="578"/>
+        <location filename="multiimagewritethread.cpp" line="630"/>
         <source>%1: Mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="586"/>
+        <location filename="multiimagewritethread.cpp" line="638"/>
         <source>%1: Error mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="593"/>
+        <location filename="multiimagewritethread.cpp" line="547"/>
         <source>%1: Downloading and extracting filesystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="595"/>
+        <location filename="multiimagewritethread.cpp" line="549"/>
         <source>%1: Extracting filesystem</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="602"/>
+        <location filename="multiimagewritethread.cpp" line="555"/>
         <source>%1: Downloading/Copying files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="670"/>
+        <location filename="multiimagewritethread.cpp" line="703"/>
         <source>Error creating file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="758"/>
+        <location filename="multiimagewritethread.cpp" line="791"/>
         <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="723"/>
+        <location filename="multiimagewritethread.cpp" line="756"/>
         <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>

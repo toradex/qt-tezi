@@ -433,20 +433,22 @@ bool MultiImageWriteThread::eraseMtdDevice(QByteArray mtddevice)
 
 bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice)
 {
-    // Do not recreate UBI if not necessary (preserves erase counters...)
+    bool result = true;
     QByteArray output;
+    QStringList ubiformatargs;
+    ubiformatargs << mtddevice << "-q" << "-y";
+
+    if (!runCommand("/usr/sbin/ubiformat", ubiformatargs, output)) {
+        emit error(tr("Formatting UBI partition failed!") + "\n" + output);
+        return false;
+    }
+
     QStringList ubiattachargs;
     ubiattachargs << "-p" << mtddevice;
 
     if (!runCommand("/usr/sbin/ubiattach", ubiattachargs, output)) {
-        qDebug() << "Attaching UBI failed, erasing partition first";
-        // Best effort...
-        eraseMtdDevice(mtddevice);
-
-        if (!runCommand("/usr/sbin/ubiattach", ubiattachargs, output)) {
-            emit error(tr("Attaching UBI failed even after erasing the MTD partition!") + "\n" + output);
-            return false;
-        }
+        emit error(tr("Attaching UBI failed!") + "\n" + output);
+        return false;
     }
 
     // At this point UBI should be attached, check Volumes...
@@ -464,16 +466,38 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
 
         runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output);
 
+        QString ubivoldev = QString("/dev/ubi0_%1").arg(ubivolid);
+
         MtdDevContentInfo *contentInfo = ubivol->content();
         if (contentInfo->fsType() == "raw") {
+            /* Typically Kernel/Device Tree */
             QStringList ubiupdatevolargs;
-            ubiupdatevolargs << QString("/dev/ubi0_%1").arg(ubivolid);
-            ubiupdatevolargs << contentInfo->rawFiles()->first()->filename();
+            ubiupdatevolargs << ubivoldev << contentInfo->rawFiles()->first()->filename();
             runCommand("/usr/sbin/ubiupdatevol", ubiupdatevolargs, output);
-        } else if(contentInfo->fsType() == "ubi") {
+        } else if(contentInfo->fsType() == "ubifs") {
+            /* Typically the rootfs */
             QStringList mkfsargs;
-            mkfsargs << QString("/dev/ubi0_%1").arg(ubivolid);
+            mkfsargs << ubivoldev;
             runCommand("/usr/sbin/mkfs.ubifs", mkfsargs, output);
+
+            QStringList mountargs;
+            mountargs << "-t" << "ubifs" << ubivoldev << TEMP_MOUNT_FOLDER;
+
+            if (!runCommand("mount", mountargs, output))
+            {
+                emit error(tr("Error mounting file system") + "\n" + output);
+                result = false;
+                break;
+            }
+
+            QString tarball = contentInfo->filename();
+            QStringList filelist = contentInfo->filelist();
+            result = processFileCopy(tarball, filelist);
+
+            QProcess::execute("umount " TEMP_MOUNT_FOLDER);
+
+            if (!result)
+                break;
         }
 
         ubivolid++;
@@ -481,7 +505,7 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
 
     runCommand("/usr/sbin/ubidetach", ubiattachargs, output);
 
-    return true;
+    return result;
 }
 
 bool MultiImageWriteThread::processMtdContent(MtdDevContentInfo *content, QByteArray mtddevice)
@@ -510,6 +534,34 @@ bool MultiImageWriteThread::processMtdContent(MtdDevContentInfo *content, QByteA
         }
     }
     return true;
+}
+
+bool MultiImageWriteThread::processFileCopy(QString tarball, QStringList filelist)
+{
+    QString os_name = _image->name();
+    bool resultfile = true;
+    bool resultfilelist = true;
+
+    if (!tarball.isEmpty()) {
+        if (tarball.startsWith("http"))
+            emit statusUpdate(tr("%1: Downloading and extracting filesystem").arg(os_name));
+        else
+            emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
+
+        resultfile = untar(tarball);
+    }
+
+    if (!filelist.isEmpty()) {
+        emit statusUpdate(tr("%1: Downloading/Copying files").arg(os_name));
+        foreach(QString file,filelist) {
+            if (!copy(_image->baseUrl(), file)) {
+                resultfilelist = false;
+                break;
+            }
+        }
+    }
+
+    return resultfile && resultfilelist;
 }
 
 bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteArray partdevice)
@@ -587,30 +639,11 @@ bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteAr
             return false;
         }
 
-        bool resultfile = true;
-        if (!tarball.isEmpty()) {
-            if (tarball.startsWith("http"))
-                emit statusUpdate(tr("%1: Downloading and extracting filesystem").arg(os_name));
-            else
-                emit statusUpdate(tr("%1: Extracting filesystem").arg(os_name));
-
-            resultfile = untar(tarball);
-        }
-
-        bool resultfilelist = true;
-        if (!filelist.isEmpty()) {
-            emit statusUpdate(tr("%1: Downloading/Copying files").arg(os_name));
-            foreach(QString file,filelist) {
-                if (!copy(_image->baseUrl(), file)) {
-                    resultfilelist = false;
-                    break;
-                }
-            }
-        }
+        bool resultfilecopy = processFileCopy(tarball, filelist);
 
         QProcess::execute("umount " TEMP_MOUNT_FOLDER);
 
-        return resultfile && resultfilelist;
+        return resultfilecopy;
     }
 
     return true;

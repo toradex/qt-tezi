@@ -43,6 +43,7 @@ protected:
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions);
     bool processContent(BlockDevContentInfo *fs, QByteArray partdevice);
+    bool processFileCopy(QString tarball, QStringList filelist);
     bool processMtdDev(MtdDevInfo *mtddev);
     bool processMtdContent(MtdDevContentInfo *content, QByteArray mtddevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");

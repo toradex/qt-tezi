@@ -442,7 +442,15 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Attaching UBI failed even after erasing the MTD partition!</source>
+        <source>Formatting UBI partition failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Attaching UBI failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -7,6 +7,10 @@ MtdDevContentInfo::MtdDevContentInfo(const QVariantMap &m, QObject *parent) :
 
     if (m.contains("filesystem_type"))
         _fstype = m.value("filesystem_type").toByteArray().toLower();
+
+    _filename      = m.value("filename").toString();
+    _filelist      = m.value("filelist").toStringList();
+
     //_mkfsOptions   = m.value("mkfs_options").toByteArray();
     //_uncompressedSize = m.value("uncompressed_size", 0).toInt();
 
