@@ -38,14 +38,12 @@ SOURCES += main.cpp\
     discardthread.cpp \
     dto/imageinfo.cpp \
     dto/blockdevinfo.cpp \
-    dto/partitioninfo.cpp \
-    dto/blockdevcontent.cpp \
     dto/rawfileinfo.cpp \
     dto/mtddevinfo.cpp \
-    dto/mtdpartitioninfo.cpp \
-    dto/mtddevcontentinfo.cpp \
     mtdnamedevicetranslator.cpp \
-    dto/ubivolumeinfo.cpp
+    dto/ubivolumeinfo.cpp \
+    dto/contentinfo.cpp \
+    dto/blockdevpartitioninfo.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -67,14 +65,14 @@ HEADERS  += mainwindow.h \
     discardthread.h \
     dto/imageinfo.h \
     dto/blockdevinfo.h \
-    dto/partitioninfo.h \
-    dto/blockdevcontent.h \
     dto/rawfileinfo.h \
     dto/mtddevinfo.h \
     dto/mtdpartitioninfo.h \
     dto/mtddevcontentinfo.h \
     mtdnamedevicetranslator.h \
-    dto/ubivolumeinfo.h
+    dto/ubivolumeinfo.h \
+    dto/contentinfo.h \
+    dto/blockdevpartitioninfo.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

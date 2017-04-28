@@ -1,9 +1,9 @@
 #include "multiimagewritethread.h"
 #include "dto/blockdevinfo.h"
-#include "dto/mtddevcontentinfo.h"
+#include "dto/blockdevpartitioninfo.h"
+#include "dto/contentinfo.h"
 #include "dto/mtddevinfo.h"
 #include "dto/mtdpartitioninfo.h"
-#include "dto/partitioninfo.h"
 #include "dto/rawfileinfo.h"
 #include "dto/ubivolumeinfo.h"
 #include "config.h"
@@ -180,7 +180,7 @@ bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
 {
     QByteArray device = mtddev->mtdDevice();
 
-    MtdDevContentInfo *content = mtddev->content();
+    ContentInfo *content = mtddev->content();
     if (content != NULL) {
         if (!processMtdContent(content, device))
             return false;
@@ -200,7 +200,7 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
     /* Make sure block device is writeable */
     disableBlockDevForceRo(blockdev->name());
 
-    QList<PartitionInfo *> *partitions = blockdev->partitions();
+    QList<BlockDevPartitionInfo *> *partitions = blockdev->partitions();
     if (!partitions->isEmpty())
     {
         /* Writing partition table to this blockdev */
@@ -209,7 +209,7 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
     }
 
     /* Writing raw content ignoring parition layout to this blockdev */
-    BlockDevContentInfo *content = blockdev->content();
+    ContentInfo *content = blockdev->content();
     if (content != NULL) {
         QByteArray device = blockdev->blockDevice();
         if (!processContent(content, device))
@@ -219,7 +219,7 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
     return true;
 }
 
-bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions)
+bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions)
 {
     int totalnominalsize = 0, totaluncompressedsize = 0, numparts = 0, numexpandparts = 0;
 
@@ -230,16 +230,16 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
     int availableMB = (totalSectors - PARTITION_ALIGNMENT) / 2048;
 
     /* key: partition number, value: partition information */
-    QMap<int, PartitionInfo *> partitionMap;
+    QMap<int, BlockDevPartitionInfo *> partitionMap;
 
-    foreach (PartitionInfo *partition, *partitions)
+    foreach (BlockDevPartitionInfo *partition, *partitions)
     {
         qDebug() << "Partition:" << numparts << "Type:" << partition->partitionType();
         numparts++;
         if ( partition->wantMaximised() )
             numexpandparts++;
         totalnominalsize += partition->partitionSizeNominal();
-        BlockDevContentInfo *content = partition->content();
+        ContentInfo *content = partition->content();
         if (content != NULL)
             totaluncompressedsize += content->uncompressedSize();
 
@@ -277,7 +277,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
 
     /* Assign logical partition numbers to partitions that did not reserve a special number */
     int pnr = 1;
-    foreach (PartitionInfo *partition, *(blockdev->partitions()))
+    foreach (BlockDevPartitionInfo *partition, *(blockdev->partitions()))
     {
         if (!partition->requiresPartitionNumber())
         {
@@ -291,8 +291,8 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
 
     /* Set partition starting sectors and sizes. */
     int offset = PARTITION_ALIGNMENT;
-    QList<PartitionInfo *> partitionList = partitionMap.values();
-    foreach (PartitionInfo *p, partitionList)
+    QList<BlockDevPartitionInfo *> partitionList = partitionMap.values();
+    foreach (BlockDevPartitionInfo *p, partitionList)
     {
         if (p->offset()) /* OS wants its partition at a fixed offset */
         {
@@ -349,16 +349,16 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
 
     /* Zero out first sector of partitions, to make sure to get rid of previous file system (label) */
     emit statusUpdate(tr("Zero'ing start of each partition"));
-    foreach (PartitionInfo *p, partitionMap.values())
+    foreach (BlockDevPartitionInfo *p, partitionMap.values())
     {
         if (p->partitionSizeSectors())
             QProcess::execute("/bin/dd count=1 bs=512 if=/dev/zero of="+p->partitionDevice());
     }
 
     /* Install each partition */
-    foreach (PartitionInfo *p, *partitions)
+    foreach (BlockDevPartitionInfo *p, *partitions)
     {
-        BlockDevContentInfo *content = p->content();
+        ContentInfo *content = p->content();
         if (content != NULL) {
             QByteArray partdevice = p->partitionDevice();
             if (!processContent(content, partdevice))
@@ -370,7 +370,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Part
 }
 
 
-bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const QMap<int, PartitionInfo *> &partitionMap)
+bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const QMap<int, BlockDevPartitionInfo *> &partitionMap)
 {
     /* Write partition table using sfdisk */
     QByteArray partitionTable;
@@ -378,7 +378,7 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     {
         if (partitionMap.contains(i))
         {
-            PartitionInfo *p = partitionMap.value(i);
+            BlockDevPartitionInfo *p = partitionMap.value(i);
 
             partitionTable += QByteArray::number(p->offset())+","+QByteArray::number(p->partitionSizeSectors())+","+p->partitionType();
             if (p->active())
@@ -413,7 +413,7 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     for (int i=1; i <= partitionMap.keys().last(); i++) {
         if (partitionMap.contains(i))
         {
-            PartitionInfo *p = partitionMap.value(i);
+            BlockDevPartitionInfo *p = partitionMap.value(i);
             while (!QFile::exists(p->partitionDevice()))
                 QThread::msleep(10);
         }
@@ -429,6 +429,52 @@ bool MultiImageWriteThread::eraseMtdDevice(QByteArray mtddevice)
     eraseargs << "--quiet" << mtddevice << "0" << "0";
 
     return runCommand("/usr/sbin/flash_erase", eraseargs, output);
+}
+
+bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString ubivoldev)
+{
+    bool result = true;
+    QString fstype = contentInfo->fsType();
+    QByteArray output;
+
+    if (fstype == "raw") {
+        emit statusUpdate(tr("Writing raw files"));
+        QList<RawFileInfo *> rawFiles = filterRawFileInfo(contentInfo->rawFiles());
+
+        if (rawFiles.count() > 1)
+            qDebug() << "Warning: UBI volumes support only one raw file per partition";
+
+        /* Typically Kernel/Device Tree */
+        QStringList ubiupdatevolargs;
+        ubiupdatevolargs << ubivoldev << rawFiles.first()->filename();
+        if (!runCommand("/usr/sbin/ubiupdatevol", ubiupdatevolargs, output))
+        {
+            emit error(tr("Error mounting file system") + "\n" + output);
+            return false;
+        }
+    } else if(fstype == "ubifs") {
+        /* Typically the rootfs */
+        QStringList mkfsargs;
+        mkfsargs << ubivoldev;
+        runCommand("/usr/sbin/mkfs.ubifs", mkfsargs, output);
+
+        QStringList mountargs;
+        mountargs << "-t" << "ubifs" << ubivoldev << TEMP_MOUNT_FOLDER;
+
+        if (!runCommand("mount", mountargs, output))
+        {
+            emit error(tr("Error mounting file system") + "\n" + output);
+            return false;
+        }
+
+        QString tarball = contentInfo->filename();
+        QStringList filelist = contentInfo->filelist();
+        result = processFileCopy(tarball, filelist);
+
+        QProcess::execute("umount " TEMP_MOUNT_FOLDER);
+    }
+
+    return result;
 }
 
 bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice)
@@ -451,12 +497,12 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
         return false;
     }
 
-    // At this point UBI should be attached, check Volumes...
+    /* At this point UBI should be attached, add volumes */
     int ubivolid = 0;
     foreach (UbiVolumeInfo *ubivol, *volumes) {
         QByteArray output;
         QStringList ubimkvolargs;
-        ubimkvolargs << "/dev/ubi0" << "-N" << ubivol->name();
+        ubimkvolargs << "/dev/ubi0" << "-N" << ubivol->name() << "-n" << QString::number(ubivolid);
 
         if (ubivol->size() > 0)
             ubimkvolargs << "-s" << QString("%1KiB").arg(ubivol->size());
@@ -464,41 +510,16 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
             ubimkvolargs << "-m";
 
 
-        runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output);
+        if (!runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output))
+        {
+            emit error(tr("Creating UBI volume failed!") + "\n" + output);
+            return false;
+        }
 
         QString ubivoldev = QString("/dev/ubi0_%1").arg(ubivolid);
-
-        MtdDevContentInfo *contentInfo = ubivol->content();
-        if (contentInfo->fsType() == "raw") {
-            /* Typically Kernel/Device Tree */
-            QStringList ubiupdatevolargs;
-            ubiupdatevolargs << ubivoldev << contentInfo->rawFiles()->first()->filename();
-            runCommand("/usr/sbin/ubiupdatevol", ubiupdatevolargs, output);
-        } else if(contentInfo->fsType() == "ubifs") {
-            /* Typically the rootfs */
-            QStringList mkfsargs;
-            mkfsargs << ubivoldev;
-            runCommand("/usr/sbin/mkfs.ubifs", mkfsargs, output);
-
-            QStringList mountargs;
-            mountargs << "-t" << "ubifs" << ubivoldev << TEMP_MOUNT_FOLDER;
-
-            if (!runCommand("mount", mountargs, output))
-            {
-                emit error(tr("Error mounting file system") + "\n" + output);
-                result = false;
-                break;
-            }
-
-            QString tarball = contentInfo->filename();
-            QStringList filelist = contentInfo->filelist();
-            result = processFileCopy(tarball, filelist);
-
-            QProcess::execute("umount " TEMP_MOUNT_FOLDER);
-
-            if (!result)
-                break;
-        }
+        result = processUbiContent(ubivol->content(), ubivoldev);
+        if (!result)
+            break;
 
         ubivolid++;
     }
@@ -508,17 +529,39 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
     return result;
 }
 
-bool MultiImageWriteThread::processMtdContent(MtdDevContentInfo *content, QByteArray mtddevice)
+QList<RawFileInfo *> MultiImageWriteThread::filterRawFileInfo(QList<RawFileInfo *> *rawFiles)
+{
+    QList<RawFileInfo *> newList;
+    QString productNumber = _configBlock->getProductNumber();
+
+    foreach (RawFileInfo *rawFile, *rawFiles) {
+        /* Only check against product id if specified */
+        if (!rawFile->productIds().isEmpty()) {
+            if (!rawFile->productIds().contains(productNumber))
+                continue;
+        }
+        newList.append(rawFile);
+    }
+    return newList;
+}
+
+bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray mtddevice)
 {
     QString os_name = _image->name();
     QByteArray fstype = content->fsType();
 
-    if (fstype == "raw" && content->rawFiles()->length() > 0)
+    if (fstype == "raw")
     {
-        RawFileInfo *rawFileInfo = content->rawFiles()->first();
+        emit statusUpdate(tr("Writing raw files"));
+        QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
+
+        if (rawFiles.count() > 1) {
+            qDebug() << "Warning: MTD partitions support only one raw file per partition";
+        }
+
+        RawFileInfo *rawFileInfo = rawFiles.first();
         QString filename = rawFileInfo->filename();
 
-        emit statusUpdate(tr("%1: Writing raw file").arg(os_name));
         if (!eraseMtdDevice(mtddevice)) {
             emit error(tr("Erasing flash failed"));
             return false;
@@ -564,7 +607,7 @@ bool MultiImageWriteThread::processFileCopy(QString tarball, QStringList filelis
     return resultfile && resultfilelist;
 }
 
-bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteArray partdevice)
+bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray partdevice)
 {
     QString os_name = _image->name();
     QByteArray fstype   = content->fsType();
@@ -572,7 +615,6 @@ bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteAr
     QByteArray label = content->label();
     QString tarball  = content->filename();
     QStringList filelist  = content->filelist();
-    QList<RawFileInfo *> *rawFiles = content->rawFiles();
 
 
     if (ImageInfo::isNetwork(_image->imageSource()) && !tarball.isEmpty()) {
@@ -597,16 +639,10 @@ bool MultiImageWriteThread::processContent(BlockDevContentInfo *content, QByteAr
 
     if (fstype == "raw")
     {
-        emit statusUpdate(tr("%1: Writing raw files").arg(os_name));
-        QString productNumber = _configBlock->getProductNumber();
+        emit statusUpdate(tr("Writing raw files"));
+        QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
 
-        foreach (RawFileInfo *rawFile, *rawFiles) {
-            /* Only check against product id if specified */
-            if (!rawFile->productIds().isEmpty()) {
-                if (!rawFile->productIds().contains(productNumber))
-                    continue;
-            }
-
+        foreach (RawFileInfo *rawFile, rawFiles) {
             if (!dd(_image->baseUrl(), partdevice, rawFile))
                 return false;
         }

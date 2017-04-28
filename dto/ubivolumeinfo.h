@@ -3,7 +3,7 @@
 
 #include <QVariantMap>
 
-class MtdDevContentInfo;
+class ContentInfo;
 
 class UbiVolumeInfo : public QObject
 {
@@ -31,7 +31,7 @@ public:
         return _ubiDevice;
     }
 
-    inline MtdDevContentInfo *content()
+    inline ContentInfo *content()
     {
         return _content;
     }
@@ -41,7 +41,7 @@ protected:
     QByteArray _ubiDevice;
     qint32 _size; //KiB
     QString _name;
-    MtdDevContentInfo *_content;
+    ContentInfo *_content;
 };
 
 #endif // UBIVOLUMEINFO_H

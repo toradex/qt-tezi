@@ -4,8 +4,8 @@
 #include <QObject>
 #include <QVariantMap>
 
-class BlockDevContentInfo;
-class PartitionInfo;
+class ContentInfo;
+class BlockDevPartitionInfo;
 
 class BlockDevInfo : public QObject
 {
@@ -29,12 +29,12 @@ public:
         return _name;
     }
 
-    inline BlockDevContentInfo *content()
+    inline ContentInfo *content()
     {
         return _content;
     }
 
-    inline QList<PartitionInfo *> *partitions()
+    inline QList<BlockDevPartitionInfo *> *partitions()
     {
         return &_partitions;
     }
@@ -42,9 +42,9 @@ public:
 protected:
 
     QByteArray _blockDevice;
-    QList<PartitionInfo *> _partitions;
+    QList<BlockDevPartitionInfo *> _partitions;
     QString _name;
-    BlockDevContentInfo *_content;
+    ContentInfo *_content;
 };
 
 #endif // BLOCKDEVINFO_H

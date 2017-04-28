@@ -3,7 +3,7 @@
 #include "blockdevinfo.h"
 #include "mtddevinfo.h"
 #include "imageinfo.h"
-#include "partitioninfo.h"
+#include "blockdevpartitioninfo.h"
 #include "json.h"
 
 ImageInfo::ImageInfo(const QString &folder, const QString &infofile, const QString &baseUrl, enum ImageSource source, QObject *parent) :

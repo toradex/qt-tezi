@@ -10,10 +10,9 @@
 #include <QList>
 
 class BlockDevInfo;
+class BlockDevPartitionInfo;
+class ContentInfo;
 class MtdDevInfo;
-class MtdDevContentInfo;
-class PartitionInfo;
-class BlockDevContentInfo;
 class RawFileInfo;
 class UbiVolumeInfo;
 
@@ -38,14 +37,16 @@ protected:
     virtual void run();
     bool runScript(QString script, QByteArray &output);
     bool runCommand(QString cmd, QStringList args, QByteArray &output);
-    bool eraseMtdDevice(QByteArray mtddevice);
-    bool processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice);
+    QList<RawFileInfo *> filterRawFileInfo(QList<RawFileInfo *> *rawFiles);
     bool processBlockDev(BlockDevInfo *blockdev);
-    bool processPartitions(BlockDevInfo *blockdev, QList<PartitionInfo *> *partitions);
-    bool processContent(BlockDevContentInfo *fs, QByteArray partdevice);
+    bool processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions);
+    bool processContent(ContentInfo *fs, QByteArray partdevice);
     bool processFileCopy(QString tarball, QStringList filelist);
+    bool eraseMtdDevice(QByteArray mtddevice);
     bool processMtdDev(MtdDevInfo *mtddev);
-    bool processMtdContent(MtdDevContentInfo *content, QByteArray mtddevice);
+    bool processMtdContent(ContentInfo *content, QByteArray mtddevice);
+    bool processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice);
+    bool processUbiContent(ContentInfo *contentInfo, QString ubivoldev);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool runwritecmd(const QString &cmd);
     bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
@@ -56,7 +57,7 @@ protected:
     void patchConfigTxt();
     QString getDescription(const QString &folder, const QString &flavour);
     QString getUncompressCommand(const QString &file);
-    bool writePartitionTable(QByteArray blockdevpath, const QMap<int, PartitionInfo *> &partitionMap);
+    bool writePartitionTable(QByteArray blockdevpath, const QMap<int, BlockDevPartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
 
     ImageInfo *_image;

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QVariantMap>
 
-class MtdDevContentInfo;
+class ContentInfo;
 class UbiVolumeInfo;
 
 class MtdDevInfo : public QObject
@@ -28,7 +28,7 @@ public:
         return _mtdDevice;
     }
 
-    inline MtdDevContentInfo *content()
+    inline ContentInfo *content()
     {
         return _content;
     }
@@ -42,7 +42,7 @@ protected:
 
     QByteArray _mtdDevice;
     QString _name;
-    MtdDevContentInfo *_content;
+    ContentInfo *_content;
     QList<UbiVolumeInfo *> _ubiVolumes;
 };
 

@@ -422,15 +422,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>%1: Writing raw files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Mtd device &apos;%1&apos; does not exist</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1: Writing raw file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -451,6 +443,14 @@ URL: %2</source>
     </message>
     <message>
         <source>Error mounting file system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Writing raw files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Creating UBI volume failed!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

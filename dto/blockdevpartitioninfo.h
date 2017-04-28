@@ -1,24 +1,24 @@
 #ifndef PARTITIONINFO_H
-#define PARTITIONINFO_H
+#define BLOCKDEVPARTITIONINFO_H
 
 /*
  * Partition information model
- * Contains information about a single partition
+ * Contains information about a single block device partition
  * and runtime information like the partition device (/dev/mmcblk0pX) it was assigned
  */
 
-#include "blockdevcontent.h"
+#include "contentinfo.h"
 #include <QObject>
 #include <QVariantMap>
 
-class PartitionInfo : public QObject
+class BlockDevPartitionInfo : public QObject
 {
     Q_OBJECT
 public:
     /* Constructor. Gets called from OsInfo with info from json file */
-    explicit PartitionInfo(const QVariantMap &m, QObject *parent = 0);
+    explicit BlockDevPartitionInfo(const QVariantMap &m, QObject *parent = 0);
 
-    explicit PartitionInfo(int partitionNr, int offset, int sectors, const QByteArray &partType, QObject *parent = 0);
+    explicit BlockDevPartitionInfo(int partitionNr, int offset, int sectors, const QByteArray &partType, QObject *parent = 0);
 
     inline void setPartitionDevice(const QByteArray &partdevice)
     {
@@ -40,7 +40,7 @@ public:
         return _requiresPartitionNumber;
     }
 
-    inline BlockDevContentInfo *content()
+    inline ContentInfo *content()
     {
         return _content;
     }
@@ -93,9 +93,9 @@ public:
 protected:
     QByteArray _partitionDevice, _partitionType;
     QString _tarball;
-    BlockDevContentInfo *_content;
+    ContentInfo *_content;
     int _partitionSizeNominal, _requiresPartitionNumber, _offset, _partitionSizeSectors;
     bool _wantMaximised, _active;
 };
 
-#endif // PARTITIONINFO_H
+#endif // BLOCKDEVPARTITIONINFO_H

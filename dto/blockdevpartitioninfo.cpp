@@ -1,6 +1,6 @@
-#include "partitioninfo.h"
+#include "blockdevpartitioninfo.h"
 
-PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
+BlockDevPartitionInfo::BlockDevPartitionInfo(const QVariantMap &m, QObject *parent) :
     QObject(parent), _content(NULL)
 {
     _wantMaximised = m.value("want_maximised", false).toBool();
@@ -12,7 +12,7 @@ PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
     QByteArray defaultPartType;
     if (m.contains("content")) {
         QVariantMap contentm = m.value("content").toMap();
-        _content = new BlockDevContentInfo(contentm, this);
+        _content = new ContentInfo(contentm, this);
 
         /* Get partiton type from filesystem type of content */
         QByteArray fstype = _content->fsType();
@@ -33,7 +33,7 @@ PartitionInfo::PartitionInfo(const QVariantMap &m, QObject *parent) :
     _partitionType = m.value("partition_type", defaultPartType).toByteArray();
 }
 
-PartitionInfo::PartitionInfo(int partitionNr, int offset, int sectors, const QByteArray &partType, QObject *parent) :
+BlockDevPartitionInfo::BlockDevPartitionInfo(int partitionNr, int offset, int sectors, const QByteArray &partType, QObject *parent) :
     QObject(parent), _partitionType(partType), _requiresPartitionNumber(partitionNr), _offset(offset), _partitionSizeSectors(sectors), _active(false)
 {
 }

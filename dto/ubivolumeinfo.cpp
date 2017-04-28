@@ -1,5 +1,5 @@
 #include "ubivolumeinfo.h"
-#include "mtddevcontentinfo.h"
+#include "contentinfo.h"
 
 UbiVolumeInfo::UbiVolumeInfo(const QVariantMap &volume, QObject *parent) :
     QObject(parent), _size(0)
@@ -10,7 +10,7 @@ UbiVolumeInfo::UbiVolumeInfo(const QVariantMap &volume, QObject *parent) :
 
     if (volume.contains("content")) {
         QVariantMap contentm = volume.value("content").toMap();
-        _content = new MtdDevContentInfo(contentm, this);
+        _content = new ContentInfo(contentm, this);
     }
 
 }

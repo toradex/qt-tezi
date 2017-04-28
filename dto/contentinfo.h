@@ -1,23 +1,25 @@
-#ifndef BLOCKDEVCONTENTINFO_H
-#define BLOCKDEVCONTENTINFO_H
+#ifndef CONTENTINFO_H
+#define CONTENTINFO_H
 
 #include <QObject>
 #include <QVariantMap>
 #include <QStringList>
 
 /*
- * Block device content information
- * Contains information about the content of a block device. This can
- * be a partition (/dev/mmcblk0p0) or a bare block device (/dev/mmcblk0).
+ * Content information
+ * Contains information about the content of a block device, MTD device or
+ * UBI volume. This can be block device partition (/dev/mmcblk0p0) or a
+ * bare block device (/dev/mmcblk0), a MTD device (/dev/mtd0) or UBI volume
+ * (/dev/ubi0_0).
  */
 
 class RawFileInfo;
 
-class BlockDevContentInfo : public QObject
+class ContentInfo : public QObject
 {
     Q_OBJECT
 public:
-    explicit BlockDevContentInfo(const QVariantMap &m, QObject *parent = 0);
+    explicit ContentInfo(const QVariantMap &m, QObject *parent = 0);
 
     inline QString filename()
     {
@@ -54,10 +56,6 @@ public:
         return &_rawFiles;
     }
 
-signals:
-
-public slots:
-
 protected:
     QByteArray _fstype, _mkfsOptions, _label;
     QString _filename;
@@ -66,4 +64,4 @@ protected:
     int _uncompressedSize;
 };
 
-#endif // BLOCKDEVCONTENTINFO_H
+#endif // CONTENTINFO_H
