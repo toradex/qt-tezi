@@ -410,10 +410,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error updateing UBI volume</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -439,6 +435,10 @@ URL: %2</source>
     </message>
     <message>
         <source>Downloading and extracting file(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to get size of URL %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

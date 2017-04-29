@@ -454,13 +454,8 @@ bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString 
             qDebug() << "Warning: UBI volumes support only one raw file per partition";
 
         /* Typically Kernel/Device Tree */
-        QStringList ubiupdatevolargs;
-        ubiupdatevolargs << ubivoldev << rawFiles.first()->filename();
-        if (!runCommand("/usr/sbin/ubiupdatevol", ubiupdatevolargs, output))
-        {
-            emit error(tr("Error updateing UBI volume") + "\n" + output);
+        if (!ubiflash(_image->baseUrl(), ubivoldev, rawFiles.first()))
             return false;
-        }
     } else if(fstype == "ubifs") {
         /* Typically the rootfs */
         updateStatus(tr("Creating filesystem (%2)").arg(QString(fstype)));
@@ -571,7 +566,7 @@ bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray m
         QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
 
         foreach(RawFileInfo *rawFile, rawFiles) {
-            if (!flash(_image->baseUrl(), mtddevice, rawFile))
+            if (!nandflash(_image->baseUrl(), mtddevice, rawFile))
                 return false;
         }
     }
@@ -816,7 +811,7 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile = WGET_COMMAND + tarball + " | ";
+        getfile = WGET_COMMAND + baseurl + tarball;
     else
         getfile = "cat " + tarball;
 
@@ -847,7 +842,7 @@ bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, Ra
     return runwritecmd(cmd);
 }
 
-bool MultiImageWriteThread::flash(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
+bool MultiImageWriteThread::nandflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
 {
     QString getfile;
     const QString& file = rawFile->filename();
@@ -866,6 +861,49 @@ bool MultiImageWriteThread::flash(const QString &baseurl, const QString &device,
     return runwritecmd(cmd);
 }
 
+bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
+{
+    QString getfile;
+    qint64 size = 0;
+    const QString& file = rawFile->filename();
+    if (!baseurl.isEmpty()) {
+        QString url = baseurl + file;
+        // Get Size of file first...
+        QByteArray output;
+        QStringList wgetargs;
+        wgetargs << "--quiet" << "--server-response" << url;
+        if (runCommand("wget", wgetargs, output))
+        {
+            foreach(QByteArray line, output.split('\n')) {
+                int colon = line.indexOf(':');
+                QByteArray headerName = line.left(colon).trimmed();
+                QByteArray headerValue = line.mid(colon + 1).trimmed();
+
+                if (headerName == "Content-Length") {
+                    size = QString(headerValue).toLongLong();
+                    break;
+                }
+            }
+        }
+        if (!size)
+        {
+            emit error(tr("Failed to get size of URL %1").arg(url));
+            return false;
+        }
+
+        getfile = WGET_COMMAND + url;
+    } else {
+        size = QFile(_image->folder() + QDir::separator() + file).size();
+        getfile = "cat " + file;
+    }
+
+    QString uncompresscmd = getUncompressCommand(file);
+    QString cmd = QString("%1 | %2 pv -b -n | ubiupdatevol %3 --size=%4 -")
+        .arg(getfile, uncompresscmd, device, QString::number(size));
+
+    qDebug() << "Raw flash file" << file;
+    return runwritecmd(cmd);
+}
 QString MultiImageWriteThread::getUncompressCommand(const QString &file)
 {
     if (file.endsWith(".gz"))
