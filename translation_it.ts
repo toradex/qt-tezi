@@ -469,107 +469,107 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="260"/>
+        <location filename="multiimagewritethread.cpp" line="280"/>
         <source>More than one content requires partition number %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="283"/>
+        <location filename="multiimagewritethread.cpp" line="303"/>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="310"/>
+        <location filename="multiimagewritethread.cpp" line="330"/>
         <source>Fixed partition offset too low</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="355"/>
+        <location filename="multiimagewritethread.cpp" line="375"/>
         <source>Writing partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="360"/>
+        <location filename="multiimagewritethread.cpp" line="380"/>
         <source>Zero&apos;ing start of each partition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="418"/>
+        <location filename="multiimagewritethread.cpp" line="438"/>
         <source>Error creating partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="450"/>
-        <location filename="multiimagewritethread.cpp" line="559"/>
-        <location filename="multiimagewritethread.cpp" line="627"/>
+        <location filename="multiimagewritethread.cpp" line="470"/>
+        <location filename="multiimagewritethread.cpp" line="582"/>
+        <location filename="multiimagewritethread.cpp" line="650"/>
         <source>Writing raw files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="461"/>
-        <location filename="multiimagewritethread.cpp" line="643"/>
+        <location filename="multiimagewritethread.cpp" line="481"/>
+        <location filename="multiimagewritethread.cpp" line="666"/>
         <source>Creating filesystem (%2)</source>
         <oldsource>Creating UBI file system</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="493"/>
+        <location filename="multiimagewritethread.cpp" line="513"/>
         <source>Formatting UBI partition failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="501"/>
+        <location filename="multiimagewritethread.cpp" line="521"/>
         <source>Attaching UBI failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="582"/>
+        <location filename="multiimagewritethread.cpp" line="605"/>
         <source>Extracting file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="584"/>
+        <location filename="multiimagewritethread.cpp" line="607"/>
         <source>Downloading and extracting file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="637"/>
+        <location filename="multiimagewritethread.cpp" line="660"/>
         <source>Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="651"/>
+        <location filename="multiimagewritethread.cpp" line="674"/>
         <source>Mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="730"/>
+        <location filename="multiimagewritethread.cpp" line="753"/>
         <source>Error creating file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="786"/>
+        <location filename="multiimagewritethread.cpp" line="809"/>
         <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="890"/>
+        <location filename="multiimagewritethread.cpp" line="913"/>
         <source>Failed to get size of URL %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="471"/>
-        <location filename="multiimagewritethread.cpp" line="665"/>
+        <location filename="multiimagewritethread.cpp" line="491"/>
+        <location filename="multiimagewritethread.cpp" line="688"/>
         <source>Error mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="562"/>
+        <location filename="multiimagewritethread.cpp" line="585"/>
         <source>Erasing flash failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="520"/>
+        <location filename="multiimagewritethread.cpp" line="540"/>
         <source>Creating UBI volume failed!</source>
         <translation type="unfinished"></translation>
     </message>

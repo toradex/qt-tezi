@@ -188,14 +188,34 @@ bool MultiImageWriteThread::runCommand(QString cmd, QStringList args, QByteArray
 bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
 {
     QByteArray device = mtddev->mtdDevice();
+    qint64 totaluncompressedsize = 0;
 
     ContentInfo *content = mtddev->content();
+    if (content != NULL) {
+        QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
+        foreach (RawFileInfo *rawFile, rawFiles)
+            totaluncompressedsize += rawFile->size();
+    }
+
+    QList<UbiVolumeInfo *> *volumes = mtddev->ubiVolumes();
+    if (volumes->length() > 0) {
+        foreach(UbiVolumeInfo *volume, *volumes) {
+            if (volume->content() != NULL) {
+                totaluncompressedsize += volume->content()->uncompressedSize();
+                QList<RawFileInfo *> rawFiles = filterRawFileInfo(volume->content()->rawFiles());
+                foreach (RawFileInfo *rawFile, rawFiles)
+                    totaluncompressedsize += rawFile->size();
+            }
+        }
+    }
+
+    emit parsedImagesize(totaluncompressedsize * 1024 * 1024);
+
     if (content != NULL) {
         if (!processMtdContent(content, device))
             return false;
     }
 
-    QList<UbiVolumeInfo *> *volumes = mtddev->ubiVolumes();
     if (volumes->length() > 0) {
         if (!processUbi(volumes, device))
             return false;
@@ -522,9 +542,12 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
         }
 
         QString ubivoldev = QString("/dev/ubi0_%1").arg(ubivolid);
-        result = processUbiContent(ubivol->content(), ubivoldev);
-        if (!result)
-            break;
+        if (ubivol->content())
+        {
+            result = processUbiContent(ubivol->content(), ubivoldev);
+            if (!result)
+                break;
+        }
 
         ubivolid++;
     }
