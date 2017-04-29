@@ -429,162 +429,147 @@ URL: %2</source>
 <context>
     <name>MultiImageWriteThread</name>
     <message>
-        <location filename="multiimagewritethread.cpp" line="57"/>
+        <location filename="multiimagewritethread.cpp" line="61"/>
         <source>No valid config block available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="65"/>
+        <location filename="multiimagewritethread.cpp" line="69"/>
         <source>Prepare script &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="71"/>
+        <location filename="multiimagewritethread.cpp" line="75"/>
         <source>Error executing prepare script</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="81"/>
+        <location filename="multiimagewritethread.cpp" line="85"/>
         <source>Block device &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="100"/>
+        <location filename="multiimagewritethread.cpp" line="104"/>
         <source>Mtd device &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="114"/>
+        <location filename="multiimagewritethread.cpp" line="118"/>
         <source>Wrap-up script &apos;%1&apos; does not exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="120"/>
+        <location filename="multiimagewritethread.cpp" line="124"/>
         <source>Error executing wrap-up script</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="125"/>
+        <location filename="multiimagewritethread.cpp" line="129"/>
         <source>Finish writing (syncing)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="256"/>
+        <location filename="multiimagewritethread.cpp" line="260"/>
         <source>More than one content requires partition number %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="279"/>
+        <location filename="multiimagewritethread.cpp" line="283"/>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="306"/>
+        <location filename="multiimagewritethread.cpp" line="310"/>
         <source>Fixed partition offset too low</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="351"/>
+        <location filename="multiimagewritethread.cpp" line="355"/>
         <source>Writing partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="356"/>
+        <location filename="multiimagewritethread.cpp" line="360"/>
         <source>Zero&apos;ing start of each partition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="414"/>
+        <location filename="multiimagewritethread.cpp" line="418"/>
         <source>Error creating partition table</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="446"/>
-        <location filename="multiimagewritethread.cpp" line="560"/>
-        <location filename="multiimagewritethread.cpp" line="644"/>
+        <location filename="multiimagewritethread.cpp" line="450"/>
+        <location filename="multiimagewritethread.cpp" line="564"/>
+        <location filename="multiimagewritethread.cpp" line="632"/>
         <source>Writing raw files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="457"/>
+        <location filename="multiimagewritethread.cpp" line="461"/>
         <source>Error updateing UBI volume</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="462"/>
-        <location filename="multiimagewritethread.cpp" line="660"/>
+        <location filename="multiimagewritethread.cpp" line="466"/>
+        <location filename="multiimagewritethread.cpp" line="648"/>
         <source>Creating filesystem (%2)</source>
         <oldsource>Creating UBI file system</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="494"/>
+        <location filename="multiimagewritethread.cpp" line="498"/>
         <source>Formatting UBI partition failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="502"/>
+        <location filename="multiimagewritethread.cpp" line="506"/>
         <source>Attaching UBI failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="593"/>
-        <source>Downloading and extracting filesystem</source>
+        <location filename="multiimagewritethread.cpp" line="587"/>
+        <source>Extracting file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="595"/>
-        <source>Extracting filesystem</source>
+        <location filename="multiimagewritethread.cpp" line="589"/>
+        <source>Downloading and extracting file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="601"/>
-        <source>Downloading/Copying files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="multiimagewritethread.cpp" line="654"/>
+        <location filename="multiimagewritethread.cpp" line="642"/>
         <source>Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="668"/>
+        <location filename="multiimagewritethread.cpp" line="656"/>
         <source>Mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="747"/>
+        <location filename="multiimagewritethread.cpp" line="735"/>
         <source>Error creating file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="800"/>
+        <location filename="multiimagewritethread.cpp" line="791"/>
         <source>Error downloading or writing image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="835"/>
-        <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="multiimagewritethread.cpp" line="472"/>
-        <location filename="multiimagewritethread.cpp" line="682"/>
+        <location filename="multiimagewritethread.cpp" line="476"/>
+        <location filename="multiimagewritethread.cpp" line="670"/>
         <source>Error mounting file system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="570"/>
+        <location filename="multiimagewritethread.cpp" line="567"/>
         <source>Erasing flash failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="multiimagewritethread.cpp" line="579"/>
-        <source>Flashing failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="multiimagewritethread.cpp" line="521"/>
+        <location filename="multiimagewritethread.cpp" line="525"/>
         <source>Creating UBI volume failed!</source>
         <translation type="unfinished"></translation>
     </message>

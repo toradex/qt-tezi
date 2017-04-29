@@ -33,7 +33,11 @@ MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
 
 void MultiImageWriteThread::setImage(const QString &folder, const QString &infofile, const QString &baseurl, enum ImageSource source)
 {
-    _image = new ImageInfo(folder, infofile, baseurl, source, this);
+    /* Make sure that baseurl is empty for local image sources, we rely on it */
+    if (ImageInfo::isNetwork(source))
+        _image = new ImageInfo(folder, infofile, baseurl, source, this);
+    else
+        _image = new ImageInfo(folder, infofile, QString(), source, this);
 }
 
 void MultiImageWriteThread::setConfigBlock(ConfigBlock *configBlock)
@@ -475,7 +479,7 @@ bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString 
 
         QString tarball = contentInfo->filename();
         QStringList filelist = contentInfo->filelist();
-        result = processFileCopy(tarball, filelist);
+        result = processFileCopy(_image->baseUrl(), tarball, filelist);
 
         QProcess::execute("umount " TEMP_MOUNT_FOLDER);
     }
@@ -558,49 +562,38 @@ bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray m
     if (fstype == "raw")
     {
         updateStatus(tr("Writing raw files"));
-        QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
-
-        if (rawFiles.count() > 1)
-            qDebug() << "Warning: MTD partitions support only one raw file per partition";
-
-        RawFileInfo *rawFileInfo = rawFiles.first();
-        QString filename = rawFileInfo->filename();
 
         if (!eraseMtdDevice(mtddevice)) {
             emit error(tr("Erasing flash failed"));
             return false;
         }
 
-        QByteArray output;
-        QStringList flashargs;
-        flashargs << filename << mtddevice;
+        QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
 
-        if (!runCommand("/usr/sbin/flashcp", flashargs, output)) {
-            emit error(tr("Flashing failed") + "\n" + output);
-            return false;
+        foreach(RawFileInfo *rawFile, rawFiles) {
+            if (!flash(_image->baseUrl(), mtddevice, rawFile))
+                return false;
         }
     }
     return true;
 }
 
-bool MultiImageWriteThread::processFileCopy(QString tarball, QStringList filelist)
+bool MultiImageWriteThread::processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist)
 {
     bool resultfile = true;
     bool resultfilelist = true;
 
-    if (!tarball.isEmpty()) {
-        if (tarball.startsWith("http"))
-            updateStatus(tr("Downloading and extracting filesystem"));
-        else
-            updateStatus(tr("Extracting filesystem"));
+    if (baseurl.isEmpty())
+        updateStatus(tr("Extracting file(s)"));
+    else
+        updateStatus(tr("Downloading and extracting file(s)"));
 
-        resultfile = untar(tarball);
-    }
+    if (!tarball.isEmpty())
+        resultfile = untar(baseurl, tarball);
 
     if (!filelist.isEmpty()) {
-        updateStatus(tr("Downloading/Copying files"));
         foreach(QString file,filelist) {
-            if (!copy(_image->baseUrl(), file)) {
+            if (!copy(baseurl, file)) {
                 resultfilelist = false;
                 break;
             }
@@ -617,11 +610,6 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
     QByteArray label = content->label();
     QString tarball  = content->filename();
     QStringList filelist  = content->filelist();
-
-
-    if (ImageInfo::isNetwork(_image->imageSource()) && !tarball.isEmpty()) {
-        tarball = _image->baseUrl() + tarball;
-    }
 
     if (label.size() > 15)
     {
@@ -652,7 +640,7 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
     else if (fstype.startsWith("partclone"))
     {
         emit statusUpdate(tr("Writing partition clone image"));
-        if (!partclone_restore(tarball, partdevice))
+        if (!partclone_restore(_image->baseUrl(), tarball, partdevice))
             return false;
     }
     else if (fstype != "unformatted")
@@ -683,7 +671,7 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
             return false;
         }
 
-        bool resultfilecopy = processFileCopy(tarball, filelist);
+        bool resultfilecopy = processFileCopy(_image->baseUrl(), tarball, filelist);
 
         QProcess::execute("umount " TEMP_MOUNT_FOLDER);
 
@@ -764,7 +752,10 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     QProcess p;
     if (!ImageInfo::isNetwork(_image->imageSource()))
         p.setWorkingDirectory(_image->folder());
-    p.start(cmd);
+    QStringList args;
+    args << "-o" << "pipefail" << "-c" << cmd;
+    qDebug() << "Running Command: sh" << args;
+    p.start("sh", args);
     p.closeWriteChannel();
     p.setReadChannel(QProcess::StandardError);
 
@@ -807,47 +798,32 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
 
 bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
 {
-    QString cmd = "sh -o pipefail -c \"";
+    QString getfile;
     if (!baseurl.isEmpty())
-        cmd += WGET_COMMAND + baseurl + file;
+        getfile += WGET_COMMAND + baseurl + file;
     else
-        cmd += "cat " + file;
+        getfile += "cat " + file;
 
     /* Use pipe viewer for actual processing speed */
-    cmd += " | pv -b -n";
-    cmd += " | cat > " TEMP_MOUNT_FOLDER "/" + file;
-    cmd += " \"";
+    QString cmd = QString("%1 | pv -b -n | cat > %2")
+        .arg(getfile, TEMP_MOUNT_FOLDER "/" + file);
 
     qDebug() << "Copying file" << file;
     return runwritecmd(cmd);
 }
 
-
-bool MultiImageWriteThread::untar(const QString &tarball)
+bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball)
 {
-    QString cmd = "sh -o pipefail -c \"";
-
-    if (isURL(tarball))
-        cmd += WGET_COMMAND + tarball + " | ";
+    QString getfile;
+    if (!baseurl.isEmpty())
+        getfile = WGET_COMMAND + tarball + " | ";
+    else
+        getfile = "cat " + tarball;
 
     QString uncompresscmd = getUncompressCommand(tarball);
-    if (uncompresscmd == NULL) {
-        emit error(tr("Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip"));
-        return false;
-    }
 
-    cmd += uncompresscmd;
-
-    if (!isURL(tarball))
-    {
-        cmd += " " + tarball;
-    }
-
-    /* Use pipe viewer for actual processing speed */
-    cmd += " | pv -b -n";
-
-    cmd += " | tar x -C " TEMP_MOUNT_FOLDER;
-    cmd += " \"";
+    QString cmd = QString("%1 | %2 pv -b -n | tar x -C %3")
+        .arg(getfile, uncompresscmd, TEMP_MOUNT_FOLDER);
 
     qDebug() << "Uncompress file" << tarball;
     return runwritecmd(cmd);
@@ -855,24 +831,38 @@ bool MultiImageWriteThread::untar(const QString &tarball)
 
 bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
 {
-    QString cmd = "sh -o pipefail -c \"";
+    QString getfile;
     const QString& file = rawFile->filename();
     if (!baseurl.isEmpty())
-        cmd += WGET_COMMAND + baseurl + file;
+        getfile = WGET_COMMAND + baseurl + file;
     else
-        cmd += "cat " + file;
+        getfile = "cat " + file;
 
-    /* For dd images compression is optional */
     QString uncompresscmd = getUncompressCommand(file);
-    if (uncompresscmd != NULL)
-        cmd += " | " + uncompresscmd;
 
-    /* Use pipe viewer for actual processing speed */
-    cmd += " | pv -b -n";
-
-    cmd += " | dd of=" + device + " " + rawFile->ddOptions(); // BusyBox can't do this: +" conv=fsync obs=4M\"";
+    QString cmd = QString("%1 | %2 pv -b -n | dd of=%3 %4")
+            .arg(getfile, uncompresscmd, device, rawFile->ddOptions());
 
     qDebug() << "Raw dd file" << file;
+    return runwritecmd(cmd);
+}
+
+bool MultiImageWriteThread::flash(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
+{
+    QString getfile;
+    const QString& file = rawFile->filename();
+    if (!baseurl.isEmpty())
+        getfile = WGET_COMMAND + baseurl + file;
+    else
+        getfile = "cat " + file;
+
+    QString uncompresscmd = getUncompressCommand(file);
+
+    /* Use pipe viewer to get bytes processed during the command */
+    QString cmd = QString("%1 | %2 pv -b -n | nandwrite --quiet %3 %4 -")
+            .arg(getfile, uncompresscmd, rawFile->nandwriteOptions(), device);
+
+    qDebug() << "Raw flash file" << file;
     return runwritecmd(cmd);
 }
 
@@ -880,46 +870,46 @@ QString MultiImageWriteThread::getUncompressCommand(const QString &file)
 {
     if (file.endsWith(".gz"))
     {
-        return "gzip -dc";
+        return "gzip -dc | ";
     }
     else if (file.endsWith(".xz"))
     {
-        return "xz -dc";
+        return "xz -dc | ";
     }
     else if (file.endsWith(".bz2"))
     {
-        return "bzcat";
+        return "bzcat | ";
     }
     else if (file.endsWith(".lzo"))
     {
-        return "lzop -dc";
+        return "lzop -dc | ";
     }
     else if (file.endsWith(".zip"))
     {
         /* Note: the image must be the only file inside the .zip */
-        return "unzip -p";
+        return "unzip -p | ";
     }
     else
     {
-        return "cat";
+        return "";
     }
 }
 
-bool MultiImageWriteThread::partclone_restore(const QString &imagePath, const QString &device)
+bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QString &image, const QString &device)
 {
-    QString cmd = "sh -o pipefail -c \"";
+    QString getfile;
+    if (!baseurl.isEmpty())
+        getfile = WGET_COMMAND + baseurl + image;
+    else
+        getfile = "cat " + image;
 
-    if (isURL(imagePath))
-        cmd += WGET_COMMAND + imagePath + " | ";
+    QString uncompresscmd = getUncompressCommand(image);
 
+    /* Use pipe viewer to get bytes processed during the command */
+    QString cmd = QString("%1 | %2 pv -b -n | partclone.restore -q -s - -o %3")
+            .arg(getfile, uncompresscmd, device);
 
-    if (!isURL(imagePath))
-        cmd += " "+imagePath;
-
-    /* Use pipe viewer for actual processing speed */
-    cmd += " | pv -b -n";
-
-    cmd += " | partclone.restore -q -s - -o "+device+" \"";
+    qDebug() << "Partclone " << image;
 
     return runwritecmd(cmd);
 }
@@ -950,9 +940,4 @@ QByteArray MultiImageWriteThread::getUUID(const QString &part)
 QByteArray MultiImageWriteThread::getFsType(const QString &part)
 {
     return getBlkId(part, "TYPE");
-}
-
-bool MultiImageWriteThread::isURL(const QString &s)
-{
-    return s.startsWith("http:") || s.startsWith("https:");
 }

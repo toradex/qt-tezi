@@ -42,7 +42,7 @@ protected:
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions);
     bool processContent(ContentInfo *fs, QByteArray partdevice);
-    bool processFileCopy(QString tarball, QStringList filelist);
+    bool processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist);
     bool eraseMtdDevice(QByteArray mtddevice);
     bool processMtdDev(MtdDevInfo *mtddev);
     bool processMtdContent(ContentInfo *content, QByteArray mtddevice);
@@ -50,10 +50,11 @@ protected:
     bool processUbiContent(ContentInfo *contentInfo, QString ubivoldev);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool runwritecmd(const QString &cmd);
-    bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
-    bool partclone_restore(const QString &imagePath, const QString &device);
-    bool untar(const QString &tarball);
+    bool partclone_restore(const QString &baseurl, const QString &image, const QString &device);
+    bool untar(const QString &baseurl, const QString &tarball);
     bool copy(const QString &baseurl, const QString &file);
+    bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
+    bool flash(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool isLabelAvailable(const QByteArray &label);
     void patchConfigTxt();
     QString getUncompressCommand(const QString &file);

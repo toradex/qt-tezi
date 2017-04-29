@@ -390,10 +390,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Flashing failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Formatting UBI partition failed!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -418,18 +414,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Downloading and extracting filesystem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extracting filesystem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Downloading/Copying files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Writing partition clone image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -450,7 +434,11 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unknown compression format file extension. Expecting .lzo, .gz, .xz, .bz2 or .zip</source>
+        <source>Extracting file(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading and extracting file(s)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

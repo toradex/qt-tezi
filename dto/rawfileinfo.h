@@ -21,6 +21,11 @@ public:
         return _ddOptions;
     }
 
+    inline QByteArray nandwriteOptions()
+    {
+        return _nandwriteOptions;
+    }
+
     inline QStringList productIds()
     {
         return _productIds;
@@ -38,6 +43,7 @@ public slots:
 protected:
     QString _filename;
     QByteArray _ddOptions;
+    QByteArray _nandwriteOptions;
     QStringList _productIds;
     int _size;
 };
