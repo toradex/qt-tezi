@@ -152,7 +152,7 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
 
     env.insert("PATH", "/bin:/usr/bin:/sbin:/usr/sbin");
 
-    qDebug() << "Executing: /bin/sh" << cmd;
+    qDebug() << "Executing:" << "/bin/sh" << cmd;
     qDebug() << "Env:" << env.toStringList();
 
     p.setProcessChannelMode(QProcess::MergedChannels);
@@ -168,19 +168,20 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
     return p.exitCode() == 0;
 }
 
-bool MultiImageWriteThread::runCommand(QString cmd, QStringList args, QByteArray &output)
+bool MultiImageWriteThread::runCommand(QString cmd, QStringList args, QByteArray &output, int msecs)
 {
     QProcess p;
 
-    qDebug() << "Executing: " << cmd << args;
+    qDebug() << "Running Command: " << cmd << args;
     p.setProcessChannelMode(QProcess::MergedChannels);
     p.setWorkingDirectory(_image->folder());
     p.start(cmd, args);
 
-    p.waitForFinished(30000);
+    p.waitForFinished(msecs);
 
     output = p.readAll();
-    qDebug() << "Output:" << output;
+    if (p.exitCode() > 0)
+        qDebug() << "Output:" << output;
     qDebug() << "Finished with exit code:" << p.exitCode();
     return p.exitCode() == 0;
 }
@@ -702,58 +703,46 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
 bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fstype, const QByteArray &label, const QByteArray &mkfsopt)
 {
     QString cmd;
+    QStringList args;
 
     if (fstype == "fat" || fstype == "FAT")
     {
-        cmd = "/usr/sbin/mkfs.fat ";
+        cmd = "/usr/sbin/mkfs.fat";
+        args << "-F" << "32";
         if (!label.isEmpty())
-        {
-            cmd += "-F 32 -n "+label+" ";
-        }
+            args << "-n" << label;
     }
     else if (fstype == "ext3")
     {
-        cmd = "/sbin/mkfs.ext3 ";
+        cmd = "/sbin/mkfs.ext3";
         if (!label.isEmpty())
-        {
-            cmd += "-L "+label+" ";
-        }
+            args << "-L" << label;
     }
     else if (fstype == "ext4")
     {
-        cmd = "/sbin/mkfs.ext4 ";
-        if (!label.isEmpty())
-        {
-            cmd += "-L "+label+" ";
-        }
+        cmd = "/sbin/mkfs.ext4";
+        args << "-L" << label;
     }
     else if (fstype == "ntfs")
     {
-        cmd = "/sbin/mkfs.ntfs --fast ";
+        cmd = "/sbin/mkfs.ntfs";
+        args << "--fast";
         if (!label.isEmpty())
-        {
-            cmd += "-L "+label+" ";
-        }
+            args << "-L" << label;
     }
 
-    if (!mkfsopt.isEmpty())
-        cmd += mkfsopt+" ";
+    if (!mkfsopt.isEmpty()) {
+        foreach (QByteArray arr, mkfsopt.split(' '))
+            args << arr;
+    }
 
-    cmd += device;
-
-    qDebug() << "Executing:" << cmd;
-    QProcess p;
-    p.setProcessChannelMode(p.MergedChannels);
-    p.start(cmd);
-    p.closeWriteChannel();
-    p.waitForFinished(-1);
-
-    if (p.exitCode() != 0)
+    args << device;
+    QByteArray output;
+    if (!runCommand(cmd, args, output, -1))
     {
-        emit error(tr("Error creating file system")+"\n"+p.readAll());
+        emit error(tr("Error creating file system") + "\n" + output);
         return false;
     }
-
     return true;
 }
 
@@ -772,7 +761,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
         p.setWorkingDirectory(_image->folder());
     QStringList args;
     args << "-o" << "pipefail" << "-c" << cmd;
-    qDebug() << "Running Command: sh" << args;
+    qDebug() << "Running Write Command:" << "sh" << args;
     p.start("sh", args);
     p.closeWriteChannel();
     p.setReadChannel(QProcess::StandardError);
@@ -809,7 +798,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
         emit error(tr("Error downloading or writing image")+"\n" + msg);
         return false;
     }
-    qDebug() << "Finished writing" << _bytesWritten << "bytes in" << (t1.elapsed()/1000.0) << "seconds";
+    qDebug() << "Finished writing after" << (t1.elapsed()/1000.0) << "seconds," << _bytesWritten << "bytes total so far.";
 
     return true;
 }

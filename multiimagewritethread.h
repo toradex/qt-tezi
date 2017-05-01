@@ -37,7 +37,7 @@ protected:
     virtual void run();
     void updateStatus(QString status);
     bool runScript(QString script, QByteArray &output);
-    bool runCommand(QString cmd, QStringList args, QByteArray &output);
+    bool runCommand(QString cmd, QStringList args, QByteArray &output, int msecs = 30000);
     QList<RawFileInfo *> filterRawFileInfo(QList<RawFileInfo *> *rawFiles);
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions);
