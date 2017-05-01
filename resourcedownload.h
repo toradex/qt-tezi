@@ -44,16 +44,19 @@ signals:
     void completed();
     void failed();
     void finished();
+    void abort();
 
 public slots:
 
 protected slots:
     void downloadRedirectCheck();
+    void abortDownload();
 
 private:
     void downloadFile(const QString &urlstring);
 
     QNetworkAccessManager *_netaccess;
+    QNetworkReply *_reply;
     QString _saveAs;
     int _index;
     QString _urlString;

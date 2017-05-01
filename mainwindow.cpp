@@ -629,6 +629,7 @@ void MainWindow::installImage(QVariantMap entry)
     /* Stop any polling, we are about to install a image */
     _networkStatusPollTimer.stop();
     _mediaPollTimer.stop();
+    emit abortAllDownloads();
 
     if (ImageInfo::isNetwork(imageSource))
     {
@@ -999,6 +1000,7 @@ void MainWindow::downloadLists(const QStringList &urls)
         connect(rd, SIGNAL(failed()), this, SLOT(downloadListJsonFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadListJsonCompleted()));
         connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
+        connect(this, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
     }
 }
 
@@ -1036,6 +1038,7 @@ void MainWindow::downloadListJsonCompleted()
         connect(rd, SIGNAL(failed()), this, SLOT(downloadImageJsonFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadImageJsonCompleted()));
         connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
+        connect(this, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
         index++;
     }
 }
@@ -1095,6 +1098,7 @@ void MainWindow::downloadImageJsonCompleted()
         connect(rd, SIGNAL(failed()), this, SLOT(downloadIconFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadIconCompleted()));
         connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
+        connect(this, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
     }
 }
 

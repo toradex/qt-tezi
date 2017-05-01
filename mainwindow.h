@@ -107,6 +107,9 @@ protected:
     void startImageWrite(QVariantMap entry);
     void reenableImageChoice();
 
+signals:
+    void abortAllDownloads();
+
 protected slots:
     void pollMedia();
     void pollNetworkStatus();

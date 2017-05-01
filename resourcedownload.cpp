@@ -26,8 +26,14 @@ void ResourceDownload::downloadFile(const QString &urlstring)
     _urlString = urlstring;
     QUrl url(urlstring);
     QNetworkRequest request(url);
-    QNetworkReply *reply = _netaccess->get(request);
-    connect(reply, SIGNAL(finished()), this, SLOT(downloadRedirectCheck()));
+    _reply = _netaccess->get(request);
+    connect(_reply, SIGNAL(finished()), this, SLOT(downloadRedirectCheck()));
+}
+
+void ResourceDownload::abortDownload()
+{
+    qDebug() << "Emit abort...";
+    _reply->abort();
 }
 
 void ResourceDownload::downloadRedirectCheck()
@@ -37,7 +43,9 @@ void ResourceDownload::downloadRedirectCheck()
     QString redirectionurl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toString();
 
     _networkError = reply->error();
-    if (_networkError != QNetworkReply::NoError) {
+    if (_networkError == QNetworkReply::OperationCanceledError) {
+        emit finished();
+    } else if (_networkError != QNetworkReply::NoError) {
         _networkErrorString = reply->errorString();
         emit failed();
         emit finished();
