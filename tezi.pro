@@ -67,7 +67,6 @@ HEADERS  += mainwindow.h \
     dto/blockdevinfo.h \
     dto/rawfileinfo.h \
     dto/mtddevinfo.h \
-    dto/mtdpartitioninfo.h \
     dto/mtddevcontentinfo.h \
     mtdnamedevicetranslator.h \
     dto/ubivolumeinfo.h \

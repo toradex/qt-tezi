@@ -3,7 +3,6 @@
 #include "dto/blockdevpartitioninfo.h"
 #include "dto/contentinfo.h"
 #include "dto/mtddevinfo.h"
-#include "dto/mtdpartitioninfo.h"
 #include "dto/rawfileinfo.h"
 #include "dto/ubivolumeinfo.h"
 #include "config.h"
