@@ -534,11 +534,11 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
         else
             ubimkvolargs << "-m";
 
-
-        if (!runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output))
+        result = runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output);
+        if (!result)
         {
             emit error(tr("Creating UBI volume failed!") + "\n" + output);
-            return false;
+            break;
         }
 
         QString ubivoldev = QString("/dev/ubi0_%1").arg(ubivolid);
