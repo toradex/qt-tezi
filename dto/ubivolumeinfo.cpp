@@ -2,7 +2,7 @@
 #include "contentinfo.h"
 
 UbiVolumeInfo::UbiVolumeInfo(const QVariantMap &volume, QObject *parent) :
-    QObject(parent), _size(0)
+    QObject(parent), _size(0), _content(NULL)
 {
     _name = volume.value("name").toString();
     if (volume.contains("size"))
