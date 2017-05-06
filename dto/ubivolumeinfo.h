@@ -16,9 +16,9 @@ public:
         return _name;
     }
 
-    inline qint32 size()
+    inline qint32 sizeKib()
     {
-        return _size;
+        return _sizeKib;
     }
 
     inline void setUbiDevice(const QByteArray &ubidevice)
@@ -39,7 +39,7 @@ public:
 protected:
 
     QByteArray _ubiDevice;
-    qint32 _size; //KiB
+    qint32 _sizeKib;
     QString _name;
     ContentInfo *_content;
 };

@@ -529,8 +529,8 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
         QStringList ubimkvolargs;
         ubimkvolargs << "/dev/ubi0" << "-N" << ubivol->name() << "-n" << QString::number(ubivolid);
 
-        if (ubivol->size() > 0)
-            ubimkvolargs << "-s" << QString("%1KiB").arg(ubivol->size());
+        if (ubivol->sizeKib() > 0)
+            ubimkvolargs << "-s" << QString("%1KiB").arg(ubivol->sizeKib());
         else
             ubimkvolargs << "-m";
 
