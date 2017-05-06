@@ -865,7 +865,7 @@ bool MultiImageWriteThread::nandflash(const QString &baseurl, const QString &dev
     QString uncompresscmd = getUncompressCommand(file);
 
     /* Use pipe viewer to get bytes processed during the command */
-    QString cmd = QString("%1 | %2 pv -b -n | nandwrite --quiet %3 %4 -")
+    QString cmd = QString("%1 | %2 pv -b -n | nandwrite --quiet --pad %3 %4 -")
             .arg(getfile, uncompresscmd, rawFile->nandwriteOptions(), device);
 
     qDebug() << "Raw flash file" << file;
