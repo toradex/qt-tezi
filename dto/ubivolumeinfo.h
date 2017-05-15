@@ -21,6 +21,11 @@ public:
         return _sizeKib;
     }
 
+    inline QString type()
+    {
+        return _type;
+    }
+
     inline void setUbiDevice(const QByteArray &ubidevice)
     {
         _ubiDevice = ubidevice;
@@ -41,6 +46,7 @@ protected:
     QByteArray _ubiDevice;
     qint32 _sizeKib;
     QString _name;
+    QString _type;
     ContentInfo *_content;
 };
 

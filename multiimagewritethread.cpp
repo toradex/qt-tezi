@@ -534,6 +534,9 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
         else
             ubimkvolargs << "-m";
 
+        if (!ubivol->type().isEmpty())
+            ubimkvolargs << "-t" << ubivol->type();
+
         result = runCommand("/usr/sbin/ubimkvol", ubimkvolargs, output);
         if (!result)
         {
