@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     mtdnamedevicetranslator.cpp \
     dto/ubivolumeinfo.cpp \
     dto/contentinfo.cpp \
-    dto/blockdevpartitioninfo.cpp
+    dto/blockdevpartitioninfo.cpp \
+    dto/winceimage.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -71,7 +72,8 @@ HEADERS  += mainwindow.h \
     mtdnamedevicetranslator.h \
     dto/ubivolumeinfo.h \
     dto/contentinfo.h \
-    dto/blockdevpartitioninfo.h
+    dto/blockdevpartitioninfo.h \
+    dto/winceimage.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

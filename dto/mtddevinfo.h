@@ -6,6 +6,7 @@
 
 class ContentInfo;
 class UbiVolumeInfo;
+class WinCEImage;
 
 class MtdDevInfo : public QObject
 {
@@ -38,12 +39,18 @@ public:
         return &_ubiVolumes;
     }
 
+    inline WinCEImage *winCEImage()
+    {
+        return _winCEImage;
+    }
+
 protected:
 
     QByteArray _mtdDevice;
     QString _name;
     ContentInfo *_content;
     QList<UbiVolumeInfo *> _ubiVolumes;
+    WinCEImage *_winCEImage;
 };
 
 #endif // MTDDEVINFO_H

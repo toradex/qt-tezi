@@ -5,6 +5,7 @@
 #include "dto/mtddevinfo.h"
 #include "dto/rawfileinfo.h"
 #include "dto/ubivolumeinfo.h"
+#include "dto/winceimage.h"
 #include "config.h"
 #include "json.h"
 #include "util.h"
@@ -209,6 +210,10 @@ bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
         }
     }
 
+    WinCEImage *winceimage = mtddev->winCEImage();
+    if (winceimage != NULL)
+        totaluncompressedsize += winceimage->size();
+
     emit parsedImagesize(totaluncompressedsize * 1024 * 1024);
 
     if (content != NULL) {
@@ -218,6 +223,11 @@ bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
 
     if (volumes->length() > 0) {
         if (!processUbi(volumes, device))
+            return false;
+    }
+
+    if (winceimage != NULL) {
+        if (!processWinCEImage(winceimage, device))
             return false;
     }
 
@@ -576,6 +586,26 @@ QList<RawFileInfo *> MultiImageWriteThread::filterRawFileInfo(QList<RawFileInfo 
     return newList;
 }
 
+bool MultiImageWriteThread::processWinCEImage(WinCEImage *image, QByteArray mtddevice)
+{
+    QString getfile;
+    const QString& file = image->imageFilename();
+    const QString& baseurl = _image->baseUrl();
+    if (!baseurl.isEmpty())
+        getfile = WGET_COMMAND + baseurl + file;
+    else
+        getfile = "cat " + file;
+
+    QString uncompresscmd = getUncompressCommand(file);
+
+    /* Use pipe viewer to get bytes processed during the command */
+    QString cmd = QString("%1 | %2 pv -b -n | flash_wince -n %3 %4 -")
+            .arg(getfile, uncompresscmd, QString::number(image->nonFsSize()), mtddevice);
+
+    qDebug() << "Flash WinCE image file" << file;
+    return runwritecmd(cmd);
+}
+
 bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray mtddevice)
 {
     QByteArray fstype = content->fsType();
@@ -782,8 +812,6 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
         if (ok) {
             bytes = tmp;
             emit imageProgress(_bytesWritten + bytes);
-        } else {
-            break;
         }
     }
 

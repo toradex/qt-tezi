@@ -15,6 +15,7 @@ class ContentInfo;
 class MtdDevInfo;
 class RawFileInfo;
 class UbiVolumeInfo;
+class WinCEImage;
 
 class MultiImageWriteThread : public QThread
 {
@@ -48,6 +49,7 @@ protected:
     bool processMtdContent(ContentInfo *content, QByteArray mtddevice);
     bool processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice);
     bool processUbiContent(ContentInfo *contentInfo, QString ubivoldev);
+    bool processWinCEImage(WinCEImage *image, QByteArray mtddevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool runwritecmd(const QString &cmd);
     bool partclone_restore(const QString &baseurl, const QString &image, const QString &device);
