@@ -72,24 +72,38 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
 
-#if 0
-    _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
-    if (_toradexConfigBlock == NULL) {
-        qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
-        _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
+    if (QFile::exists("/dev/mtd0")) {
+        _toradexConfigBlock = ConfigBlock::readConfigBlockFromMtd(QString("mtd0"), Q_INT64_C(0x800));
+
         if (_toradexConfigBlock) {
-            qDebug() << "Config Block found, migration will be executed upon flashing a new image...";
-            _toradexConfigBlock->needsWrite = true;
+            _targetDevice = "mtd0";
+            _targetDeviceClass = "mtd";
+        } else {
+            qDebug() << "Config Block not found on raw NAND";
+        }
+    } else {
+        _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+        if (_toradexConfigBlock == NULL) {
+            qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
+            _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
+            if (_toradexConfigBlock) {
+                qDebug() << "Config Block found, migration will be executed upon flashing a new image...";
+                _toradexConfigBlock->needsWrite = true;
+                _toradexConfigBlock->device = "mmcblk0boot0";
+            }
+        }
+
+        if (_toradexConfigBlock) {
+            _targetDevice = "mmcblk0";
+            _targetDeviceClass = "block";
         }
     }
-#endif
-    _toradexConfigBlock = ConfigBlock::readConfigBlockFromMtd(QString("mtd0"), Q_INT64_C(0x800));
 
     if (_toradexConfigBlock == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
                               QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing."),
                               QMessageBox::Close);
-        return;
+        QApplication::exit(LINUX_POWEROFF);
     }
 
     updateVersion();
@@ -123,7 +137,12 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    _availableMB = (getFileContents("/sys/class/block/mmcblk0/size").trimmed().toULongLong())/2048;
+    QString sysfsSize = QString("/sys/class/%1/%2/size").arg(_targetDeviceClass, _targetDevice);
+    _availableMB = getFileContents(sysfsSize).trimmed().toULongLong();
+    if (_targetDeviceClass == "block")
+        _availableMB /= 2048;
+    else if (_targetDeviceClass == "mtd")
+        _availableMB /= (1024 * 1024);
 
     _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId);
     if (_usbGadget->initMassStorage())
@@ -428,10 +447,8 @@ void MainWindow::checkSDcard()
 
     // Unfortunately we can't rely on removable property for SD card... just ignore mmcblk0 and take everything else
     foreach(QString blockdev, list) {
-#if 0
-        if (blockdev.startsWith("mmcblk0"))
+        if (blockdev.startsWith(_targetDevice))
             continue;
-#endif
 
         /* Try raw blockdev without any partition table... */
         processMedia(SOURCE_SDCARD, blockdev);
@@ -733,7 +750,7 @@ void MainWindow::discardFinished()
 
     /* Restore config block... */
     if (_toradexConfigBlock)
-        _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
+        _toradexConfigBlock->writeToBlockdev(Q_INT64_C(-512));
 
     if (_qpd)
         _qpd->hide();
@@ -1222,7 +1239,10 @@ void MainWindow::updateNeeded()
         enableOk = true;
     }
 
-    ui->labelAmountRequired->setText(QString("%2 MB").arg(_neededMB));
+    if (!_neededMB)
+        ui->labelAmountRequired->setText(tr("Unknown"));
+    else
+        ui->labelAmountRequired->setText(QString("%2 MB").arg(_neededMB));
     ui->labelAmountAvailable->setText(QString("%2 MB").arg(_availableMB));
 
     if (_neededMB > _availableMB)
@@ -1357,9 +1377,12 @@ void MainWindow::startImageWrite(QVariantMap entry)
         slidesFolders.append(folder+"/slides_vga");
     }
 
-    // Write Config Block to default location...
-    _toradexConfigBlock->writeToBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
-    qDebug() << "Config Block migrated to mmcblk0boot0...";
+    // Migrate Config Block to default location just before we actually flash...
+    if (_toradexConfigBlock->needsWrite) {
+        _toradexConfigBlock->writeToBlockdev(Q_INT64_C(-512));
+        qDebug() << "Config Block migrated to mmcblk0boot0...";
+        _toradexConfigBlock->needsWrite = false;
+    }
 
     _imageWriteThread->setConfigBlock(_toradexConfigBlock);
     _imageWriteThread->setImage(folder, entry.value("image_info").toString(),

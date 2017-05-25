@@ -49,8 +49,8 @@ const char* const toradex_modules[] = {
     [35] = "Apalis iMX6 Dual 1GB IT",
 };
 
-ConfigBlock::ConfigBlock(const QByteArray &cb, QObject *parent) : QObject(parent),
-  needsWrite(false), _cb(cb)
+ConfigBlock::ConfigBlock(const QByteArray &cb, const QString &dev, QObject *parent) : QObject(parent),
+  needsWrite(false), device(dev), _cb(cb)
 {
     qint32 cboffset = 0;
 
@@ -125,11 +125,11 @@ qint64 ConfigBlock::calculateAbsoluteOffset(int blockdevHandle, qint64 offset)
     return offset;
 }
 
-void ConfigBlock::writeToBlockdev(const QString &dev, qint64 offset)
+void ConfigBlock::writeToBlockdev(qint64 offset)
 {
-    disableBlockDevForceRo(dev);
+    disableBlockDevForceRo(device);
 
-    QFile blockDev("/dev/" + dev);
+    QFile blockDev("/dev/" + device);
     blockDev.open(QFile::ReadWrite);
     blockDev.seek(calculateAbsoluteOffset(blockDev.handle(), offset));
 
@@ -152,7 +152,7 @@ ConfigBlock *ConfigBlock::readConfigBlockFromBlockdev(const QString &dev, qint64
     if (tag->flags != TAG_FLAG_VALID || tag->id != TAG_VALID)
         return NULL;
 
-    return new ConfigBlock(cb);
+    return new ConfigBlock(cb, dev);
 }
 
 ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offset)
@@ -170,5 +170,5 @@ ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offs
     if (tag->flags != TAG_FLAG_VALID || tag->id != TAG_VALID)
         return NULL;
 
-    return new ConfigBlock(cb);
+    return new ConfigBlock(cb, dev);
 }

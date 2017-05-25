@@ -34,11 +34,11 @@ class ConfigBlock : public QObject
 {
     Q_OBJECT
 public:
-    explicit ConfigBlock(const QByteArray &cb, QObject *parent = 0);
+    explicit ConfigBlock(const QByteArray &cb, const QString &dev, QObject *parent = 0);
     static ConfigBlock *readConfigBlockFromBlockdev(const QString &dev, qint64 offset);
     static ConfigBlock *readConfigBlockFromMtd(const QString &dev, qint64 offset);
     static qint64 calculateAbsoluteOffset(int blockdevHandle, qint64 offset);
-    void writeToBlockdev(const QString &dev, qint64 offset);
+    void writeToBlockdev(qint64 offset);
     QString getSerialNumber();
     quint16 getProductId();
     QString getProductNumber();
@@ -46,6 +46,7 @@ public:
     QString getProductName();
 
     bool needsWrite;
+    QString device;
 
 private:
     QByteArray _cb;

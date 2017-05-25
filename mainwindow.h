@@ -57,6 +57,7 @@ protected:
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
     ConfigBlock *_toradexConfigBlock;
+    QString _targetDevice, _targetDeviceClass;
     QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
     int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll, _newInstallerAvailable;
