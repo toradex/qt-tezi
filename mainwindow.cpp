@@ -12,6 +12,7 @@
 #include "twoiconsdelegate.h"
 #include "wifisettingsdialog.h"
 #include "discardthread.h"
+#include "mtderasethread.h"
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMap>
@@ -717,6 +718,61 @@ void MainWindow::on_actionUsbRndis_triggered(bool checked)
 
 void MainWindow::on_actionEraseModule_triggered()
 {
+    if (_targetDeviceClass == "block")
+        discardBlockdev();
+    else if (_targetDeviceClass == "mtd")
+        eraseMtd();
+}
+
+void MainWindow::eraseMtd()
+{
+    if (QMessageBox::warning(this,
+                            tr("Confirm"),
+                            tr("This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as block erase counters. "
+                               "After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?"),
+                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
+    {
+        showProgressDialog(tr("Erasing all data on internal raw NAND..."));
+
+        /*
+         * Preserve first block, in Tezi due to mtd0 being the full NAND flash,
+         * this is MTD partition 1 (e.g. mx7-bcb)
+         */
+        QFile mtdDev("/dev/mtd1");
+        mtdDev.open(QFile::ReadOnly);
+        _nandBootBlock = new QByteArray(mtdDev.readAll());
+        mtdDev.close();
+
+        QStringList mtdDevs;
+        mtdDevs << "/dev/mtd0";
+        MtdEraseThread *thread = new MtdEraseThread(mtdDevs);
+
+        connect(thread, SIGNAL (finished()), this, SLOT (eraseFinished()));
+        connect(thread, SIGNAL (error(QString)), this, SLOT (discardOrEraseError(QString)));
+
+        thread->start();
+    }
+}
+
+void MainWindow::eraseFinished()
+{
+    DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
+
+    /* Restore first block... */
+    QFile mtdDev("/dev/mtd1");
+    mtdDev.open(QFile::WriteOnly);
+    mtdDev.write(*_nandBootBlock);
+    mtdDev.close();
+    delete _nandBootBlock;
+
+    if (_qpd)
+        _qpd->hide();
+
+    thread->deleteLater();
+}
+
+void MainWindow::discardBlockdev()
+{
     if (QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("This discards all data on the internal eMMC, including boot loader and boot loader configuration. "
@@ -728,20 +784,11 @@ void MainWindow::on_actionEraseModule_triggered()
         blockDevs << "/dev/mmcblk0" << "/dev/mmcblk0boot0" << "/dev/mmcblk0boot1";
         DiscardThread *thread = new DiscardThread(blockDevs);
 
-        connect(thread, SIGNAL (error(QString)), this, SLOT (discardError(QString)));
         connect(thread, SIGNAL (finished()), this, SLOT (discardFinished()));
+        connect(thread, SIGNAL (error(QString)), this, SLOT (discardOrEraseError(QString)));
 
         thread->start();
     }
-}
-
-void MainWindow::discardError(const QString &errorString)
-{
-    DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
-
-    QMessageBox::critical(this, tr("Error"), errorString, QMessageBox::Close);
-
-    thread->deleteLater();
 }
 
 void MainWindow::discardFinished()
@@ -754,6 +801,18 @@ void MainWindow::discardFinished()
 
     if (_qpd)
         _qpd->hide();
+
+    thread->deleteLater();
+}
+
+void MainWindow::discardOrEraseError(const QString &errorString)
+{
+    QThread *thread = qobject_cast<QThread *>(sender());
+
+    if (_qpd)
+        _qpd->hide();
+
+    QMessageBox::critical(this, tr("Error"), errorString, QMessageBox::Close);
 
     thread->deleteLater();
 }

@@ -326,6 +326,21 @@ URL: %2</source>
         <source>Capacity</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discarding all data on internal raw NAND...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MtdEraseThread</name>
+    <message>
+        <source>Eraseing device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MultiImageWriteThread</name>

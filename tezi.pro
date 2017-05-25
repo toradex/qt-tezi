@@ -44,7 +44,8 @@ SOURCES += main.cpp\
     dto/ubivolumeinfo.cpp \
     dto/contentinfo.cpp \
     dto/blockdevpartitioninfo.cpp \
-    dto/winceimage.cpp
+    dto/winceimage.cpp \
+    mtderasethread.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -73,7 +74,8 @@ HEADERS  += mainwindow.h \
     dto/ubivolumeinfo.h \
     dto/contentinfo.h \
     dto/blockdevpartitioninfo.h \
-    dto/winceimage.h
+    dto/winceimage.h \
+    mtderasethread.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

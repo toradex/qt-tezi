@@ -57,6 +57,7 @@ protected:
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
     ConfigBlock *_toradexConfigBlock;
+    QByteArray *_nandBootBlock;
     QString _targetDevice, _targetDeviceClass;
     QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
     int _toradexProductId;
@@ -123,8 +124,11 @@ protected slots:
     void downloadMetaCompleted();
     void downloadMetaFailed();
     void downloadFinished();
-    void discardError(const QString &errorString);
+    void eraseMtd();
+    void eraseFinished();
+    void discardBlockdev();
     void discardFinished();
+    void discardOrEraseError(const QString &errorString);
 
     /* Events from ImageWriterThread */
     void onError(const QString &msg);
