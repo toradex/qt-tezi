@@ -711,9 +711,9 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
 
         QString mountcmd;
         if (fstype == "ntfs")
-            mountcmd = "/sbin/mount.ntfs-3g ";
+            mountcmd = "/sbin/mount.ntfs-3g";
         else
-            mountcmd = "mount ";
+            mountcmd = "mount";
 
         QByteArray output;
         if (!runCommand(mountcmd, mountargs, output))
