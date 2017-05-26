@@ -45,7 +45,8 @@ SOURCES += main.cpp\
     dto/contentinfo.cpp \
     dto/blockdevpartitioninfo.cpp \
     dto/winceimage.cpp \
-    mtderasethread.cpp
+    mtderasethread.cpp \
+    configblockdialog.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -75,12 +76,14 @@ HEADERS  += mainwindow.h \
     dto/contentinfo.h \
     dto/blockdevpartitioninfo.h \
     dto/winceimage.h \
-    mtderasethread.h
+    mtderasethread.h \
+    configblockdialog.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \
     progressslideshowdialog.ui \
-    confeditdialog.ui
+    confeditdialog.ui \
+    configblockdialog.ui
 
 # Avoid warnings from resources. Unfortunately applied to all files...
 QMAKE_CXXFLAGS += -Wno-unused-variable
