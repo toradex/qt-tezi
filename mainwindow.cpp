@@ -4,6 +4,7 @@
 #include "confeditdialog.h"
 #include "progressslideshowdialog.h"
 #include "config.h"
+#include "configblockdialog.h"
 #include "resourcedownload.h"
 #include "languagedialog.h"
 #include "scrolltextdialog.h"
@@ -74,15 +75,20 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     ui->setupUi(this);
 
     if (QFile::exists("/dev/mtd0")) {
+        _targetDevice = "mtd0";
+        _targetDeviceClass = "mtd";
+        _targetDeviceCfgBlock = "mtd1";
+
         _toradexConfigBlock = ConfigBlock::readConfigBlockFromMtd(QString("mtd0"), Q_INT64_C(0x800));
 
-        if (_toradexConfigBlock) {
-            _targetDevice = "mtd0";
-            _targetDeviceClass = "mtd";
-        } else {
+        if (!_toradexConfigBlock) {
             qDebug() << "Config Block not found on raw NAND";
         }
     } else {
+        _targetDevice = "mmcblk0";
+        _targetDeviceClass = "block";
+        _targetDeviceCfgBlock = "mmcblk0boot0";
+
         _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
         if (_toradexConfigBlock == NULL) {
             qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
@@ -93,18 +99,20 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
                 _toradexConfigBlock->device = "mmcblk0boot0";
             }
         }
-
-        if (_toradexConfigBlock) {
-            _targetDevice = "mmcblk0";
-            _targetDeviceClass = "block";
-        }
     }
 
     if (_toradexConfigBlock == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
-                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing."),
-                              QMessageBox::Close);
-        QApplication::exit(LINUX_POWEROFF);
+                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block using the information on the Modules Sticker before continuing."),
+                              QMessageBox::Ok);
+
+        ConfigBlockDialog* cbd = new ConfigBlockDialog(this);
+        if (cbd->exec() == QDialog::Accepted) {
+            _toradexConfigBlock = cbd->configBlock;
+            _toradexConfigBlock->device = _targetDeviceCfgBlock;
+        }
+
+
     }
 
     updateVersion();

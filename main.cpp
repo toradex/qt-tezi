@@ -4,7 +4,6 @@
 #include "gpioinput.h"
 #include "rightbuttonfilter.h"
 #include "longpresshandler.h"
-#include "configblockdialog.h"
 #include "json.h"
 #include "util.h"
 #include "configblock.h"
@@ -139,11 +138,6 @@ int main(int argc, char *argv[])
     //mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
     //mw.setGeometry(a.desktop()->availableGeometry());
     mw.show();
-
-    ConfigBlockDialog* cbd = new ConfigBlockDialog(&mw);
-    cbd->show();
-
-    a.exec();
 
     int mode = a.exec();
 

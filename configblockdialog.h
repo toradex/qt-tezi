@@ -2,6 +2,7 @@
 #define CONFIGBLOCKDIALOG_H
 
 #include <QDialog>
+#include "configblock.h"
 
 namespace Ui {
 class ConfigBlockDialog;
@@ -14,6 +15,8 @@ class ConfigBlockDialog : public QDialog
 public:
     explicit ConfigBlockDialog(QWidget *parent = 0);
     ~ConfigBlockDialog();
+
+    ConfigBlock *configBlock;
 
 public slots:
     virtual void accept();

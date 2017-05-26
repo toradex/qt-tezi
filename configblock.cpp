@@ -8,10 +8,8 @@
 #include "configblock.h"
 #include "util.h"
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-
 const char* const toradex_modules[] = {
-     [0] = "UNKNOWN MODULE",
+     [0] = "Unknown Module",
      [1] = "Colibri PXA270 312MHz",
      [2] = "Colibri PXA270 520MHz",
      [3] = "Colibri PXA320 806MHz",
@@ -73,6 +71,46 @@ ConfigBlock::ConfigBlock(const QByteArray &cb, const QString &dev, QObject *pare
 
         cboffset += tag->len * 4;
     }
+}
+
+ConfigBlock::ConfigBlock(const ConfigBlockHw &hwsrc, const ConfigBlockEthAddr &ethsrc, QObject *parent) : QObject(parent),
+  needsWrite(true)
+{
+    struct ConfigBlockTag *tag;
+    qint32 cboffset = 0;
+    _cb.fill('\0', 32);
+
+    // Create a binary config block
+    tag = (struct ConfigBlockTag *)(_cb.data() + cboffset);
+    tag->id = TAG_VALID;
+    tag->flags = TAG_FLAG_VALID;
+    tag->len = 0;
+    cboffset += 4;
+
+    tag = (struct ConfigBlockTag *)(_cb.data() + cboffset);
+    tag->id = TAG_HW;
+    tag->flags = TAG_FLAG_VALID;
+    tag->len = 2;
+    cboffset += 4;
+
+    struct ConfigBlockHw *hw = (struct ConfigBlockHw *)(_cb.data() + cboffset);
+    *hw = hwsrc;
+    _hw = QByteArray(_cb.data() + cboffset, tag->len * 4);
+    cboffset += tag->len * 4;
+
+    tag = (struct ConfigBlockTag *)(_cb.data() + cboffset);
+    tag->id = TAG_MAC;
+    tag->flags = TAG_FLAG_VALID;
+    tag->len = 2;
+    cboffset += 4;
+
+    struct ConfigBlockEthAddr *eth = (struct ConfigBlockEthAddr *)(_cb.data() + cboffset);
+    *eth = ethsrc;
+    _mac = QByteArray(_cb.data() + cboffset, tag->len * 4);
+    cboffset += tag->len * 4;
+
+    qDebug() << _cb.toHex();
+    qDebug() << "Done";
 }
 
 QString ConfigBlock::getSerialNumber()
@@ -171,4 +209,24 @@ ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offs
         return NULL;
 
     return new ConfigBlock(cb, dev);
+}
+
+ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QString &version, const QString &serial)
+{
+    QByteArray asciiver = version.toAscii();
+    ConfigBlockHw hw;
+    ConfigBlockEthAddr eth;
+    qDebug() << productid;
+    qDebug() << version;
+    qDebug() << serial;
+
+    hw.prodid = productid;
+    hw.ver_major = asciiver[1] - '0';
+    hw.ver_minor = asciiver[3] - '0';
+    hw.ver_assembly = asciiver[4] - 'A';
+
+    eth.oui = qToBigEndian(0x00142dU << 8);
+    eth.nic = qToBigEndian(serial.toInt() << 8);
+
+    return new ConfigBlock(hw, eth);
 }

@@ -17,6 +17,33 @@
     </message>
 </context>
 <context>
+    <name>ConfigBlockDialog</name>
+    <message>
+        <source>Toradex Config Block</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Module Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>99999999;_</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>VD.9&gt;A;_</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DiscardThread</name>
     <message>
         <source>Discarding device %1 failed</source>
@@ -327,11 +354,11 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as block erase counters. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Discarding all data on internal raw NAND...</source>
+        <source>Erasing all data on internal raw NAND...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -519,6 +546,14 @@ URL: %2</source>
     </message>
     <message>
         <source>Toradex Easy Installer v%1 (g%2) - Built: %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Config Block information not valid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please enter valid and complete Config Block data.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
