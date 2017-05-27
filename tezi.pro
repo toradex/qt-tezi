@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     dto/blockdevpartitioninfo.cpp \
     dto/winceimage.cpp \
     mtderasethread.cpp \
-    configblockdialog.cpp
+    configblockdialog.cpp \
+    moduleinformation.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     dto/blockdevpartitioninfo.h \
     dto/winceimage.h \
     mtderasethread.h \
-    configblockdialog.h
+    configblockdialog.h \
+    moduleinformation.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

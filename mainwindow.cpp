@@ -74,45 +74,29 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
 
-    if (QFile::exists("/dev/mtd0")) {
-        _targetDevice = "mtd0";
-        _targetDeviceClass = "mtd";
-        _targetDeviceCfgBlock = "mtd1";
-
-        _toradexConfigBlock = ConfigBlock::readConfigBlockFromMtd(QString("mtd0"), Q_INT64_C(0x800));
-
-        if (!_toradexConfigBlock) {
-            qDebug() << "Config Block not found on raw NAND";
-        }
-    } else {
-        _targetDevice = "mmcblk0";
-        _targetDeviceClass = "block";
-        _targetDeviceCfgBlock = "mmcblk0boot0";
-
-        _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0boot0"), Q_INT64_C(-512));
-        if (_toradexConfigBlock == NULL) {
-            qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
-            _toradexConfigBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
-            if (_toradexConfigBlock) {
-                qDebug() << "Config Block found, migration will be executed upon flashing a new image...";
-                _toradexConfigBlock->needsWrite = true;
-                _toradexConfigBlock->device = "mmcblk0boot0";
-            }
-        }
+    _moduleInformation = ModuleInformation::detectModule();
+    if (_moduleInformation == NULL) {
+        QMessageBox::critical(NULL, QObject::tr("Module Detection failed"),
+                              QObject::tr("Failed to detect the basic module type. Cannot continue."),
+                              QMessageBox::Close);
+        QApplication::exit(LINUX_POWEROFF);
     }
 
+    _toradexConfigBlock = _moduleInformation->readConfigBlock();
+
+    // No config block found, ask the user to create a new one using Label information
     if (_toradexConfigBlock == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
                               QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block using the information on the Modules Sticker before continuing."),
                               QMessageBox::Ok);
 
-        ConfigBlockDialog* cbd = new ConfigBlockDialog(this);
+        ConfigBlockDialog* cbd = new ConfigBlockDialog(_moduleInformation->productIds(), this);
         if (cbd->exec() == QDialog::Accepted) {
+            // The user created a new config block, it will be written to NAND once we flash an image...
             _toradexConfigBlock = cbd->configBlock;
-            _toradexConfigBlock->device = _targetDeviceCfgBlock;
+        } else {
+            QApplication::exit(LINUX_POWEROFF);
         }
-
-
     }
 
     updateVersion();
@@ -805,7 +789,7 @@ void MainWindow::discardFinished()
 
     /* Restore config block... */
     if (_toradexConfigBlock)
-        _toradexConfigBlock->writeToBlockdev(Q_INT64_C(-512));
+        _toradexConfigBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
 
     if (_qpd)
         _qpd->hide();
@@ -1446,8 +1430,15 @@ void MainWindow::startImageWrite(QVariantMap entry)
 
     // Migrate Config Block to default location just before we actually flash...
     if (_toradexConfigBlock->needsWrite) {
-        _toradexConfigBlock->writeToBlockdev(Q_INT64_C(-512));
-        qDebug() << "Config Block migrated to mmcblk0boot0...";
+        switch (_moduleInformation->storageClass()) {
+        case ModuleInformation::StorageClass::Block:
+            _toradexConfigBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
+            break;
+        case ModuleInformation::StorageClass::Mtd:
+            _toradexConfigBlock->writeToMtddev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
+            break;
+        }
+        qDebug() << "Config Block written to " << _moduleInformation->configBlockPartition();
         _toradexConfigBlock->needsWrite = false;
     }
 

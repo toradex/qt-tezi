@@ -16,6 +16,7 @@
 #include "usbgadget.h"
 #include "configblock.h"
 #include "multiimagewritethread.h"
+#include "moduleinformation.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -56,6 +57,7 @@ protected:
     Ui::MainWindow *ui;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
+    ModuleInformation *_moduleInformation;
     ConfigBlock *_toradexConfigBlock;
     QByteArray *_nandBootBlock;
     QString _targetDevice, _targetDeviceClass, _targetDeviceCfgBlock;

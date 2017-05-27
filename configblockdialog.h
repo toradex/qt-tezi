@@ -13,7 +13,7 @@ class ConfigBlockDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ConfigBlockDialog(QWidget *parent = 0);
+    explicit ConfigBlockDialog(QList<quint16> supportedModules, QWidget *parent = 0);
     ~ConfigBlockDialog();
 
     ConfigBlock *configBlock;

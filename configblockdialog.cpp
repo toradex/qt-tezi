@@ -5,19 +5,17 @@
 #include <QDebug>
 #include <QMessageBox>
 
-ConfigBlockDialog::ConfigBlockDialog(QWidget *parent) :
+ConfigBlockDialog::ConfigBlockDialog(QList<quint16> supportedModules, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ConfigBlockDialog)
 {
     ui->setupUi(this);
-    //ui->moduleVersion->setCursorPosition(4);
-    qDebug() << ui->moduleVersion->cursorPosition();
-    int supported_modules[] = { 0, 27, 28, 29, 35, 14, 15, 16, 17, 32, 33 };
 
-    for (unsigned int i=0; i < ARRAY_SIZE(supported_modules); i++) {
-        quint16 productId = supported_modules[i];
+    // Force User to choose a module, set to invalid value "Unknown Module"
+    ui->moduleType->addItem(QString(toradex_modules[0]), 0);
+
+    foreach (quint16 productId, supportedModules)
         ui->moduleType->addItem(QString(toradex_modules[productId]), productId);
-    }
 }
 
 ConfigBlockDialog::~ConfigBlockDialog()

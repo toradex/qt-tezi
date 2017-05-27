@@ -47,8 +47,8 @@ const char* const toradex_modules[] = {
     [35] = "Apalis iMX6 Dual 1GB IT",
 };
 
-ConfigBlock::ConfigBlock(const QByteArray &cb, const QString &dev, QObject *parent) : QObject(parent),
-  needsWrite(false), device(dev), _cb(cb)
+ConfigBlock::ConfigBlock(const QByteArray &cb, QObject *parent) : QObject(parent),
+  needsWrite(false), _cb(cb)
 {
     qint32 cboffset = 0;
 
@@ -109,8 +109,7 @@ ConfigBlock::ConfigBlock(const ConfigBlockHw &hwsrc, const ConfigBlockEthAddr &e
     _mac = QByteArray(_cb.data() + cboffset, tag->len * 4);
     cboffset += tag->len * 4;
 
-    qDebug() << _cb.toHex();
-    qDebug() << "Done";
+    qDebug() << "Raw Config Block:" << _cb.toHex();
 }
 
 QString ConfigBlock::getSerialNumber()
@@ -163,7 +162,22 @@ qint64 ConfigBlock::calculateAbsoluteOffset(int blockdevHandle, qint64 offset)
     return offset;
 }
 
-void ConfigBlock::writeToBlockdev(qint64 offset)
+// Note: This currently assumes the config block location is already erased!!
+// We need boot block awareness to do this more clever...
+void ConfigBlock::writeToMtddev(QString device, qint64 offset)
+{
+    int writesize = getFileContents("/sys/class/mtd/" + device + "/writesize").trimmed().toInt();
+
+    QFile blockDev("/dev/" + device);
+    blockDev.open(QFile::ReadWrite);
+    blockDev.seek(calculateAbsoluteOffset(blockDev.handle(), offset));
+    int written = blockDev.write(_cb);
+    // Make sure we write writesize aligned (fill with 0xff)
+    blockDev.write(QByteArray(writesize - (written % writesize), 0xff));
+    blockDev.close();
+}
+
+void ConfigBlock::writeToBlockdev(QString device, qint64 offset)
 {
     disableBlockDevForceRo(device);
 
@@ -190,7 +204,7 @@ ConfigBlock *ConfigBlock::readConfigBlockFromBlockdev(const QString &dev, qint64
     if (tag->flags != TAG_FLAG_VALID || tag->id != TAG_VALID)
         return NULL;
 
-    return new ConfigBlock(cb, dev);
+    return new ConfigBlock(cb);
 }
 
 ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offset)
@@ -208,7 +222,7 @@ ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offs
     if (tag->flags != TAG_FLAG_VALID || tag->id != TAG_VALID)
         return NULL;
 
-    return new ConfigBlock(cb, dev);
+    return new ConfigBlock(cb);
 }
 
 ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QString &version, const QString &serial)
@@ -216,9 +230,8 @@ ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QStr
     QByteArray asciiver = version.toAscii();
     ConfigBlockHw hw;
     ConfigBlockEthAddr eth;
-    qDebug() << productid;
-    qDebug() << version;
-    qDebug() << serial;
+
+    qDebug() << "User created Config Block, Product ID:" << productid << "Version:" << version << "Serial:" << serial;
 
     hw.prodid = productid;
     hw.ver_major = asciiver[1] - '0';
