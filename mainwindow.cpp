@@ -130,12 +130,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    QString sysfsSize = QString("/sys/class/%1/%2/size").arg(_targetDeviceClass, _targetDevice);
-    _availableMB = getFileContents(sysfsSize).trimmed().toULongLong();
-    if (_targetDeviceClass == "block")
-        _availableMB /= 2048;
-    else if (_targetDeviceClass == "mtd")
-        _availableMB /= (1024 * 1024);
+    _availableMB = _moduleInformation->getStorageSize() / (1024 * 1024);
 
     _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId);
     if (_usbGadget->initMassStorage())
@@ -438,10 +433,17 @@ void MainWindow::checkSDcard()
     QDir dir("/sys/block/", "mmcblk*", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
     QStringList list = dir.entryList();
 
-    // Unfortunately we can't rely on removable property for SD card... just ignore mmcblk0 and take everything else
+
     foreach(QString blockdev, list) {
-        if (blockdev.startsWith(_targetDevice))
-            continue;
+        /* We need to ignore internal/target block devices on modules with eMMC */
+        if (_moduleInformation->storageClass() == ModuleInformation::Block) {
+            /*
+             * Unfortunately, at least with Linux 4.1, we can't rely on removable property for
+             * eMMC/SD card detection... just ignore the block devices we consider as internal...
+             */
+            if (_moduleInformation->erasePartitions().contains(blockdev))
+                continue;
+        }
 
         /* Try raw blockdev without any partition table... */
         processMedia(SOURCE_SDCARD, blockdev);
@@ -710,57 +712,32 @@ void MainWindow::on_actionUsbRndis_triggered(bool checked)
 
 void MainWindow::on_actionEraseModule_triggered()
 {
-    if (_targetDeviceClass == "block")
+    switch (_moduleInformation->storageClass()) {
+    case ModuleInformation::StorageClass::Block:
         discardBlockdev();
-    else if (_targetDeviceClass == "mtd")
+        break;
+    case ModuleInformation::StorageClass::Mtd:
         eraseMtd();
+        break;
+    }
 }
 
 void MainWindow::eraseMtd()
 {
     if (QMessageBox::warning(this,
                             tr("Confirm"),
-                            tr("This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as block erase counters. "
+                            tr("This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. "
                                "After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?"),
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
-        showProgressDialog(tr("Erasing all data on internal raw NAND..."));
+        showProgressDialog(tr("Erasing internal raw NAND..."));
+        MtdEraseThread *thread = new MtdEraseThread(_moduleInformation->erasePartitions());
 
-        /*
-         * Preserve first block, in Tezi due to mtd0 being the full NAND flash,
-         * this is MTD partition 1 (e.g. mx7-bcb)
-         */
-        QFile mtdDev("/dev/mtd1");
-        mtdDev.open(QFile::ReadOnly);
-        _nandBootBlock = new QByteArray(mtdDev.readAll());
-        mtdDev.close();
-
-        QStringList mtdDevs;
-        mtdDevs << "/dev/mtd0";
-        MtdEraseThread *thread = new MtdEraseThread(mtdDevs);
-
-        connect(thread, SIGNAL (finished()), this, SLOT (eraseFinished()));
+        connect(thread, SIGNAL (finished()), this, SLOT (discardOrEraseFinished()));
         connect(thread, SIGNAL (error(QString)), this, SLOT (discardOrEraseError(QString)));
 
         thread->start();
     }
-}
-
-void MainWindow::eraseFinished()
-{
-    DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
-
-    /* Restore first block... */
-    QFile mtdDev("/dev/mtd1");
-    mtdDev.open(QFile::WriteOnly);
-    mtdDev.write(*_nandBootBlock);
-    mtdDev.close();
-    delete _nandBootBlock;
-
-    if (_qpd)
-        _qpd->hide();
-
-    thread->deleteLater();
 }
 
 void MainWindow::discardBlockdev()
@@ -772,24 +749,33 @@ void MainWindow::discardBlockdev()
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
         showProgressDialog(tr("Discarding all data on internal eMCC..."));
-        QStringList blockDevs;
-        blockDevs << "/dev/mmcblk0" << "/dev/mmcblk0boot0" << "/dev/mmcblk0boot1";
-        DiscardThread *thread = new DiscardThread(blockDevs);
+        /*
+         * Note: In the eMMC case we discard all partitons. It is not easy to carve out
+         * small portitions of blocks since discard seems to operate on erase bock size.
+         * So even when specifiying "discard 0 - (end - 512 bytes), the eMMC actually
+         * discards the last 512 bytes...
+         *
+         * On eMMC its easy to just restore the config block which we read on startup...
+         */
+        DiscardThread *thread = new DiscardThread(_moduleInformation->erasePartitions());
+        _toradexConfigBlock->needsWrite = true;
 
-        connect(thread, SIGNAL (finished()), this, SLOT (discardFinished()));
+        connect(thread, SIGNAL (finished()), this, SLOT (discardOrEraseFinished()));
         connect(thread, SIGNAL (error(QString)), this, SLOT (discardOrEraseError(QString)));
 
         thread->start();
     }
 }
 
-void MainWindow::discardFinished()
+void MainWindow::discardOrEraseFinished()
 {
     DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
 
-    /* Restore config block... */
-    if (_toradexConfigBlock)
+    /* In the eMMC case we have to restore config block... */
+    if (_toradexConfigBlock->needsWrite) {
         _toradexConfigBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
+        _toradexConfigBlock->needsWrite = false;
+    }
 
     if (_qpd)
         _qpd->hide();

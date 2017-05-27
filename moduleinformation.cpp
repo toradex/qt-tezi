@@ -1,4 +1,5 @@
 #include "moduleinformation.h"
+#include "util.h"
 
 #include <QFile>
 #include <QDebug>
@@ -9,17 +10,32 @@ ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
   _socId(socId), _productIds(productIds), _storageClass(storageClass)
 {
     switch (_storageClass) {
-    case StorageClass::Mtd:
-        _configBlockPartition = "mtd1";
-        _configBlockOffset = Q_INT64_C(0x800);
-        break;
     case StorageClass::Block:
         _configBlockPartition = "mmcblk0boot0";
         _configBlockOffset = Q_INT64_C(-512);
+        _erasePartitions << "mmcblk0" << "mmcblk0boot0" << "mmcblk0boot1";
+        _mainPartition = "mmcblk0";
+        break;
+    case StorageClass::Mtd:
+        _configBlockPartition = "mtd1";
+        _configBlockOffset = Q_INT64_C(0x800);
+        _erasePartitions << "mtd2" << "mtd3" <<  "mtd4" <<  "mtd5";
+        _mainPartition = "mtd0";
         break;
     default:
         qDebug() << "Unknown Storage class";
     }
+}
+
+quint64 ModuleInformation::getStorageSize()
+{
+    QString sysfsSize = QString("/sys/class/%1/%2/size")
+            .arg(getStorageClassString(), _mainPartition);
+    quint64 size = getFileContents(sysfsSize).trimmed().toULongLong();
+    if (_storageClass == StorageClass::Block)
+        return size * 512;
+
+    return size;
 }
 
 ConfigBlock *ModuleInformation::readConfigBlock()

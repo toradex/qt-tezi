@@ -18,8 +18,9 @@ protected:
 public:
     static ModuleInformation *detectModule();
     ConfigBlock *readConfigBlock();
+    quint64 getStorageSize();
 
-    inline QList<quint16> productIds() {
+    inline QList<quint16> &productIds() {
         return _productIds;
     }
 
@@ -35,6 +36,26 @@ public:
         return _configBlockOffset;
     }
 
+    inline QList<QString> &erasePartitions() {
+        return _erasePartitions;
+    }
+
+    inline QString &mainPartition() {
+        return _mainPartition;
+    }
+
+    inline const QString getStorageClassString() {
+        switch (_storageClass) {
+        case StorageClass::Mtd:
+            return QString("mtd");
+            break;
+        case StorageClass::Block:
+            return QString("block");
+            break;
+        }
+        return QString("");
+    }
+
 signals:
 
 public slots:
@@ -45,6 +66,8 @@ private:
     enum StorageClass _storageClass;
     QString _configBlockPartition;
     qint64 _configBlockOffset;
+    QList<QString> _erasePartitions;
+    QString _mainPartition;
 
     ConfigBlock *_configBlock;
 
