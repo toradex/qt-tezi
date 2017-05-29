@@ -35,6 +35,7 @@ public slots:
     void updateIOstats(qint64 progress);
 
 protected:
+    void keyPressEvent(QKeyEvent *e);
     QStringList _slides;
     int _pos, _changeInterval, _maxSectors;
     qint64 _lastBytes;

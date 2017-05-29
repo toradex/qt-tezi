@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QDesktopWidget>
 #include <QDebug>
+#include <QKeyEvent>
 
 /* Progress dialog with slideshow
  *
@@ -66,6 +67,12 @@ ProgressSlideshowDialog::ProgressSlideshowDialog(const QStringList &slidesDirect
 ProgressSlideshowDialog::~ProgressSlideshowDialog()
 {
     delete ui;
+}
+
+void ProgressSlideshowDialog::keyPressEvent(QKeyEvent *e) {
+    if(e->key() != Qt::Key_Escape)
+        QDialog::keyPressEvent(e);
+    else {/* minimize */}
 }
 
 void ProgressSlideshowDialog::setLabelText(const QString &text)
