@@ -671,17 +671,11 @@ void MainWindow::installImage(QVariantMap entry)
         }
     }
 
+    /* If asynchrounous meta data download is in progress, wait for them to finish... */
     if (_numMetaFilesToDownload == 0)
-    {
-        /* All OSes selected are local */
         startImageWrite(entry);
-    }
     else
-    {
-        _qpd = new QProgressDialog(tr("The install process will begin shortly."), QString(), 0, 0, this);
-        _qpd->setWindowFlags(Qt::Window | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-        _qpd->show();
-    }
+        showProgressDialog(tr("The install process will begin shortly."));
 }
 
 void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
