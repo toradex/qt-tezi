@@ -10,7 +10,7 @@ DiscardThread::DiscardThread(QStringList devs) :
 
 void DiscardThread::run() {
     foreach (const QString &str, _blockDevs) {
-        if (!discard(str, 0, 0))
+        if (!discard("/dev/" + str, 0, 0))
             break;
     }
     emit finished();

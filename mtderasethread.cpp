@@ -10,7 +10,7 @@ MtdEraseThread::MtdEraseThread(QStringList devs) :
 
 void MtdEraseThread::run() {
     foreach (const QString &str, _mtdDevs) {
-        if (!erase(str, 0, 0))
+        if (!erase("/dev/" + str, 0, 0))
             break;
     }
     emit finished();
