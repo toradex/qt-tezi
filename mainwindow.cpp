@@ -546,6 +546,9 @@ void MainWindow::parseTeziConfig(const QString &path)
         return;
 
     QVariantMap teziconfig = Json::loadFromFile(configjson).toMap();
+    if (!teziconfig.contains("image_lists"))
+        return;
+
     QStringList imagelisturls = teziconfig["image_lists"].value<QStringList>();
     qDebug() << "Adding URLs to URL list" << imagelisturls;
 
@@ -555,6 +558,9 @@ void MainWindow::parseTeziConfig(const QString &path)
         else
             _networkUrlList.append(url);
     }
+
+    if (!_firstMediaPoll)
+        on_actionRefreshCloud_triggered();
 }
 
 QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
