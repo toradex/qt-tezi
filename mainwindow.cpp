@@ -249,7 +249,13 @@ void MainWindow::addImages(QList<QVariantMap> images)
             }
         }
 
-        QString friendlyname = name + "\n";
+        QString friendlyname = name;
+        if (!supportedImage)
+            friendlyname += " [" + tr("not compatible with this module") + "]";
+        else if (!supportedConfigFormat)
+            friendlyname += " [" + tr("requires a newer version of the installer") + "]";
+
+        friendlyname += "\n";
         if (!version.isEmpty())
             friendlyname += version;
         else
@@ -284,11 +290,6 @@ void MainWindow::addImages(QList<QVariantMap> images)
                 }
             }
         }
-
-        if (!supportedImage)
-            friendlyname += "\n[" + tr("This image is not compatible with the current module") + "]";
-        else if (!supportedConfigFormat)
-            friendlyname += "\n[" + tr("This image requires a newer version of the Toradex Easy Installer") + "]";
 
         QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
 
