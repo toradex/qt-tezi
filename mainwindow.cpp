@@ -133,10 +133,15 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     _availableMB = _moduleInformation->getStorageSize() / (1024 * 1024);
 
     _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId);
-    if (_usbGadget->initMassStorage())
-        ui->actionUsbMassStorage->setEnabled(true);
-    else
-        ui->actionUsbMassStorage->setEnabled(false);
+
+    if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block) {
+        if (_usbGadget->initMassStorage())
+            ui->actionUsbMassStorage->setEnabled(true);
+        else
+            ui->actionUsbMassStorage->setEnabled(false);
+    } else {
+        ui->mainToolBar->removeAction(ui->actionUsbMassStorage);
+    }
 
     if (_usbGadget->initRndis()) {
         ui->actionUsbRndis->setEnabled(true);
@@ -708,7 +713,8 @@ void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
 void MainWindow::on_actionUsbRndis_triggered(bool checked)
 {
     _usbGadget->enableRndis(checked);
-    ui->actionUsbMassStorage->setEnabled(!checked);
+    if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block)
+        ui->actionUsbMassStorage->setEnabled(!checked);
 }
 
 void MainWindow::on_actionEraseModule_triggered()
