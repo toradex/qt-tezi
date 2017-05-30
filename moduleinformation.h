@@ -13,7 +13,8 @@ public:
     Q_OBJECT
 protected:
     explicit ModuleInformation(QString socId, QList<quint16> productIds,
-                               enum StorageClass storageClass, QObject *parent = 0);
+                               enum StorageClass storageClass, bool rebootWorks,
+                               QObject *parent = 0);
 
 public:
     static ModuleInformation *detectModule();
@@ -56,6 +57,16 @@ public:
         return QString("");
     }
 
+    /*
+     * Return true if the module can get stuck in boot ROM when rebooting
+     * We can later extend that to runtime detect whether we booted with
+     * recovery mode to make that smarter
+     */
+    inline bool rebootWorks()
+    {
+        return _rebootWorks;
+    }
+
 signals:
 
 public slots:
@@ -70,6 +81,7 @@ private:
     QString _mainPartition;
 
     ConfigBlock *_configBlock;
+    bool _rebootWorks;
 
 
 };

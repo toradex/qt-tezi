@@ -5,9 +5,9 @@
 #include <QDebug>
 
 ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
-                                     enum StorageClass storageClass,
+                                     enum StorageClass storageClass, bool rebootWorks,
                                      QObject *parent) : QObject(parent),
-  _socId(socId), _productIds(productIds), _storageClass(storageClass)
+  _socId(socId), _productIds(productIds), _storageClass(storageClass), _rebootWorks(rebootWorks)
 {
     switch (_storageClass) {
     case StorageClass::Block:
@@ -78,22 +78,25 @@ ModuleInformation *ModuleInformation::detectModule()
     file.close();
     QList<quint16> productIds;
     enum StorageClass storageClass;
-
+    bool rebootWorks;
     if (socid == "i.MX7D") {
         // Dual and Solo are using the same soc_id currently
         productIds << 32 << 33;
         storageClass = StorageClass::Mtd;
+        rebootWorks = true;
     } else if (socid == "i.MX6Q") {
         // i.MX6 Quad/Dual are only populated on Apalis currently
         productIds << 27 << 28 << 29 << 35;
         storageClass = StorageClass::Block;
+        rebootWorks = false;
     } else if (socid == "i.MX6DL") {
         // i.MX6 DualLite/Solo are only populated on Colibri currently
         productIds << 14 << 15 << 16 << 17;
         storageClass = StorageClass::Block;
+        rebootWorks = false;
     } else {
         return NULL;
     }
 
-    return new ModuleInformation(socid, productIds, storageClass);
+    return new ModuleInformation(socid, productIds, storageClass, rebootWorks);
 }

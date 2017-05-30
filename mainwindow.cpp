@@ -878,10 +878,12 @@ void MainWindow::onCompleted()
         QApplication::exit(LINUX_REBOOT);
     }
 
-    QMessageBox msgbox(QMessageBox::Information,
-                       tr("Image Installed"),
-                       tr("The Image has been installed successfully.") + " <b>" + tr("You can now safely power off or reset the system.") + "</b><br><br>" +
-                       tr("In case recovery mode has been used a power cycle will be necessary."),
+    QString text = tr("The Image has been installed successfully.") + " <b>" + tr("You can now safely power off or reset the system.") + "</b>";
+
+    if (!_moduleInformation->rebootWorks())
+        text += "<br><br>" + tr("In case recovery mode has been used a power cycle will be necessary.");
+
+    QMessageBox msgbox(QMessageBox::Information, tr("Image Installed"), text,
                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
     msgbox.button(QMessageBox::Yes)->setText(tr("Power off"));
     msgbox.button(QMessageBox::No)->setText(tr("Reboot"));
