@@ -26,6 +26,7 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <QApplication>
+#include <QDirIterator>
 #include <QScreen>
 #include <QSplashScreen>
 #include <QDesktopWidget>
@@ -569,28 +570,38 @@ void MainWindow::parseTeziConfig(const QString &path)
         on_actionRefreshCloud_triggered();
 }
 
-QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
+QList<QFileInfo> MainWindow::findImages(const QString &path, int depth)
 {
-    QList<QVariantMap> images;
+    QList<QFileInfo> images;
 
     /* Local image folders, search all subfolders... */
-    QDir dir(path, "", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList list = dir.entryList();
+    QDirIterator it(path, QStringList() << "image.json", QDir::Files | QDir::AllDirs | QDir::NoDotAndDotDot);
+    while (it.hasNext()) {
+        it.next();
+        QFileInfo fi = it.fileInfo();
+        if (fi.isDir() && depth < 3)
+            images << findImages(fi.filePath(), depth+1);
+        if (fi.isFile())
+            images << fi;
+    }
 
-    /* ...and root too */
-    list.append("");
+    return images;
+}
 
-    foreach(QString image, list) {
-        QString imagefolder = path + QDir::separator() + image;
-        QString imagejson = imagefolder + QDir::separator() + "image.json";
-        if (!QFile::exists(imagejson))
-            continue;
+QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
+{
+    QDir root(path);
+    QList<QVariantMap> images;
+    QList<QFileInfo> imagefiles = findImages(path, 0);
 
-        qDebug() << "Adding image" << image << "from" << blockdev;
+    foreach(QFileInfo image, imagefiles) {
+        QString imagename = root.relativeFilePath(image.path());
 
-        QVariantMap imagemap = Json::loadFromFile(imagejson).toMap();
-        imagemap["foldername"] = image;
-        imagemap["folder"] = imagefolder;
+        qDebug() << "Adding image" << imagename << "from" << blockdev;
+
+        QVariantMap imagemap = Json::loadFromFile(image.filePath()).toMap();
+        imagemap["foldername"] = imagename;
+        imagemap["folder"] = image.path();
         imagemap["source"] = source;
 
         if (!imagemap.contains("nominal_size"))
@@ -599,7 +610,7 @@ QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QStrin
         QString iconFilename = imagemap["icon"].toString();
         if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator())) {
             QPixmap pix;
-            pix.load(imagefolder + QDir::separator() + iconFilename);
+            pix.load(image.path() + QDir::separator() + iconFilename);
             QIcon icon(pix);
             imagemap["iconimage"] = icon;
         }

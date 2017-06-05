@@ -41,6 +41,7 @@ class QListWidgetItem;
 class QNetworkAccessManager;
 class QNetworkAddressEntry;
 class QMessageBox;
+class QFileInfo;
 
 class MainWindow : public QMainWindow
 {
@@ -86,6 +87,7 @@ protected:
     int calculateNominalSize(const QVariantMap &imagemap);
     void processMedia(enum ImageSource src, const QString &blockdev);
     void parseTeziConfig(const QString &path);
+    QList<QFileInfo> findImages(const QString &path, int depth);
     QList<QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
     bool isMounted(const QString &path);
