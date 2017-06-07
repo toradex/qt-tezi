@@ -3,6 +3,7 @@
 #include <QtEndian>
 
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include "configblock.h"
@@ -186,6 +187,8 @@ void ConfigBlock::writeToBlockdev(QString device, qint64 offset)
     blockDev.seek(calculateAbsoluteOffset(blockDev.handle(), offset));
 
     blockDev.write(_cb);
+    blockDev.flush();
+    fsync(blockDev.handle());
     blockDev.close();
 }
 
