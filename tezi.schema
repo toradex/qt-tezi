@@ -1,0 +1,190 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Toradex Easy Installer Image",
+    "description": "Toradex Easy Installer Image description file",
+
+    "definitions": {
+        "content": {
+            "type": "object",
+            "properties": {
+                "filesystem_type": {
+                    "description": "File system to create ext3/ext4/swap/fat/ntfs/raw/unformatted",
+                    "type": "string",
+                    "enum": [ "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "raw", "unformatted" ]
+                },
+                "label": {
+                    "description": "File system label used when creating the file system (ext3/ext4/fat/ntfs only)",
+                    "type": "string"
+                },
+                "mkfs_options": {
+                    "description": "Extra options passed to the mkfs command (ext3/ext4/fat/ntfs only)",
+                    "type": "string"
+                },
+                "filename": {
+                    "description": "Only if filesystem_type is a filesystem: Filename of file which gets written into the new file system. If this is a zip/tar.gz/tar.xz/tar.bz2 it will get automatically extracted into the file system.",
+                    "type": "string"
+                },
+                "filelist": {
+                    "description": "Only if filesystem_type is a filesystem: List of filenames which get copied into the new file system",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "uncompressed_size": {
+                    "description": "The uncompressed size of all files in megabytes (used for progress bar)",
+                    "type": "number"
+                },
+                "rawfiles": {
+                    "description": "Only if filesystem_type is raw: List of files to write using block wise copy mode (dd)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/rawfile"
+                    }
+                }
+            },
+            "required": [ "filesystem_type" ]
+        },
+        "rawfile": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "description": "Filename of file which gets copied block wise to the target device",
+                    "type": "string"
+                },
+                "dd_options": {
+                    "description": "Extra options passed to the dd command (raw only)",
+                    "type": "string"
+                },
+                "product_ids": {
+                    "description": "Product IDs on which this file will be copied (all supported Product IDs if not specified)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product_id"
+                    }
+                },
+                "size": {
+                    "description": "The size of all files in megabytes (used for progress bar)",
+                    "type": "number"
+                }
+            },
+            "required": [ "filename" ]
+        },
+
+        "product_id": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        }
+    },
+
+    "type": "object",
+    "properties": {
+        "autoinstall": {
+            "description": "Automatically install image upon image detection (defaults to false).",
+            "type": "boolean"
+        },
+        "config_format": {
+            "description": "The image configuration format version, currently always 1",
+            "type": "integer"
+        },
+        "name": {
+            "description": "Name of the image (as displayed in the image list)",
+            "type": "string"
+        },
+        "description": {
+            "description": "Description of the image (will be shown as ToolTip of the image)", 
+            "type": "string"
+        },
+	"version": {
+            "description": "Version of the image, mostly informational character except if isinstaller is true, see below", 
+            "type": "string"
+        },
+        "release_date": {
+            "description": "ISO 8601 date format, only informational character",
+            "type": "string"
+        },
+        "prepare_script": {
+            "description": "Filename of script which will get executed before the image installs.",
+            "type": "string"
+        },
+        "wrapup_script": {
+            "description": "Filename of script which will get executed after the image has been successfully installed.",
+            "type": "string"
+        },
+        "marketing": {
+            "description": "Filename of a tar file with images which will be shown during installation process.",
+            "type": "string"
+        },
+        "icon": {
+            "description": "Filename of the Icon shown in front of the image (typically a PNG with a dimension of 40x40)",
+            "type": "string"
+        },
+        "license": {
+            "description": "Filename of a HTML file containing the image license agreement.",
+            "type": "string"
+        },
+        "license_title": {
+            "description": "Title to show in the license agreement dialog.",
+            "type": "string"
+        },
+        "supported_product_ids": {
+            "description": "List of supported Product ID's. The product ID will be obtained from the Toradex Config Block. If a image is found which does not support the current module type it will be displayed in gray.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/product_id"
+            }
+        },
+        "isinstaller": {
+            "description": "This is a special property which marks the image as being the Toradex Easy Installer itself.",
+            "type": "boolean"
+        },
+	"blockdevs": {
+            "description": "List of block devices to flash (for eMMC based devices, see below)", 
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the block device to write to (as it appears under /dev/)",
+                        "type": "string"
+                    },
+                    "content": {
+                        "$ref": "#/definitions/content",
+                        "description": "Content which should get written to the raw block device (see Content)"
+                    },
+                    "partitions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {
+                                    "description": "File system label used when creating the file system (ext3/ext4/fat/ntfs only)",
+                                    "type": "string"
+                                },
+                                "content": {
+                                    "$ref": "#/definitions/content",
+                                    "description": "Content which should get written in this partition (see Content)"
+                                }
+                            }
+                        }
+                    }
+                },
+                "allOf": [
+                    { "required": ["name"] },
+                    { "anyOf": [
+                        { "required": ["partitions"] },
+                        { "required": ["content"] }
+                    ] }
+                ]
+            }
+        }
+    },
+    "allOf": [
+       { "required": ["config_format", "name", "description", "supported_product_ids" ] },
+       { "oneOf": [
+           { "required": ["blockdevs"] },
+           { "required": ["mtddevs"] }
+       ] }
+    ],
+    "additionalProperties": false
+}
