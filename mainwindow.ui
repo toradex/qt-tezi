@@ -447,7 +447,7 @@
     <string>Erase Flash (c)</string>
    </property>
    <property name="toolTip">
-    <string>Discards all data on eMMC.</string>
+    <string>Discards all data on flash.</string>
    </property>
    <property name="shortcut">
     <string>C</string>
