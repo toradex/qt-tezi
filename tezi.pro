@@ -7,7 +7,9 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = tezi
 target.files = tezi
 target.path = /var/volatile
-INSTALLS = target
+schema.files = tezi.schema
+schema.path = /var/volatile
+INSTALLS = target schema
 TEMPLATE = app
 LIBS += -lqjson
 CONFIG += link_pkgconfig
@@ -100,4 +102,5 @@ TRANSLATIONS += translation_de.ts \
 
 OTHER_FILES += \
     README.txt \
-    wpa_supplicant/wpa_supplicant.xml
+    wpa_supplicant/wpa_supplicant.xml \
+    tezi.schema

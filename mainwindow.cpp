@@ -596,8 +596,16 @@ QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QStrin
 
     foreach(QFileInfo image, imagefiles) {
         QString imagename = root.relativeFilePath(image.path());
+        QString validationerror;
 
         qDebug() << "Adding image" << imagename << "from" << blockdev;
+
+        if (!Json::validateFile("/var/volatile/tezi.schema", image.filePath(), validationerror)) {
+            QMessageBox::critical(this, tr("Error"), tr("Image JSON validation failed for %1").arg(image.filePath()) + "\n\n" + validationerror, QMessageBox::Close);
+            qDebug() << "Image JSON validation failed for" << image.filePath();
+            qDebug() << validationerror;
+            continue;
+        }
 
         QVariantMap imagemap = Json::loadFromFile(image.filePath()).toMap();
         imagemap["foldername"] = imagename;
