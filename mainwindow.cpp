@@ -596,16 +596,8 @@ QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QStrin
 
     foreach(QFileInfo image, imagefiles) {
         QString imagename = root.relativeFilePath(image.path());
-        QString validationerror;
 
         qDebug() << "Adding image" << imagename << "from" << blockdev;
-
-        if (!Json::validateFile("/var/volatile/tezi.schema", image.filePath(), validationerror)) {
-            QMessageBox::critical(this, tr("Error"), tr("Image JSON validation failed for %1").arg(image.filePath()) + "\n\n" + validationerror, QMessageBox::Close);
-            qDebug() << "Image JSON validation failed for" << image.filePath();
-            qDebug() << validationerror;
-            continue;
-        }
 
         QVariantMap imagemap = Json::loadFromFile(image.filePath()).toMap();
         imagemap["foldername"] = imagename;
@@ -668,6 +660,29 @@ void MainWindow::installImage(QVariantMap entry)
 
     setEnabled(false);
     _numMetaFilesToDownload = 0;
+
+    /* Re-mount local media */
+    if (!ImageInfo::isNetwork(imageSource))
+        mountMedia(entry.value("image_source_blockdev").toString());
+
+    /* Validate image */
+    QString validationerror;
+    QFile schemafile(":/tezi.schema");
+    schemafile.open(QIODevice::ReadOnly);
+
+    QFile jsonfile(entry.value("folder").value<QString>() + QDir::separator() + entry.value("image_info").value<QString>());
+    jsonfile.open(QIODevice::ReadOnly);
+
+    if (!Json::validate(schemafile.readAll(), jsonfile.readAll(), validationerror)) {
+        QMessageBox::critical(this, tr("Error"), tr("Image JSON validation failed for '%1'").arg(entry.value("name").value<QString>()) + "\n\n"
+                              + validationerror, QMessageBox::Close);
+        qDebug() << "Image JSON validation failed for" << entry.value("name").value<QString>();
+        qDebug() << validationerror;
+        jsonfile.close();
+        unmountMedia();
+        setEnabled(true);
+        return;
+    }
 
     /* Stop any polling, we are about to install a image */
     _networkStatusPollTimer.stop();
@@ -1391,10 +1406,6 @@ void MainWindow::startImageWrite(QVariantMap entry)
     enum ImageSource imageSource = (enum ImageSource)entry.value("source").toInt();
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
-
-    /* Re-mount local media */
-    if (!ImageInfo::isNetwork(imageSource))
-        mountMedia(entry.value("image_source_blockdev").toString());
 
     if (entry.contains("license") && !_isAutoinstall) {
         QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());

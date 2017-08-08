@@ -21,7 +21,7 @@ public:
     static QByteArray serialize(const QVariant &json);
     static QVariant loadFromFile(const QString &filename);
     static void saveToFile(const QString &filename, const QVariant &json);
-    static bool validateFile(const QString &schemafile, const QString &filename, QString &errortext);
+    static bool validate(const QByteArray &schemastr, const QByteArray &filestr, QString &errortext);
 };
 
 #endif // JSON_H

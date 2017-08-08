@@ -80,21 +80,18 @@ QVariant Json::loadFromFile(const QString &filename)
     return result;
 }
 
-bool Json::validateFile(const QString &schemafile, const QString &filename, QString &errortext)
+bool Json::validate(const QByteArray &schemastr, const QByteArray &filestr, QString &errortext)
 {
-    std::string schemafilestr = schemafile.toUtf8().constData();
-    std::string filenamestr = filename.toUtf8().constData();
-
     // Load the document containing the schema
     rapidjson::Document schemaDocument;
-    if (!valijson::utils::loadDocument(schemafilestr, schemaDocument)) {
+    if (!valijson::utils::loadDocumentFromString(schemastr.constData(), schemaDocument)) {
         errortext = "Failed to load schema document.";
         return false;
     }
 
     // Load the document that is to be validated
     rapidjson::Document targetDocument;
-    if (!valijson::utils::loadDocument(filenamestr, targetDocument)) {
+    if (!valijson::utils::loadDocumentFromString(filestr, targetDocument)) {
         errortext = "Failed to load target document.";
         return false;
     }
