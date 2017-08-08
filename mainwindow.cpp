@@ -679,7 +679,8 @@ void MainWindow::installImage(QVariantMap entry)
         qDebug() << "Image JSON validation failed for" << entry.value("name").value<QString>();
         qDebug() << validationerror;
         jsonfile.close();
-        unmountMedia();
+        if (!ImageInfo::isNetwork(imageSource))
+            unmountMedia();
         setEnabled(true);
         return;
     }

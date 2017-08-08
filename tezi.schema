@@ -8,9 +8,9 @@
             "type": "object",
             "properties": {
                 "filesystem_type": {
-                    "description": "File system to create ext3/ext4/swap/fat/ntfs/raw/unformatted",
+                    "description": "File system to create ext3/ext4/swap/fat/ntfs/raw/unformatted (defaults to raw)",
                     "type": "string",
-                    "enum": [ "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "raw", "unformatted" ]
+                    "enum": [ "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "ubifs", "raw", "unformatted" ]
                 },
                 "label": {
                     "description": "File system label used when creating the file system (ext3/ext4/fat/ntfs only)",
@@ -42,8 +42,7 @@
                         "$ref": "#/definitions/rawfile"
                     }
                 }
-            },
-            "required": [ "filesystem_type" ]
+            }
         },
         "rawfile": {
             "type": "object",
@@ -58,10 +57,16 @@
                 },
                 "product_ids": {
                     "description": "Product IDs on which this file will be copied (all supported Product IDs if not specified)",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/product_id"
-                    }
+                    "anyOf": [ {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/product_id"
+                            }
+                        }, {
+                            "type": "string",
+                            "$ref": "#/definitions/product_id"
+                        }
+                    ]
                 },
                 "size": {
                     "description": "The size of all files in megabytes (used for progress bar)",
@@ -69,6 +74,48 @@
                 }
             },
             "required": [ "filename" ]
+        },
+
+        "ubivolume": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of this UBI volume.",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "UBI volume type (defaults to dynamic).",
+                    "type": "string",
+                    "enum": [ "static", "dynamic" ]
+                },
+                "size_kib": {
+                    "description": "UBI volume size in kilobytes. If not specified, maximum available size will be used.",
+                    "type": "integer"
+                },
+                "content": {
+                    "$ref": "#/definitions/content"
+                }
+            },
+            "required": [ "name" ]
+        },
+
+        "winceimage": {
+            "type": "object",
+            "properties": {
+                "image_filename": {
+                    "description": "Source filename of the WinCE image to write.",
+                    "type": "string"
+                },
+                "nonfs_size": {
+                    "description": "Non-FS size in megabyte (maximum size of the WinCE image).",
+                    "type": "number"
+                },
+                "size": {
+                    "description": "The size of the image in megabytes (used for progress bar)",
+                    "type": "number"
+                }
+            },
+            "required": [ "image_filename", "nonfs_size" ]
         },
 
         "product_id": {
@@ -177,6 +224,41 @@
                     ] }
                 ]
             }
+        },
+        "mtddevs": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name of the MTD device as shown in '/proc/mtd'.",
+                        "type": "string"
+                    },
+                    "content": {
+                        "$ref": "#/definitions/content",
+                        "description": "Content to write to MTD partition. Currently only supports 'rawfile'."
+                    },
+                    "ubivolumes": {
+                        "description": "List of UBI volumes to write into this MTD partition.",
+                        "type": "array",
+                        "items": {
+                             "$ref": "#/definitions/ubivolume"
+                        }
+                    },
+                    "winceimage": {
+                        "$ref": "#/definitions/winceimage",
+                        "description": "WinCE to write to MTD partition."
+                    }
+                },
+                "allOf": [
+		     { "required": [ "name" ] },
+                     { "anyOf": [
+                          { "required": ["content"] },
+                          { "required": ["ubivolumes"] },
+                          { "required": ["winceimage"] }
+                     ] }
+                ]
+            }
         }
     },
     "allOf": [
@@ -185,6 +267,5 @@
            { "required": ["blockdevs"] },
            { "required": ["mtddevs"] }
        ] }
-    ],
-    "additionalProperties": false
+    ]
 }

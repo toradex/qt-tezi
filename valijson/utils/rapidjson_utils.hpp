@@ -12,6 +12,21 @@ namespace valijson {
 namespace utils {
 
 template<typename Encoding, typename Allocator>
+inline bool loadDocumentFromString(const char *string, rapidjson::GenericDocument<Encoding, Allocator> &document)
+{
+    // Parse schema
+    document.template Parse<0>(string);
+    if (document.HasParseError()) {
+        std::cerr << "RapidJson failed to parse the document:" << std::endl;
+        std::cerr << "Parse error: " << document.GetParseError() << std::endl;
+        std::cerr << "Near: " <<  std::string(string, (std::max)(size_t(0), document.GetErrorOffset() - 20), 40) << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+template<typename Encoding, typename Allocator>
 inline bool loadDocument(const std::string &path, rapidjson::GenericDocument<Encoding, Allocator> &document)
 {
     // Load schema JSON from file
@@ -21,16 +36,7 @@ inline bool loadDocument(const std::string &path, rapidjson::GenericDocument<Enc
         return false;
     }
 
-    // Parse schema
-    document.template Parse<0>(file.c_str());
-    if (document.HasParseError()) {
-        std::cerr << "RapidJson failed to parse the document:" << std::endl;
-        std::cerr << "Parse error: " << document.GetParseError() << std::endl;
-        std::cerr << "Near: " << file.substr((std::max)(size_t(0), document.GetErrorOffset() - 20), 40) << std::endl;
-        return false;
-    }
-
-    return true;
+    return loadDocumentFromString(file.c_str(), document);
 }
 
 }  // namespace utils

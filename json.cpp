@@ -80,6 +80,18 @@ QVariant Json::loadFromFile(const QString &filename)
     return result;
 }
 
+/*
+ * This currently uses RapidJson to parse the Json file (again!). This
+ * is far from a ideal solution, but it works today. Unfortunately there
+ * is no Json Schema parser which works with QJson out of the box.
+ * The ValiJson Schema validator would allow to write an adapter to any
+ * Json parsers document type, hence an adapter to QJson (or Json files
+ * as QVariant) should be doable.
+ *
+ * However, ValiJson has an adapter for the Qt5 native JSON support... So
+ * rather to invest time in writing an adapter for the Qt4 library, it
+ * would be better to move forward and start porting Tezi to Qt5...
+ */
 bool Json::validate(const QByteArray &schemastr, const QByteArray &filestr, QString &errortext)
 {
     // Load the document containing the schema
