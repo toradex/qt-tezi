@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     dto/winceimage.cpp \
     mtderasethread.cpp \
     configblockdialog.cpp \
-    moduleinformation.cpp
+    moduleinformation.cpp \
+    mediapollthread.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -79,7 +80,8 @@ HEADERS  += mainwindow.h \
     dto/winceimage.h \
     mtderasethread.h \
     configblockdialog.h \
-    moduleinformation.h
+    moduleinformation.h \
+    mediapollthread.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

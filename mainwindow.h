@@ -15,6 +15,7 @@
 #include "dto/imageinfo.h"
 #include "usbgadget.h"
 #include "configblock.h"
+#include "mediapollthread.h"
 #include "multiimagewritethread.h"
 #include "moduleinformation.h"
 #include <QMainWindow>
@@ -52,7 +53,6 @@ public:
     ~MainWindow();
     void show();
     void showProgressDialog(const QString &labelText);
-    void startNetworking();
 
 protected:
     Ui::MainWindow *ui;
@@ -68,15 +68,13 @@ protected:
     bool _wasOnline, _wasRndis;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numDownloads, _numMetaFilesToDownload;
+    bool _installingFromMedia;
     QTimer _networkStatusPollTimer;
-    QTimer _mediaPollTimer;
     QTime _time;
     QIcon _sdIcon,_usbIcon, _internetIcon;
     QVariantMap _imageEntry;
-    bool _mediaMounted, _firstMediaPoll;
-    QSet<QString> _blockdevsChecked;
-    QSet<QString> _blockdevsChecking;
     UsbGadget *_usbGadget;
+    MediaPollThread *_mediaPollThread;
     MultiImageWriteThread *_imageWriteThread;
     QList<QVariantMap> _netImages;
     QStringList _networkUrlList;
@@ -84,21 +82,9 @@ protected:
 
     void updateModuleInformation();
     void updateVersion();
-    int calculateNominalSize(const QVariantMap &imagemap);
-    void processMedia(enum ImageSource src, const QString &blockdev);
-    void parseTeziConfig(const QString &path);
-    QList<QFileInfo> findImages(const QString &path, int depth);
-    QList<QVariantMap> listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source);
     virtual void changeEvent(QEvent * event);
-    bool isMounted(const QString &path);
-    bool mountMedia(const QString &blockdev);
-    bool unmountMedia();
-    void checkRemovableBlockdev(const QString &nameFilter);
-    void checkSDcard();
     static bool orderByIndex(const QVariantMap &m1, const QVariantMap &m2);
-    void addImages(QList<QVariantMap> images);
     void removeTemporaryFiles(const QVariantMap entry);
-    void removeImagesByBlockdev(const QString &blockdev);
     void removeImagesBySource(enum ImageSource source);
     bool hasAddress(const QString &iface, QNetworkAddressEntry *currAddress = NULL);
     QStringList getFlavours(const QString &folder);
@@ -115,7 +101,6 @@ signals:
     void abortAllDownloads();
 
 protected slots:
-    void pollMedia();
     void pollNetworkStatus();
     void downloadListJsonCompleted();
     void downloadListJsonFailed();
@@ -130,6 +115,11 @@ protected slots:
     void discardBlockdev();
     void discardOrEraseFinished();
     void discardOrEraseError(const QString &errorString);
+    void startNetworking();
+    void removeImagesByBlockdev(const QString blockdev);
+    void addNewImageUrl(const QString url);
+    void addImages(const QListVariantMap images);
+    void errorMounting(const QString blockdev);
 
     /* Events from ImageWriterThread */
     void onError(const QString &msg);

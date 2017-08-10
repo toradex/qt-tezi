@@ -66,7 +66,7 @@ ConfigBlock *ModuleInformation::readConfigBlock()
     return configBlock;
 }
 
-ModuleInformation *ModuleInformation::detectModule()
+ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 {
     // Try to detect which module we are running on...
     QFile file("/sys/bus/soc/devices/soc0/soc_id");
@@ -98,5 +98,5 @@ ModuleInformation *ModuleInformation::detectModule()
         return NULL;
     }
 
-    return new ModuleInformation(socid, productIds, storageClass, rebootWorks);
+    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, parent);
 }

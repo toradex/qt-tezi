@@ -91,7 +91,7 @@ void MultiImageWriteThread::run()
             return;
     }
 
-    if (mtddevs) {
+    if (!mtddevs->empty()) {
         MtdNameDeviceTranslator mtdNameDev;
 
         foreach (MtdDevInfo *mtddev, *mtddevs) {
@@ -130,6 +130,7 @@ void MultiImageWriteThread::run()
     sync();
 
     emit completed();
+    qDebug() << "Write Thread finished";
 }
 
 bool MultiImageWriteThread::runScript(QString script, QByteArray &output)

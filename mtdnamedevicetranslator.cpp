@@ -15,7 +15,6 @@ MtdNameDeviceTranslator::MtdNameDeviceTranslator(QObject *parent) : QObject(pare
         return;
     }
 
-    qDebug() << "start";
     QTextStream in(&mtdList);
     QString line = in.readLine();
     while (!line.isNull()) {

@@ -17,7 +17,7 @@ protected:
                                QObject *parent = 0);
 
 public:
-    static ModuleInformation *detectModule();
+    static ModuleInformation *detectModule(QObject *parent);
     ConfigBlock *readConfigBlock();
     quint64 getStorageSize();
 

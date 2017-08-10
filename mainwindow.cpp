@@ -26,7 +26,6 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <QApplication>
-#include <QDirIterator>
 #include <QScreen>
 #include <QSplashScreen>
 #include <QDesktopWidget>
@@ -67,15 +66,14 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
-    _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _netaccess(NULL), _numDownloads(0), _mediaMounted(false),
-    _firstMediaPoll(true)
+    _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _netaccess(NULL), _numDownloads(0)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
 
-    _moduleInformation = ModuleInformation::detectModule();
+    _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Module Detection failed"),
                               QObject::tr("Failed to detect the basic module type. Cannot continue."),
@@ -123,11 +121,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     _usbIcon = QIcon(":/icons/flashdisk_logo.png");
     _internetIcon = QIcon(":/icons/download_cloud.png");
 
-    QDir dir;
-    dir.mkpath(SRC_MOUNT_FOLDER);
-
-    if (isMounted(SRC_MOUNT_FOLDER))
-        unmountMedia();
+    _mediaPollThread = new MediaPollThread(_moduleInformation, this);
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -155,8 +149,16 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     // Add static server list
     _networkUrlList.append(QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts));
 
-    connect(&_mediaPollTimer, SIGNAL(timeout()), SLOT(pollMedia()));
-    _mediaPollTimer.start(100);
+    qRegisterMetaType<QListVariantMap>("QListVariantMap");
+
+    // Starting network after first media scan makes sure that a local media takes presedence over a server provided image.
+    connect(_mediaPollThread, SIGNAL (firstScanFinished()), this, SLOT (startNetworking()));
+    connect(_mediaPollThread, SIGNAL (removedBlockdev(const QString)), this, SLOT (removeImagesByBlockdev(const QString)));
+    connect(_mediaPollThread, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
+    connect(_mediaPollThread, SIGNAL (newImagesToAdd(const QListVariantMap)), this, SLOT (addImages(const QListVariantMap)));
+    connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
+
+    _mediaPollThread->start();
 }
 
 MainWindow::~MainWindow()
@@ -188,14 +190,14 @@ void MainWindow::showProgressDialog(const QString &labelText)
     _qpd->show();
 }
 
-void MainWindow::addImages(QList<QVariantMap> images)
+void MainWindow::addImages(const QListVariantMap images)
 {
     QSize currentsize = ui->list->iconSize();
     int validImages = 0;
     bool isAutoinstall = false;
     QVariantMap autoInstallImage;
 
-    foreach (QVariantMap m, images)
+    foreach (const QVariantMap m, images)
     {
         int config_format = m.value("config_format").toInt();
         QString name = m.value("name").toString();
@@ -203,7 +205,7 @@ void MainWindow::addImages(QList<QVariantMap> images)
         QString description = m.value("description").toString();
         QString version = m.value("version").toString();
         QString releasedate = m.value("release_date").toString();
-        QIcon icon = m.value("iconimage").value<QIcon>();
+        QByteArray icondata = m.value("iconimage").value<QByteArray>();
         bool autoInstall = m.value("autoinstall").toBool();
         bool isInstaller = m.value("isinstaller").toBool();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
@@ -278,6 +280,9 @@ void MainWindow::addImages(QList<QVariantMap> images)
             friendlyname += ", " + url;
         }
 
+        QPixmap pix;
+        pix.loadFromData(icondata);
+        QIcon icon(pix);
         if (icon.isNull()) {
             icon = QIcon();
         } else {
@@ -368,7 +373,7 @@ void MainWindow::removeTemporaryFiles(const QVariantMap entry)
     }
 }
 
-void MainWindow::removeImagesByBlockdev(const QString &blockdev)
+void MainWindow::removeImagesByBlockdev(const QString blockdev)
 {
     for (int i=0; i< ui->list->count(); i++)
     {
@@ -397,252 +402,21 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
     }
 }
 
-bool MainWindow::isMounted(const QString &path) {
-    QFile file("/proc/mounts");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return false;
-
-    QTextStream in(&file);
-    QString line = in.readLine();
-    while (!line.isNull()) {
-        if (line.contains(path))
-            return true;
-        line = in.readLine();
-    }
-
-    return false;
-}
-
-void MainWindow::checkRemovableBlockdev(const QString &nameFilter)
+void MainWindow::addNewImageUrl(const QString url)
 {
-    QDir dir("/sys/block/", nameFilter, QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList list = dir.entryList();
-
-    foreach(QString blockdev, list) {
-        QByteArray removable = getFileContents("/sys/block/" + blockdev + "/removable");
-        if (!removable.startsWith("1"))
-            continue;
-
-        /* Try raw blockdev without any partition table... */
-        processMedia(SOURCE_USB, blockdev);
-
-        /* Get partitions of this device */
-        QDir devdir("/dev", blockdev + "?*", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
-        QStringList devfiles = devdir.entryList();
-        foreach (QString devfile, devfiles) {
-            processMedia(SOURCE_USB, devfile);
-        }
-    }
-}
-
-void MainWindow::checkSDcard()
-{
-    QDir dir("/sys/block/", "mmcblk*", QDir::Name, QDir::Dirs | QDir::NoDotAndDotDot);
-    QStringList list = dir.entryList();
-
-
-    foreach(QString blockdev, list) {
-        /* We need to ignore internal/target block devices on modules with eMMC */
-        if (_moduleInformation->storageClass() == ModuleInformation::Block) {
-            /*
-             * Unfortunately, at least with Linux 4.1, we can't rely on removable property for
-             * eMMC/SD card detection... just ignore the block devices we consider as internal...
-             */
-            if (_moduleInformation->erasePartitions().contains(blockdev))
-                continue;
-        }
-
-        /* Try raw blockdev without any partition table... */
-        processMedia(SOURCE_SDCARD, blockdev);
-
-        /* Get partitions of this device */
-        QDir devdir("/dev", blockdev + "p?", QDir::Name, QDir::System | QDir::NoDotAndDotDot);
-        QStringList devfiles = devdir.entryList();
-        foreach (QString devfile, devfiles)
-            processMedia(SOURCE_SDCARD, devfile);
-    }
-}
-
-bool MainWindow::mountMedia(const QString &blockdev)
-{
-    if (_mediaMounted ||
-        QProcess::execute("mount " + blockdev + " " SRC_MOUNT_FOLDER) != 0)
-    {
-        qDebug() << "Error mounting external device" << blockdev << "to" << SRC_MOUNT_FOLDER;
-        QMessageBox::critical(this, tr("Error mounting"),
-                              tr("Error mounting external device (%1)").arg(blockdev),
-                              QMessageBox::Close);
-        return false;
-    }
-
-    _mediaMounted = true;
-
-    return true;
-}
-
-bool MainWindow::unmountMedia()
-{
-    if (QProcess::execute("umount " SRC_MOUNT_FOLDER) != 0) {
-        qDebug() << "Error unmounting external device" << SRC_MOUNT_FOLDER;
-        return false;
-    }
-
-    _mediaMounted = false;
-
-    return true;
-}
-
-void MainWindow::processMedia(enum ImageSource src, const QString &blockdev)
-{
-    QString blockdevpath = "/dev/" + blockdev;
-
-    _blockdevsChecking.insert(blockdevpath);
-
-    /* Did we already checked this block device? */
-    if (_blockdevsChecked.contains(blockdevpath))
-        return;
-
-    /* Ignore blockdev if it has not a valid file system */
-    if (MultiImageWriteThread::getFsType(blockdevpath).length() <= 0)
-        return;
-
-    qDebug() << "Reading images from media" << blockdevpath;
-    if (_qpd) {
-        _qpd->setLabelText(tr("Reading images from device %1...").arg(blockdevpath));
-        QApplication::processEvents();
-    }
-
-    if (mountMedia(blockdevpath))
-    {
-        // Check for HTTP server urls
-        parseTeziConfig(SRC_MOUNT_FOLDER);
-
-        QList<QVariantMap> images = listMediaImages(SRC_MOUNT_FOLDER, blockdevpath, src);
-        unmountMedia();
-        addImages(images);
-    }
-}
-
-void MainWindow::pollMedia()
-{
-    _blockdevsChecking.clear();
-
-    checkRemovableBlockdev("sd*");
-    checkSDcard();
-
-    /* Check which blockdevices disappeared since last poll and remove them */
-    QSet<QString> lostblockdevs = _blockdevsChecked - _blockdevsChecking;
-    foreach(QString blockdev, lostblockdevs) {
-        removeImagesByBlockdev(blockdev);
-    }
-
-    _blockdevsChecked = _blockdevsChecking;
-
-    /* After first poll, set intervall to 1s and start networking... */
-    if (_firstMediaPoll) {
-        _mediaPollTimer.setInterval(1000);
-        startNetworking();
-        _firstMediaPoll = false;
-    }
-}
-
-void MainWindow::parseTeziConfig(const QString &path)
-{
-    QString configjson = path + QDir::separator() + "tezi_config.json";
-    if (!QFile::exists(configjson))
-        return;
-
-    QVariantMap teziconfig = Json::loadFromFile(configjson).toMap();
-    if (!teziconfig.contains("image_lists"))
-        return;
-
-    QStringList imagelisturls = teziconfig["image_lists"].value<QStringList>();
-    qDebug() << "Adding URLs to URL list" << imagelisturls;
-
-    foreach (QString url, imagelisturls) {
-        if (url.contains(RNDIS_ADDRESS))
+    if (url.contains(RNDIS_ADDRESS)) {
+        if (!_rndisUrlList.contains(url))
             _rndisUrlList.append(url);
-        else
+    } else {
+        if (!_networkUrlList.contains(url))
             _networkUrlList.append(url);
     }
 
-    if (!_firstMediaPoll)
+    /* Refresh images obtained over network in case we are connected in at least one way */
+    if (_wasOnline || _wasRndis)
         on_actionRefreshCloud_triggered();
 }
 
-QList<QFileInfo> MainWindow::findImages(const QString &path, int depth)
-{
-    QList<QFileInfo> images;
-
-    /* Local image folders, search all subfolders... */
-    QDirIterator it(path, QStringList() << "image.json", QDir::Files | QDir::AllDirs | QDir::NoDotAndDotDot);
-    while (it.hasNext()) {
-        it.next();
-        QFileInfo fi = it.fileInfo();
-        if (fi.isDir() && depth < 3)
-            images << findImages(fi.filePath(), depth+1);
-        if (fi.isFile())
-            images << fi;
-    }
-
-    return images;
-}
-
-QList<QVariantMap> MainWindow::listMediaImages(const QString &path, const QString &blockdev, enum ImageSource source)
-{
-    QDir root(path);
-    QList<QVariantMap> images;
-    QList<QFileInfo> imagefiles = findImages(path, 0);
-
-    foreach(QFileInfo image, imagefiles) {
-        QString imagename = root.relativeFilePath(image.path());
-
-        qDebug() << "Adding image" << imagename << "from" << blockdev;
-
-        QVariantMap imagemap = Json::loadFromFile(image.filePath()).toMap();
-        imagemap["foldername"] = imagename;
-        imagemap["folder"] = image.path();
-        imagemap["source"] = source;
-
-        if (!imagemap.contains("nominal_size"))
-            imagemap["nominal_size"] = calculateNominalSize(imagemap);
-
-        QString iconFilename = imagemap["icon"].toString();
-        if (!iconFilename.isEmpty() && !iconFilename.contains(QDir::separator())) {
-            QPixmap pix;
-            pix.load(image.path() + QDir::separator() + iconFilename);
-            QIcon icon(pix);
-            imagemap["iconimage"] = icon;
-        }
-
-        imagemap["image_info"] = "image.json";
-        imagemap["image_source_blockdev"] = blockdev;
-        images.append(imagemap);
-    }
-
-    return images;
-}
-
-/* Calculates nominal image size based on partition information. */
-int MainWindow::calculateNominalSize(const QVariantMap &imagemap)
-{
-    int nominal_size = 0;
-    QVariantList blockdevs = imagemap.value("blockdevs").toList();
-    foreach (QVariant b, blockdevs) {
-        QVariantMap blockdev = b.toMap();
-        if (blockdev.value("name") == "mmcblk0") {
-            QVariantList pvl = blockdev.value("partitions").toList();
-            foreach (QVariant v, pvl)
-            {
-                QVariantMap pv = v.toMap();
-                nominal_size += pv.value("partition_size_nominal").toInt();
-            }
-            break;
-        }
-    }
-
-    return nominal_size;
-}
 
 void MainWindow::on_list_currentItemChanged()
 {
@@ -654,6 +428,13 @@ void MainWindow::on_list_itemDoubleClicked()
     on_actionInstall_triggered();
 }
 
+void MainWindow::errorMounting(const QString blockdev)
+{
+    QMessageBox::critical(this, tr("Error mounting"),
+                          tr("Error mounting external device (%1)").arg(blockdev),
+                          QMessageBox::Close);
+}
+
 void MainWindow::installImage(QVariantMap entry)
 {
     enum ImageSource imageSource = (enum ImageSource)entry.value("source").value<int>();
@@ -662,32 +443,43 @@ void MainWindow::installImage(QVariantMap entry)
     _numMetaFilesToDownload = 0;
 
     /* Re-mount local media */
-    if (!ImageInfo::isNetwork(imageSource))
-        mountMedia(entry.value("image_source_blockdev").toString());
+    _installingFromMedia = !ImageInfo::isNetwork(imageSource);
+    if (_installingFromMedia) {
+        QString blockdev = entry.value("image_source_blockdev").value<QString>();
+        if (!_mediaPollThread->mountMedia(blockdev)) {
+            errorMounting(blockdev);
+            setEnabled(true);
+            return;
+        }
+    }
 
     /* Validate image */
     QString validationerror;
     QFile schemafile(":/tezi.schema");
     schemafile.open(QIODevice::ReadOnly);
+    QByteArray schemadata = schemafile.readAll();
+    schemafile.close();
 
     QFile jsonfile(entry.value("folder").value<QString>() + QDir::separator() + entry.value("image_info").value<QString>());
     jsonfile.open(QIODevice::ReadOnly);
+    QByteArray jsondata = jsonfile.readAll();
+    jsonfile.close();
 
-    if (!Json::validate(schemafile.readAll(), jsonfile.readAll(), validationerror)) {
+    if (!Json::validate(schemadata, jsondata, validationerror)) {
         QMessageBox::critical(this, tr("Error"), tr("Image JSON validation failed for '%1'").arg(entry.value("name").value<QString>()) + "\n\n"
                               + validationerror, QMessageBox::Close);
         qDebug() << "Image JSON validation failed for" << entry.value("name").value<QString>();
         qDebug() << validationerror;
-        jsonfile.close();
-        if (!ImageInfo::isNetwork(imageSource))
-            unmountMedia();
-        setEnabled(true);
+
+        if (_installingFromMedia)
+            _mediaPollThread->unmountMedia();
+
+        reenableImageChoice();
         return;
     }
 
-    /* Stop any polling, we are about to install a image */
+    /* Stop network polling, we are about to install a image (media polling is protected due to "mount singleton") */
     _networkStatusPollTimer.stop();
-    _mediaPollTimer.stop();
     emit abortAllDownloads();
 
     if (ImageInfo::isNetwork(imageSource))
@@ -851,13 +643,14 @@ void MainWindow::on_actionInstall_triggered()
     if (!ui->list->currentItem())
         return;
 
+    QListWidgetItem *item = ui->list->currentItem();
+    QVariantMap entry = item->data(Qt::UserRole).toMap();
+
     if (QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        QListWidgetItem *item = ui->list->currentItem();
-        QVariantMap entry = item->data(Qt::UserRole).toMap();
         installImage(entry);
     }
 }
@@ -902,9 +695,11 @@ void MainWindow::onCompleted()
     _psd->close();
     _psd->deleteLater();
     _psd = NULL;
+    _imageWriteThread->deleteLater();
 
-    if (_mediaMounted)
-        unmountMedia();
+
+    if (_installingFromMedia)
+        _mediaPollThread->unmountMedia();
 
     /* Directly reboot into newer Toradex Easy Installer */
     if (_imageWriteThread->getImageInfo()->isInstaller() && _isAutoinstall) {
@@ -925,7 +720,6 @@ void MainWindow::onCompleted()
     msgbox.button(QMessageBox::Cancel)->setText(tr("Return to menu"));
 
     int value = msgbox.exec();
-    _imageWriteThread->deleteLater();
 
     switch (value) {
     case QMessageBox::Yes:
@@ -950,8 +744,8 @@ void MainWindow::onError(const QString &msg)
 {
     qDebug() << "Error:" << msg;
 
-    if (_mediaMounted)
-        unmountMedia();
+    if (_installingFromMedia)
+        _mediaPollThread->unmountMedia();
 
     QMessageBox::critical(this, tr("Error"),
                           msg  + "\n\n" +
@@ -1171,7 +965,7 @@ void MainWindow::downloadImageJsonCompleted()
     imagemap["index"] = rd->index();
 
     if (!imagemap.contains("nominal_size"))
-        imagemap["nominal_size"] = calculateNominalSize(imagemap);
+        imagemap["nominal_size"] = MediaPollThread::calculateNominalSize(imagemap);
 
     QFile imageinfo(folder + "/image.json");
     imageinfo.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -1215,15 +1009,11 @@ void MainWindow::downloadIconCompleted()
 {
     ResourceDownload *rd = qobject_cast<ResourceDownload *>(sender());
 
-    QPixmap pix;
-    pix.loadFromData(rd->data());
-    QIcon icon(pix);
-
     for (QList<QVariantMap>::iterator i = _netImages.begin(); i != _netImages.end(); ++i)
     {
         // Assign icon...
         if (i->value("icon") == rd->saveAs())
-            i->insert("iconimage", icon);
+            i->insert("iconimage", rd->data());
     }
 }
 
@@ -1396,7 +1186,6 @@ void MainWindow::downloadMetaFailed()
 void MainWindow::reenableImageChoice()
 {
     _networkStatusPollTimer.start();
-    _mediaPollTimer.start();
     setEnabled(true);
 }
 
@@ -1416,8 +1205,9 @@ void MainWindow::startImageWrite(QVariantMap entry)
         int ret = eula.exec();
 
         if (ret != QDialogButtonBox::Yes) {
+            if (_installingFromMedia)
+                _mediaPollThread->unmountMedia();
             reenableImageChoice();
-            unmountMedia();
             return;
         }
     }
@@ -1429,8 +1219,9 @@ void MainWindow::startImageWrite(QVariantMap entry)
         int ret = eula.exec();
 
         if (ret != QDialogButtonBox::Ok) {
+            if (_installingFromMedia)
+                _mediaPollThread->unmountMedia();
             reenableImageChoice();
-            unmountMedia();
             return;
         }
     }
