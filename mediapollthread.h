@@ -26,6 +26,7 @@ public:
     bool mountMedia(const QString &blockdev);
     bool unmountMedia();
     static int calculateNominalSize(const QVariantMap &imagemap);
+    QMutex scanMutex;
 
 protected:
     bool isMounted(const QString &path);

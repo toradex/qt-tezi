@@ -444,10 +444,12 @@ void MainWindow::installImage(QVariantMap entry)
 
     /* Re-mount local media */
     _installingFromMedia = !ImageInfo::isNetwork(imageSource);
+    _mediaPollThread->scanMutex.lock();
     if (_installingFromMedia) {
         QString blockdev = entry.value("image_source_blockdev").value<QString>();
         if (!_mediaPollThread->mountMedia(blockdev)) {
             errorMounting(blockdev);
+            _mediaPollThread->scanMutex.unlock();
             setEnabled(true);
             return;
         }
@@ -659,7 +661,7 @@ void MainWindow::on_actionRefreshCloud_triggered()
 {
     bool downloading = false;
 
-    showProgressDialog("");
+    showProgressDialog(tr("Reloading images from network..."));
     removeImagesBySource(SOURCE_NETWORK);
     if (hasAddress("eth0")) {
         if (!_networkUrlList.empty()) {
@@ -1183,9 +1185,16 @@ void MainWindow::downloadMetaFailed()
     fd->deleteLater();
 }
 
+/*
+ * Returning to main menu, reenable timers and media poll thread
+ *
+ * Must be called after unmounting the image media, otherwise
+ * there is a deadlock possibility scanMutex vs. mountMutex.
+ */
 void MainWindow::reenableImageChoice()
 {
     _networkStatusPollTimer.start();
+    _mediaPollThread->scanMutex.unlock();
     setEnabled(true);
 }
 

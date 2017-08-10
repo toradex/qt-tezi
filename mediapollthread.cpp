@@ -9,6 +9,14 @@
 #include <QDirIterator>
 #include <QIcon>
 
+/*
+ * Polls external mass storage media devices such as USB flash drives or
+ * SD cards. We use a single mount point for scanning and installation later
+ * on. This also makes sure that we are not scanning while installing and
+ * visa versa.
+ *
+ * Initial author: Stefan Agner
+ */
 MediaPollThread::MediaPollThread(ModuleInformation *moduleInformation, QObject *parent)
     : QThread(parent),
     _moduleInformation(moduleInformation)
@@ -91,8 +99,9 @@ bool MediaPollThread::mountMedia(const QString &blockdev)
 {
     while (!mountMutex.tryLock(2000)) {
         qDebug() << "Trying to mount" << blockdev << ", but something else still mounted...?";
+
         if (!isMounted(SRC_MOUNT_FOLDER))
-            break;
+            break; // the folder is not mounted anymore, manual user intervene? Just reuse the lock */
     }
 
     if (QProcess::execute("mount " + blockdev + " " SRC_MOUNT_FOLDER) != 0)
@@ -240,7 +249,7 @@ void MediaPollThread::parseTeziConfig(const QString &path)
 }
 
 void MediaPollThread::poll() {
-
+    scanMutex.lock();
     _blockdevsChecking.clear();
 
     checkRemovableBlockdev("sd*");
@@ -253,6 +262,7 @@ void MediaPollThread::poll() {
     }
 
     _blockdevsChecked = _blockdevsChecking;
+    scanMutex.unlock();
 }
 
 void MediaPollThread::run() {
