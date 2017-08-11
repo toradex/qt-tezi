@@ -135,11 +135,12 @@ int main(int argc, char *argv[])
 
     // Main window in the middle of screen
     MainWindow mw(splash, ld, autoinstall);
-    //mw.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, mw.size(), a.desktop()->availableGeometry()));
-    //mw.setGeometry(a.desktop()->availableGeometry());
-    mw.show();
+    int mode = LINUX_POWEROFF;
 
-    int mode = a.exec();
+    if (mw.initialize()) {
+        mw.show();
+        mode = a.exec();
+    }
 
     switch (mode) {
     case LINUX_REBOOT:

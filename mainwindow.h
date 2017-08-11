@@ -53,6 +53,7 @@ public:
     ~MainWindow();
     void show();
     void showProgressDialog(const QString &labelText);
+    bool initialize();
 
 protected:
     Ui::MainWindow *ui;

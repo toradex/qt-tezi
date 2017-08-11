@@ -6,8 +6,8 @@
 
 ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
                                      enum StorageClass storageClass, bool rebootWorks,
-                                     QObject *parent) : QObject(parent),
-  _socId(socId), _productIds(productIds), _storageClass(storageClass), _rebootWorks(rebootWorks)
+                                     bool moduleSupported, QObject *parent) : QObject(parent),
+  _socId(socId), _productIds(productIds), _storageClass(storageClass), _rebootWorks(rebootWorks), _moduleSupported(moduleSupported)
 {
     switch (_storageClass) {
     case StorageClass::Block:
@@ -78,12 +78,24 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     file.close();
     QList<quint16> productIds;
     enum StorageClass storageClass;
-    bool rebootWorks;
+    bool rebootWorks, moduleSupported = true;
     if (socid == "i.MX7D") {
         // Dual and Solo are using the same soc_id currently
         productIds << 32 << 33;
         storageClass = StorageClass::Mtd;
         rebootWorks = true;
+
+        // Chip Tape-Out version
+        // 1.0 chips had a bug in the Boot ROM which required U-Boot
+        // to be written in a special format (3/4 of each page only)
+        // Tezi does not support those modules.
+        QFile file("/sys/bus/soc/devices/soc0/revision");
+        if (file.exists()) {
+            if (getFileContents("/sys/bus/soc/devices/soc0/revision").trimmed() == "1.0")
+                moduleSupported = false;
+        }
+
+
     } else if (socid == "i.MX6Q") {
         // i.MX6 Quad/Dual are only populated on Apalis currently
         productIds << 27 << 28 << 29 << 35;
@@ -98,5 +110,5 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         return NULL;
     }
 
-    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, parent);
+    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
 }

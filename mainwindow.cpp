@@ -72,13 +72,22 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setWindowState(Qt::WindowMaximized);
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
+}
 
+bool MainWindow::initialize() {
     _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Module Detection failed"),
                               QObject::tr("Failed to detect the basic module type. Cannot continue."),
                               QMessageBox::Close);
-        QApplication::exit(LINUX_POWEROFF);
+        return false;
+    }
+
+    if (!_moduleInformation->moduleSupported()) {
+        QMessageBox::critical(NULL, QObject::tr("Unsupported Module Type"),
+                              QObject::tr("This module is an early sample which is not supported by the Toradex Easy Installer due to chip issues."),
+                              QMessageBox::Close);
+        return false;
     }
 
     _toradexConfigBlock = _moduleInformation->readConfigBlock();

@@ -14,7 +14,7 @@ public:
 protected:
     explicit ModuleInformation(QString socId, QList<quint16> productIds,
                                enum StorageClass storageClass, bool rebootWorks,
-                               QObject *parent = 0);
+                               bool moduleSupported, QObject *parent = 0);
 
 public:
     static ModuleInformation *detectModule(QObject *parent);
@@ -67,6 +67,11 @@ public:
         return _rebootWorks;
     }
 
+    inline bool moduleSupported()
+    {
+        return _moduleSupported;
+    }
+
 signals:
 
 public slots:
@@ -82,8 +87,7 @@ private:
 
     ConfigBlock *_configBlock;
     bool _rebootWorks;
-
-
+    bool _moduleSupported;
 };
 
 #endif // MODULEINFORMATION_H
