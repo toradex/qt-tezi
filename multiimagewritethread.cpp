@@ -437,7 +437,7 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     /* Let sfdisk write a proper partition table */
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
-    proc.start("/usr/sbin/sfdisk -uS " + blockdevpath);
+    proc.start("/usr/sbin/sfdisk -uS --label dos " + blockdevpath);
     proc.write(partitionTable);
     proc.closeWriteChannel();
     proc.waitForFinished(-1);
