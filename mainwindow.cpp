@@ -444,6 +444,30 @@ void MainWindow::errorMounting(const QString blockdev)
                           QMessageBox::Close);
 }
 
+bool MainWindow::validateImageJson(QVariantMap &entry)
+{
+    /* Validate image */
+    QString validationerror;
+    QFile schemafile(":/tezi.schema");
+    schemafile.open(QIODevice::ReadOnly);
+    QByteArray schemadata = schemafile.readAll();
+    schemafile.close();
+
+    QFile jsonfile(entry.value("folder").value<QString>() + QDir::separator() + entry.value("image_info").value<QString>());
+    jsonfile.open(QIODevice::ReadOnly);
+    QByteArray jsondata = jsonfile.readAll();
+    jsonfile.close();
+
+    if (!Json::validate(schemadata, jsondata, validationerror)) {
+        QMessageBox::critical(this, tr("Error"), tr("Image JSON validation failed for '%1'").arg(entry.value("name").value<QString>()) + "\n\n"
+                              + validationerror, QMessageBox::Close);
+        qDebug() << "Image JSON validation failed for" << entry.value("name").value<QString>();
+        qDebug() << validationerror;
+        return false;
+    }
+    return true;
+}
+
 void MainWindow::installImage(QVariantMap entry)
 {
     enum ImageSource imageSource = (enum ImageSource)entry.value("source").value<int>();
@@ -464,29 +488,14 @@ void MainWindow::installImage(QVariantMap entry)
         }
     }
 
-    /* Validate image */
-    QString validationerror;
-    QFile schemafile(":/tezi.schema");
-    schemafile.open(QIODevice::ReadOnly);
-    QByteArray schemadata = schemafile.readAll();
-    schemafile.close();
+    if (entry.value("validate", true).value<bool>()) {
+        if (!validateImageJson(entry)) {
+            if (_installingFromMedia)
+                _mediaPollThread->unmountMedia();
 
-    QFile jsonfile(entry.value("folder").value<QString>() + QDir::separator() + entry.value("image_info").value<QString>());
-    jsonfile.open(QIODevice::ReadOnly);
-    QByteArray jsondata = jsonfile.readAll();
-    jsonfile.close();
-
-    if (!Json::validate(schemadata, jsondata, validationerror)) {
-        QMessageBox::critical(this, tr("Error"), tr("Image JSON validation failed for '%1'").arg(entry.value("name").value<QString>()) + "\n\n"
-                              + validationerror, QMessageBox::Close);
-        qDebug() << "Image JSON validation failed for" << entry.value("name").value<QString>();
-        qDebug() << validationerror;
-
-        if (_installingFromMedia)
-            _mediaPollThread->unmountMedia();
-
-        reenableImageChoice();
-        return;
+            reenableImageChoice();
+            return;
+        }
     }
 
     /* Stop network polling, we are about to install a image (media polling is protected due to "mount singleton") */
@@ -1207,7 +1216,7 @@ void MainWindow::reenableImageChoice()
     setEnabled(true);
 }
 
-void MainWindow::startImageWrite(QVariantMap entry)
+void MainWindow::startImageWrite(QVariantMap &entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     _imageWriteThread = new MultiImageWriteThread();

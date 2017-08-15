@@ -95,7 +95,8 @@ protected:
     void downloadMetaFile(const QString &url, const QString &saveAs);
     void downloadLists(const QStringList &urls);
     void installImage(QVariantMap entry);
-    void startImageWrite(QVariantMap entry);
+    void startImageWrite(QVariantMap &entry);
+    bool validateImageJson(QVariantMap &entry);
     void reenableImageChoice();
 
 signals:
