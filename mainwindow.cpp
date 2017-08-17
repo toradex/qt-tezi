@@ -168,6 +168,8 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
 
     _mediaPollThread->start();
+
+    return true;
 }
 
 MainWindow::~MainWindow()
