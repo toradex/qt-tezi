@@ -169,13 +169,13 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
     return p.exitCode() == 0;
 }
 
-bool MultiImageWriteThread::runCommand(QString cmd, QStringList args, QByteArray &output, int msecs)
+bool MultiImageWriteThread::runCommand(const QString &cmd, const QStringList &args, QByteArray &output, int msecs, const QString &workdir)
 {
     QProcess p;
 
     qDebug() << "Running Command: " << cmd << args;
     p.setProcessChannelMode(QProcess::MergedChannels);
-    p.setWorkingDirectory(_image->folder());
+    p.setWorkingDirectory(workdir);
     p.start(cmd, args);
 
     p.waitForFinished(msecs);
@@ -462,13 +462,13 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     return true;
 }
 
-bool MultiImageWriteThread::eraseMtdDevice(QByteArray mtddevice)
+bool MultiImageWriteThread::eraseMtdDevice(const QByteArray &mtddevice)
 {
     QStringList eraseargs;
     QByteArray output;
     eraseargs << "--quiet" << mtddevice << "0" << "0";
 
-    return runCommand("/usr/sbin/flash_erase", eraseargs, output);
+    return runCommand("/usr/sbin/flash_erase", eraseargs, output, -1);
 }
 
 bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString ubivoldev)

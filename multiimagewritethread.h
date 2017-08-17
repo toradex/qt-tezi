@@ -30,6 +30,9 @@ public:
     static QByteArray getUUID(const QString &part);
     static QByteArray getFsType(const QString &part);
 
+    static bool runCommand(const QString &cmd, const QStringList &args, QByteArray &output, int msecs = 30000, const QString &workdir = "/");
+    static bool eraseMtdDevice(const QByteArray &mtddevice);
+
     ImageInfo *getImageInfo() {
         return _image;
     }
@@ -38,13 +41,11 @@ protected:
     virtual void run();
     void updateStatus(QString status);
     bool runScript(QString script, QByteArray &output);
-    bool runCommand(QString cmd, QStringList args, QByteArray &output, int msecs = 30000);
     QList<RawFileInfo *> filterRawFileInfo(QList<RawFileInfo *> *rawFiles);
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions);
     bool processContent(ContentInfo *fs, QByteArray partdevice);
     bool processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist);
-    bool eraseMtdDevice(QByteArray mtddevice);
     bool processMtdDev(MtdDevInfo *mtddev);
     bool processMtdContent(ContentInfo *content, QByteArray mtddevice);
     bool processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice);
