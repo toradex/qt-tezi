@@ -8,9 +8,9 @@
             "type": "object",
             "properties": {
                 "filesystem_type": {
-                    "description": "File system to create ext3/ext4/swap/fat/ntfs/raw/unformatted (defaults to raw)",
+                    "description": "File system to create ext3/ext4/swap/fat/ntfs/raw (defaults to raw)",
                     "type": "string",
-                    "enum": [ "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "ubifs", "raw", "unformatted" ]
+                    "enum": [ "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "ubifs", "raw" ]
                 },
                 "label": {
                     "description": "File system label used when creating the file system (ext3/ext4/fat/ntfs only)",
@@ -52,7 +52,11 @@
                     "type": "string"
                 },
                 "dd_options": {
-                    "description": "Extra options passed to the dd command (raw only)",
+                    "description": "Extra options passed to the dd command (raw on block devices only)",
+                    "type": "string"
+                },
+                "nandwrite_options": {
+                    "description": "Extra options passed to the nandwrite command (raw on NAND devices only)",
                     "type": "string"
                 },
                 "product_ids": {
@@ -84,7 +88,7 @@
                     "type": "string"
                 },
                 "type": {
-                    "description": "UBI volume type (defaults to dynamic).",
+                    "description": "UBI volume type: static or dynamic (default).",
                     "type": "string",
                     "enum": [ "static", "dynamic" ]
                 },
@@ -103,7 +107,7 @@
             "type": "object",
             "properties": {
                 "image_filename": {
-                    "description": "Source filename of the WinCE image to write.",
+                    "description": "Filename of the WinCE image to write.",
                     "type": "string"
                 },
                 "nonfs_size": {
@@ -239,7 +243,7 @@
                         "description": "Content to write to MTD partition. Currently only supports 'rawfile'."
                     },
                     "ubivolumes": {
-                        "description": "List of UBI volumes to write into this MTD partition.",
+                        "description": "List of UBI volumes to create in this MTD partition.",
                         "type": "array",
                         "items": {
                              "$ref": "#/definitions/ubivolume"
@@ -247,7 +251,7 @@
                     },
                     "winceimage": {
                         "$ref": "#/definitions/winceimage",
-                        "description": "WinCE to write to MTD partition."
+                        "description": "WinCE image to write into this MTD partition."
                     }
                 },
                 "allOf": [
