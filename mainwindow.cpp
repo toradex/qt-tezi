@@ -1221,7 +1221,7 @@ void MainWindow::reenableImageChoice()
 void MainWindow::startImageWrite(QVariantMap &entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
-    _imageWriteThread = new MultiImageWriteThread();
+    _imageWriteThread = new MultiImageWriteThread(_toradexConfigBlock, _moduleInformation);
     enum ImageSource imageSource = (enum ImageSource)entry.value("source").toInt();
     QString folder = entry.value("folder").toString();
     QStringList slidesFolders;
@@ -1274,21 +1274,6 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         slidesFolders.append(folder+"/slides_vga");
     }
 
-    // Migrate Config Block to default location just before we actually flash...
-    if (_toradexConfigBlock->needsWrite) {
-        switch (_moduleInformation->storageClass()) {
-        case ModuleInformation::StorageClass::Block:
-            _toradexConfigBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
-            break;
-        case ModuleInformation::StorageClass::Mtd:
-            _toradexConfigBlock->writeToMtddev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
-            break;
-        }
-        qDebug() << "Config Block written to " << _moduleInformation->configBlockPartition();
-        _toradexConfigBlock->needsWrite = false;
-    }
-
-    _imageWriteThread->setConfigBlock(_toradexConfigBlock);
     _imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), imageSource);
 

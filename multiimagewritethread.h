@@ -3,6 +3,7 @@
 
 #include "dto/imageinfo.h"
 #include "configblock.h"
+#include "moduleinformation.h"
 #include <QThread>
 #include <QStringList>
 #include <QMultiMap>
@@ -21,9 +22,8 @@ class MultiImageWriteThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit MultiImageWriteThread(QObject *parent = 0);
+    explicit MultiImageWriteThread(ConfigBlock *configBlock, ModuleInformation *moduleInformation, QObject *parent = 0);
     void setImage(const QString &folder, const QString &fileinfo, const QString &baseurl, enum ImageSource source);
-    void setConfigBlock(ConfigBlock *configBlock);
 
     static QByteArray getBlkId(const QString &part, const QString &tag);
     static QByteArray getLabel(const QString &part);
@@ -31,7 +31,8 @@ public:
     static QByteArray getFsType(const QString &part);
 
     static bool runCommand(const QString &cmd, const QStringList &args, QByteArray &output, int msecs = 30000, const QString &workdir = "/");
-    static bool eraseMtdDevice(const QByteArray &mtddevice);
+    static bool eraseMtdDevice(const QByteArray &mtddevice, QByteArray &output);
+    static bool eraseBlockDevice(const QByteArray &blockdevice, qint64 start, qint64 end, QByteArray &output);
 
     ImageInfo *getImageInfo() {
         return _image;
@@ -67,6 +68,7 @@ protected:
 
     ImageInfo *_image;
     ConfigBlock *_configBlock;
+    ModuleInformation *_moduleInformation;
 
     int _extraSpacePerPartition, _sectorOffset;
     qint64 _bytesWritten;

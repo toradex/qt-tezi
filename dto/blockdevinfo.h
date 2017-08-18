@@ -39,8 +39,14 @@ public:
         return &_partitions;
     }
 
+    inline bool erase()
+    {
+        return _erase;
+    }
+
 protected:
 
+    bool _erase;
     QByteArray _blockDevice;
     QList<BlockDevPartitionInfo *> _partitions;
     QString _name;

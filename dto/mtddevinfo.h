@@ -44,10 +44,16 @@ public:
         return _winCEImage;
     }
 
+    inline bool erase()
+    {
+        return _erase;
+    }
+
 protected:
 
     QByteArray _mtdDevice;
     QString _name;
+    bool _erase;
     ContentInfo *_content;
     QList<UbiVolumeInfo *> _ubiVolumes;
     WinCEImage *_winCEImage;

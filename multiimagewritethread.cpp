@@ -22,8 +22,8 @@
 #include <sys/ioctl.h>
 #include <QtEndian>
 
-MultiImageWriteThread::MultiImageWriteThread(QObject *parent) :
-    QThread(parent), _extraSpacePerPartition(0), _bytesWritten(0)
+MultiImageWriteThread::MultiImageWriteThread(ConfigBlock *configBlock, ModuleInformation *moduleInformation, QObject *parent) :
+    QThread(parent), _configBlock(configBlock), _moduleInformation(moduleInformation),  _extraSpacePerPartition(0), _bytesWritten(0)
 {
     QDir dir;
 
@@ -38,11 +38,6 @@ void MultiImageWriteThread::setImage(const QString &folder, const QString &infof
         _image = new ImageInfo(folder, infofile, baseurl, source, this);
     else
         _image = new ImageInfo(folder, infofile, QString(), source, this);
-}
-
-void MultiImageWriteThread::setConfigBlock(ConfigBlock *configBlock)
-{
-    _configBlock = configBlock;
 }
 
 void MultiImageWriteThread::updateStatus(QString status)
@@ -109,6 +104,20 @@ void MultiImageWriteThread::run()
             if (!processMtdDev(mtddev))
                 return;
         }
+    }
+
+    /* Write Config Block after flashing (e.g. migration/restore after partition erase) */
+    if (_configBlock->needsWrite) {
+        switch (_moduleInformation->storageClass()) {
+        case ModuleInformation::StorageClass::Block:
+            _configBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
+            break;
+        case ModuleInformation::StorageClass::Mtd:
+            _configBlock->writeToMtddev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
+            break;
+        }
+        qDebug() << "Config Block written to " << _moduleInformation->configBlockPartition();
+        _configBlock->needsWrite = false;
     }
 
     /* Run wrap-up script */
@@ -217,6 +226,17 @@ bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
 
     emit parsedImagesize(totaluncompressedsize * 1024 * 1024);
 
+    /* Erase partition if explicit erase is requested or raw content is specified */
+    if (mtddev->erase() || content != NULL) {
+        QByteArray output;
+        updateStatus(tr("Erasing partition"));
+
+        if (!eraseMtdDevice(device, output)) {
+            emit error(tr("Erasing flash failed") + "\n" + output);
+            return false;
+        }
+    }
+
     if (content != NULL) {
         if (!processMtdContent(content, device))
             return false;
@@ -239,6 +259,23 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
 {
     /* Make sure block device is writeable */
     disableBlockDevForceRo(blockdev->name());
+
+    if (blockdev->erase()) {
+        updateStatus(tr("Erasing partition"));
+
+        /*
+         * We are erasing the partition which contains the config block! Make sure the config block gets
+         * written at the end of the flashing process
+         */
+        if (blockdev->name() == _moduleInformation->configBlockPartition())
+                _configBlock->needsWrite = true;
+
+        QByteArray output;
+        if (!eraseBlockDevice(blockdev->blockDevice(), 0, 0, output)) {
+            emit error(tr("Discarding content on device %1 failed").arg(blockdev->name()) + "\n" + output);
+            return false;
+        }
+    }
 
     QList<BlockDevPartitionInfo *> *partitions = blockdev->partitions();
     if (!partitions->isEmpty())
@@ -462,13 +499,27 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     return true;
 }
 
-bool MultiImageWriteThread::eraseMtdDevice(const QByteArray &mtddevice)
+bool MultiImageWriteThread::eraseMtdDevice(const QByteArray &mtddevice, QByteArray &output)
 {
     QStringList eraseargs;
-    QByteArray output;
     eraseargs << "--quiet" << mtddevice << "0" << "0";
 
     return runCommand("/usr/sbin/flash_erase", eraseargs, output, -1);
+}
+
+bool MultiImageWriteThread::eraseBlockDevice(const QByteArray &blockdevice, qint64 start, qint64 end, QByteArray &output)
+{
+    QStringList args;
+
+    /* If start and end is zero, blkdiscard will discard the whole eMMC */
+    if (start)
+        args.append(QString("-o %1").arg(start));
+    if (end)
+        args.append(QString("-l %1").arg(end));
+    args.append(blockdevice);
+
+
+    return runCommand("/usr/sbin/blkdiscard", args, output, -1);
 }
 
 bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString ubivoldev)
@@ -614,11 +665,6 @@ bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray m
     if (fstype == "raw")
     {
         updateStatus(tr("Writing raw files"));
-
-        if (!eraseMtdDevice(mtddevice)) {
-            emit error(tr("Erasing flash failed"));
-            return false;
-        }
 
         QList<RawFileInfo *> rawFiles = filterRawFileInfo(content->rawFiles());
 

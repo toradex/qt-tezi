@@ -17,7 +17,7 @@ signals:
 
 private:
     QStringList _mtdDevs;
-    bool erase(QString mtddev, qint64 start, qint64 end);
+    bool erase(QString mtddev);
 };
 
 #endif // MTDERASETHREAD_H

@@ -1,4 +1,5 @@
 #include "discardthread.h"
+#include "multiimagewritethread.h"
 
 #include <QProcess>
 #include <QDebug>
@@ -18,25 +19,12 @@ void DiscardThread::run() {
 
 bool DiscardThread::discard(QString blkdev, qint64 start, qint64 end)
 {
-    QStringList args;
+    QByteArray output;
 
-    /* If start and end is zero, blkdiscard will discard the whole eMMC */
-    if (start)
-        args.append(QString("-o %1").arg(start));
-    if (end)
-        args.append(QString("-l %1").arg(end));
-    args.append(blkdev);
-
-    QProcess p;
-    p.setProcessChannelMode(QProcess::MergedChannels);
-    p.start("/usr/sbin/blkdiscard", args);
-    p.waitForFinished(-1);
-
-    qDebug() << "blkdiscard of device" << blkdev << "finished with exit code" << p.exitCode();
-
-    if (p.exitCode() != 0) {
-        emit error(tr("Discarding device %1 failed").arg(blkdev) + "\n" + p.readAll());
+    if (!MultiImageWriteThread::eraseBlockDevice(blkdev.toAscii(), start, end, output)) {
+        emit error(tr("Discarding content on device %1 failed").arg(blkdev) + "\n" + output);
         return false;
     }
+
     return true;
 }

@@ -5,6 +5,7 @@ BlockDevInfo::BlockDevInfo(const QVariantMap &blockdev, QObject *parent) :
     QObject(parent), _content(NULL)
 {
     _name = blockdev.value("name").toString();
+    _erase = blockdev.value("erase", false).toBool();
 
     /* Partitions within a blockdev */
     if (blockdev.contains("partitions"))

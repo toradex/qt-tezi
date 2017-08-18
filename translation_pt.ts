@@ -44,9 +44,28 @@
     </message>
 </context>
 <context>
+    <name>Dialog</name>
+    <message>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Registration Code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This image needs registration. Please visit the following URL to register and proceed with the provided registration code.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>http://www.partner.com/toradex</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DiscardThread</name>
     <message>
-        <source>Discarding device %1 failed</source>
+        <source>Discarding content on device %1 failed</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -136,10 +155,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error mounting</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Image Installed</source>
         <translation type="unfinished"></translation>
     </message>
@@ -149,14 +164,6 @@
     </message>
     <message>
         <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Reading images from device %1...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error mounting external device (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -212,10 +219,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Discards all data on eMMC.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>C</source>
         <translation type="unfinished"></translation>
     </message>
@@ -265,14 +268,6 @@
     </message>
     <message>
         <source>Return to menu</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This image is not compatible with the current module</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This image requires a newer version of the Toradex Easy Installer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -354,18 +349,46 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as block erase counters. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Erasing all data on internal raw NAND...</source>
+        <source>Erasing internal raw NAND...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>not compatible with this module</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>requires a newer version of the installer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discards all data on flash.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error mounting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error mounting external device (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image JSON validation failed for &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reloading images from network...</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>MtdEraseThread</name>
     <message>
-        <source>Eraseing device %1 failed</source>
+        <source>Erasing device %1 failed</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -483,6 +506,14 @@ URL: %2</source>
         <source>Failed to get size of URL %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Erasing partition</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discarding content on device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProgressSlideshowDialog</name>
@@ -541,10 +572,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block before continuing.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Toradex Easy Installer v%1 (g%2) - Built: %3</source>
         <translation type="unfinished"></translation>
     </message>
@@ -554,6 +581,26 @@ URL: %2</source>
     </message>
     <message>
         <source>Please enter valid and complete Config Block data.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Module Detection failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to detect the basic module type. Cannot continue.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block using the information on the Modules Sticker before continuing.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unsupported Module Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This module is an early sample which is not supported by the Toradex Easy Installer due to chip issues.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

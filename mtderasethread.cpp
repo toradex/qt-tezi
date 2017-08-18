@@ -19,8 +19,10 @@ void MtdEraseThread::run() {
 
 bool MtdEraseThread::erase(QString mtddev)
 {
-    if (!MultiImageWriteThread::eraseMtdDevice(mtddev.toAscii())) {
-        emit error(tr("Erasing device %1 failed").arg(mtddev));
+    QByteArray output;
+
+    if (!MultiImageWriteThread::eraseMtdDevice(mtddev.toAscii(), output)) {
+        emit error(tr("Erasing device %1 failed").arg(mtddev) + "\n" + output);
         return false;
     }
     return true;

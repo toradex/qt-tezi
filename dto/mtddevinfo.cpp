@@ -4,9 +4,10 @@
 #include "winceimage.h"
 
 MtdDevInfo::MtdDevInfo(const QVariantMap &mtddev, QObject *parent) :
-    QObject(parent), _content(NULL), _winCEImage(NULL)
+    QObject(parent), _content(NULL), _winCEImage(NULL), _erase(false)
 {
     _name = mtddev.value("name").toString();
+    _erase = mtddev.value("erase", false).toBool();
 
     if (mtddev.contains("content")) {
         QVariantMap content = mtddev.value("content").toMap();

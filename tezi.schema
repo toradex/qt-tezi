@@ -199,6 +199,10 @@
                         "description": "Name of the block device to write to (as it appears under /dev/)",
                         "type": "string"
                     },
+                    "erase": {
+                        "description": "Discards all data on block device before writing (preserves Toradex Config Block on boot partition).",
+                        "type": "boolean"
+                    },
                     "content": {
                         "$ref": "#/definitions/content",
                         "description": "Content which should get written to the raw block device (see Content)"
@@ -237,6 +241,10 @@
                     "name": {
                         "description": "Name of the MTD device as shown in '/proc/mtd'.",
                         "type": "string"
+                    },
+                    "erase": {
+                        "description": "Erase MTD partition using flash_erase (this also clears erase counters of a UBI partition).",
+                        "type": "boolean"
                     },
                     "content": {
                         "$ref": "#/definitions/content",
