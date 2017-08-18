@@ -49,9 +49,9 @@
 /* Default wget command line options, wait just 10s then declare a connection as dead */
 #define WGET_COMMAND "wget --no-verbose --tries=10 --read-timeout=10 -O- "
 
-/* Use named pipes and pipe viewer to communicate progress to Qt UI */
+/* Use named pipes to communicate with pipe viewer for progress to Qt UI */
 #define PIPEVIEWER_NAMEDPIPE "/var/volatile/pvpipe"
-#define PIPEVIEWER_COMMAND "pv -b -n 2>" PIPEVIEWER_NAMEDPIPE
+#define TEE_PIPE_COMMAND "tee " PIPEVIEWER_NAMEDPIPE
 
 /* RNDIS network */
 #define RNDIS_ADDRESS "192.168.11"
