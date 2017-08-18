@@ -48,6 +48,11 @@ void disableBlockDevForceRo(const QString &blockdev)
     f.close();
 }
 
+bool makeFifo(const QString &file)
+{
+    return mkfifo(file.toLocal8Bit().constData(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH) == 0;
+}
+
 QString getUrlPath(const QString& url)
 {
     int slash = url.lastIndexOf('/');
