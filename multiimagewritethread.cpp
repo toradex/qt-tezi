@@ -840,13 +840,6 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     QTime t1;
     t1.start();
 
-    /* Use pipe viewer for progress */
-    QProcess pv;
-    pv.start("pv", QStringList() << "-b" << "-n" << PIPEVIEWER_NAMEDPIPE);
-    pv.closeWriteChannel();
-    pv.closeReadChannel(QProcess::StandardOutput);
-    pv.setReadChannel(QProcess::StandardError);
-
     QProcess md5sum;
     md5sum.start("md5sum", QStringList() << MD5SUM_NAMEDPIPE);
     md5sum.closeWriteChannel();
@@ -862,12 +855,22 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     p.closeWriteChannel();
     p.setReadChannel(QProcess::StandardError);
 
-    qint64 bytes = 0;
-    while (pv.waitForReadyRead(-1))
-    {
-        QByteArray line = pv.readLine();
-        bool ok;
+    /* Parse pipe viewer output for progress */
+    QFile pv(PIPEVIEWER_NAMEDPIPE);
+    if (!pv.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        emit error(tr("Error downloading or writing image")+"\n" + "Could not open pipe viewers named pipe");
+        return false;
+    }
 
+    qint64 bytes = 0;
+    while (true) {
+        /* This will block unless the pipe is EOF */
+        QByteArray line = pv.readLine();
+
+        if (line == "")
+            break;
+
+        bool ok;
         qint64 tmp = line.trimmed().toLongLong(&ok);
 
         if (ok) {
@@ -877,9 +880,9 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     }
 
     _bytesWritten += bytes;
+    pv.close();
 
     p.waitForFinished(-1);
-    pv.waitForFinished(-1);
     md5sum.waitForFinished(-1);
 
     if (p.exitCode() != 0)
@@ -908,7 +911,7 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
         getfile += "cat " + file;
 
     /* Use pipe viewer for actual processing speed */
-    QString cmd = QString("%1 | tee " MD5SUM_NAMEDPIPE " " PIPEVIEWER_NAMEDPIPE " | cat > %2")
+    QString cmd = QString("%1 | tee " MD5SUM_NAMEDPIPE " | " PIPEVIEWER_COMMAND " | cat > %2")
         .arg(getfile, TEMP_MOUNT_FOLDER "/" + file);
 
     qDebug() << "Copying file" << file;
@@ -1040,11 +1043,11 @@ QString MultiImageWriteThread::getUncompressCommand(const QString &file)
     }
     else
     {
-        return "tee " MD5SUM_NAMEDPIPE " " PIPEVIEWER_NAMEDPIPE;
+        return "tee " MD5SUM_NAMEDPIPE " | " PIPEVIEWER_COMMAND;
     }
 
     /* Send data to md5sum named pipe first, then unpack, then send to pipe viewer pipe (progress) */
-    return "tee " MD5SUM_NAMEDPIPE " | " + unpack + " | tee " PIPEVIEWER_NAMEDPIPE;
+    return "tee " MD5SUM_NAMEDPIPE " | " + unpack + " | " PIPEVIEWER_COMMAND;
 }
 
 bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QString &image, const QString &device)

@@ -49,9 +49,12 @@
 /* Default wget command line options, wait just 10s then declare a connection as dead */
 #define WGET_COMMAND "wget --no-verbose --tries=10 --read-timeout=10 -O- "
 
-/* Use named pipes to communicate with pipe viewer for progress to Qt UI */
+/* Use named pipe to communicate data to md5sum */
 #define MD5SUM_NAMEDPIPE "/var/volatile/md5sumpipe"
+
+/* Use named pipe to communicate result of pipe viewer for progress to Qt UI */
 #define PIPEVIEWER_NAMEDPIPE "/var/volatile/pvpipe"
+#define PIPEVIEWER_COMMAND "pv -b -n 2>" PIPEVIEWER_NAMEDPIPE
 
 /* RNDIS network */
 #define RNDIS_ADDRESS "192.168.11"
