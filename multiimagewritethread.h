@@ -53,16 +53,16 @@ protected:
     bool processUbiContent(ContentInfo *contentInfo, QString ubivoldev);
     bool processWinCEImage(WinCEImage *image, QByteArray mtddevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
-    bool runwritecmd(const QString &cmd);
+    bool runwritecmd(const QString &cmd, bool checkmd5sum);
     bool partclone_restore(const QString &baseurl, const QString &image, const QString &device);
     bool untar(const QString &baseurl, const QString &tarball);
-    bool copy(const QString &baseurl, const QString &file);
+    bool copy(const QString &baseurl, const QString &file, const QString &md5sum = "");
     bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool nandflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool ubiflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool isLabelAvailable(const QByteArray &label);
     void patchConfigTxt();
-    QString getUncompressCommand(const QString &file);
+    QString getUncompressCommand(const QString &file, bool md5sum);
     bool writePartitionTable(QByteArray blockdevpath, const QMap<int, BlockDevPartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
 

@@ -653,14 +653,14 @@ bool MultiImageWriteThread::processWinCEImage(WinCEImage *image, QByteArray mtdd
     else
         getfile = "cat " + file;
 
-    QString uncompresscmd = getUncompressCommand(file);
+    QString uncompresscmd = getUncompressCommand(file, false);
 
     /* Use pipe viewer to get bytes processed during the command */
     QString cmd = QString("%1 | %2 | flash_wince -n %3 %4 -")
             .arg(getfile, uncompresscmd, QString::number(image->nonFsSize()), mtddevice);
 
     qDebug() << "Flash WinCE image file" << file;
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, false);
 }
 
 bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray mtddevice)
@@ -835,15 +835,17 @@ bool MultiImageWriteThread::isLabelAvailable(const QByteArray &label)
     return (QProcess::execute("/sbin/findfs LABEL="+label) != 0);
 }
 
-bool MultiImageWriteThread::runwritecmd(const QString &cmd)
+bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
 {
     QTime t1;
+    QProcess md5sum;
     t1.start();
 
-    QProcess md5sum;
-    md5sum.start("md5sum", QStringList() << MD5SUM_NAMEDPIPE);
-    md5sum.closeWriteChannel();
-    md5sum.setReadChannel(QProcess::StandardOutput);
+    if (checkmd5sum) {
+        md5sum.start("md5sum", QStringList() << MD5SUM_NAMEDPIPE);
+        md5sum.closeWriteChannel();
+        md5sum.setReadChannel(QProcess::StandardOutput);
+    }
 
     QProcess p;
     if (!ImageInfo::isNetwork(_image->imageSource()))
@@ -883,7 +885,9 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     pv.close();
 
     p.waitForFinished(-1);
-    md5sum.waitForFinished(-1);
+
+    if (checkmd5sum)
+        md5sum.waitForFinished(-1);
 
     if (p.exitCode() != 0)
     {
@@ -892,17 +896,20 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd)
     }
     qDebug() << "Finished writing after" << (t1.elapsed()/1000.0) << "seconds," << _bytesWritten << "bytes total so far.";
 
-    if (md5sum.exitCode() != 0)
+    if (checkmd5sum)
     {
-        emit error(tr("Error calculating checksum")+"\n" + md5sum.readAll());
-        return false;
+        if (md5sum.exitCode() != 0)
+        {
+            emit error(tr("Error calculating checksum")+"\n" + md5sum.readAll());
+            return false;
+        }
+        qDebug() << md5sum.readAll().left(32);
     }
-    qDebug() << md5sum.readAll().left(32);
 
     return true;
 }
 
-bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
+bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, const QString &md5sum)
 {
     QString getfile;
     if (!baseurl.isEmpty())
@@ -910,12 +917,16 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file)
     else
         getfile += "cat " + file;
 
+    QString md5sumcmd = "";
+    if (md5sum != "")
+        md5sumcmd = "tee " MD5SUM_NAMEDPIPE " | ";
+
     /* Use pipe viewer for actual processing speed */
-    QString cmd = QString("%1 | tee " MD5SUM_NAMEDPIPE " | " PIPEVIEWER_COMMAND " | cat > %2")
-        .arg(getfile, TEMP_MOUNT_FOLDER "/" + file);
+    QString cmd = QString("%1 | %2" PIPEVIEWER_COMMAND " | cat > %3")
+        .arg(getfile, md5sumcmd, TEMP_MOUNT_FOLDER "/" + file);
 
     qDebug() << "Copying file" << file;
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, md5sum != "");
 }
 
 bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball)
@@ -926,13 +937,13 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
     else
         getfile = "cat " + tarball;
 
-    QString uncompresscmd = getUncompressCommand(tarball);
+    QString uncompresscmd = getUncompressCommand(tarball, false);
 
     QString cmd = QString("%1 | %2 | tar x -C " TEMP_MOUNT_FOLDER)
         .arg(getfile, uncompresscmd);
 
     qDebug() << "Uncompress file" << tarball;
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, false);
 }
 
 bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
@@ -944,13 +955,13 @@ bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, Ra
     else
         getfile = "cat " + file;
 
-    QString uncompresscmd = getUncompressCommand(file);
+    QString uncompresscmd = getUncompressCommand(file, false);
 
     QString cmd = QString("%1 | %2 | dd of=%3 %4")
             .arg(getfile, uncompresscmd, device, rawFile->ddOptions());
 
     qDebug() << "Raw dd file" << file;
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, false);
 }
 
 bool MultiImageWriteThread::nandflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
@@ -962,14 +973,14 @@ bool MultiImageWriteThread::nandflash(const QString &baseurl, const QString &dev
     else
         getfile = "cat " + file;
 
-    QString uncompresscmd = getUncompressCommand(file);
+    QString uncompresscmd = getUncompressCommand(file, false);
 
     /* Use pipe viewer to get bytes processed during the command */
     QString cmd = QString("%1 | %2 | nandwrite --quiet --pad %3 %4 -")
             .arg(getfile, uncompresscmd, rawFile->nandwriteOptions(), device);
 
     qDebug() << "Raw flash file" << file;
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, false);
 }
 
 bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile)
@@ -1008,46 +1019,49 @@ bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &devi
         getfile = "cat " + file;
     }
 
-    QString uncompresscmd = getUncompressCommand(file);
+    QString uncompresscmd = getUncompressCommand(file, false);
     QString cmd = QString("%1 | %2 | ubiupdatevol %3 --size=%4 -")
         .arg(getfile, uncompresscmd, device, QString::number(size));
 
     qDebug() << "Raw flash file" << file;
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, false);
 }
 
-QString MultiImageWriteThread::getUncompressCommand(const QString &file)
+QString MultiImageWriteThread::getUncompressCommand(const QString &file, bool md5sum)
 {
-    QString unpack;
+    QString cmd;
+
+    if (md5sum)
+        cmd = "tee " MD5SUM_NAMEDPIPE " | ";
 
     if (file.endsWith(".gz"))
     {
-        unpack = "gzip -dc";
+        cmd += "gzip -dc";
     }
     else if (file.endsWith(".xz"))
     {
-        unpack = "xz -dc";
+        cmd += "xz -dc";
     }
     else if (file.endsWith(".bz2"))
     {
-        unpack = "bzcat";
+        cmd += "bzcat";
     }
     else if (file.endsWith(".lzo"))
     {
-        unpack = "lzop -dc";
+        cmd += "lzop -dc";
     }
     else if (file.endsWith(".zip"))
     {
         /* Note: the image must be the only file inside the .zip */
-        unpack = "unzip -p";
+        cmd += "unzip -p";
     }
     else
     {
-        return "tee " MD5SUM_NAMEDPIPE " | " PIPEVIEWER_COMMAND;
+        return cmd + PIPEVIEWER_COMMAND;
     }
 
     /* Send data to md5sum named pipe first, then unpack, then send to pipe viewer pipe (progress) */
-    return "tee " MD5SUM_NAMEDPIPE " | " + unpack + " | " PIPEVIEWER_COMMAND;
+    return cmd + " | " PIPEVIEWER_COMMAND;
 }
 
 bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QString &image, const QString &device)
@@ -1058,7 +1072,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QStr
     else
         getfile = "cat " + image;
 
-    QString uncompresscmd = getUncompressCommand(image);
+    QString uncompresscmd = getUncompressCommand(image, false);
 
     /* Use pipe viewer to get bytes processed during the command */
     QString cmd = QString("%1 | %2 | partclone.restore -q -s - -o %3")
@@ -1066,7 +1080,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QStr
 
     qDebug() << "Partclone " << image;
 
-    return runwritecmd(cmd);
+    return runwritecmd(cmd, false);
 }
 
 QByteArray MultiImageWriteThread::getBlkId(const QString &part, const QString &tag)
