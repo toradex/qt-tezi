@@ -50,8 +50,8 @@
 #define WGET_COMMAND "wget --no-verbose --tries=10 --read-timeout=10 -O- "
 
 /* Use named pipes to communicate with pipe viewer for progress to Qt UI */
+#define MD5SUM_NAMEDPIPE "/var/volatile/md5sumpipe"
 #define PIPEVIEWER_NAMEDPIPE "/var/volatile/pvpipe"
-#define TEE_PIPE_COMMAND "tee " PIPEVIEWER_NAMEDPIPE
 
 /* RNDIS network */
 #define RNDIS_ADDRESS "192.168.11"
