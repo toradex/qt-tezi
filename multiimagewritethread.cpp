@@ -776,7 +776,10 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
 
         bool resultfilecopy = processFileCopy(_image->baseUrl(), tarball, filelist);
 
-        QProcess::execute("umount " TEMP_MOUNT_FOLDER);
+        if (!runCommand("umount", QStringList() << TEMP_MOUNT_FOLDER, output)) {
+            emit error(tr("Error unmounting file system") + "\n" + output);
+            return false;
+        }
 
         return resultfilecopy;
     }
