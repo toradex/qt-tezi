@@ -80,9 +80,15 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     enum StorageClass storageClass;
     bool rebootWorks, moduleSupported = true;
     if (socid == "i.MX7D") {
-        // Dual and Solo are using the same soc_id currently
-        productIds << 32 << 33;
-        storageClass = StorageClass::Mtd;
+
+        if (getFileContents("/proc/device-tree/compatible").contains("colibri_imx7d_emmc")) {
+            storageClass = StorageClass::Block;
+            productIds << 39;
+        } else {
+            storageClass = StorageClass::Mtd;
+            // Dual and Solo are using the same soc_id currently
+            productIds << 32 << 33;
+        }
         rebootWorks = true;
 
         // Chip Tape-Out version
@@ -94,8 +100,6 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             if (getFileContents("/sys/bus/soc/devices/soc0/revision").trimmed() == "1.0")
                 moduleSupported = false;
         }
-
-
     } else if (socid == "i.MX6Q") {
         // i.MX6 Quad/Dual are only populated on Apalis currently
         productIds << 27 << 28 << 29 << 35;
