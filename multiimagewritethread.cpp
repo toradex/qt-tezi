@@ -996,7 +996,7 @@ bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &devi
         // Get Size of file first...
         QByteArray output;
         QStringList wgetargs;
-        wgetargs << "--quiet" << "--server-response" << url;
+        wgetargs << "--quiet" << "--server-response" << "--spider" << url;
         if (runCommand("wget", wgetargs, output))
         {
             foreach(QByteArray line, output.split('\n')) {
@@ -1012,7 +1012,7 @@ bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &devi
         }
         if (!size)
         {
-            emit error(tr("Failed to get size of URL %1").arg(url));
+            emit error(tr("Failed to get size of file at URL %1").arg(url));
             return false;
         }
 
