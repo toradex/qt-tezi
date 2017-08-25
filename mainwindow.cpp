@@ -66,7 +66,8 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
-    _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _netaccess(NULL), _numDownloads(0)
+    _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
+    _netaccess(NULL), _numDownloads(0)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -416,16 +417,18 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
 void MainWindow::addNewImageUrl(const QString url)
 {
     if (url.contains(RNDIS_ADDRESS)) {
-        if (!_rndisUrlList.contains(url))
+        if (!_rndisUrlList.contains(url)) {
             _rndisUrlList.append(url);
+            _downloadRndis = true;
+            removeImagesBySource(SOURCE_RNDIS);
+        }
     } else {
-        if (!_networkUrlList.contains(url))
+        if (!_networkUrlList.contains(url)) {
             _networkUrlList.append(url);
+            _downloadNetwork = true;
+            removeImagesBySource(SOURCE_NETWORK);
+        }
     }
-
-    /* Refresh images obtained over network in case we are connected in at least one way */
-    if (_wasOnline || _wasRndis)
-        on_actionRefreshCloud_triggered();
 }
 
 
@@ -864,14 +867,19 @@ void MainWindow::pollNetworkStatus()
             if (_qpd)
                 _qpd->setLabelText(tr("Downloading image list ..."));
 
-            downloadLists(_networkUrlList);
             _wasOnline = true;
+        }
+
+        if (_downloadNetwork) {
+            _downloadNetwork = false;
+            downloadLists(_networkUrlList);
         }
     } else {
         if (_wasOnline) {
             ui->labelEthernetAddress->setText(tr("No address assigned"));
             removeImagesBySource(SOURCE_NETWORK);
             _wasOnline = false;
+            _downloadNetwork = true;
         }
     }
 
@@ -882,14 +890,20 @@ void MainWindow::pollNetworkStatus()
             ui->labelRNDISAddress->setText(
                         QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 
-            downloadLists(_rndisUrlList);
             _wasRndis = true;
         }
+
+        if (_downloadRndis) {
+            _downloadRndis = false;
+            downloadLists(_rndisUrlList);
+        }
+
     } else {
         if (_wasRndis) {
             ui->labelRNDISAddress->setText(tr("No address assigned"));
             removeImagesBySource(SOURCE_RNDIS);
             _wasRndis = false;
+            _downloadRndis = true;
         }
     }
 }

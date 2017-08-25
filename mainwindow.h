@@ -67,6 +67,7 @@ protected:
     QSplashScreen *_splash;
     LanguageDialog *_ld;
     bool _wasOnline, _wasRndis;
+    bool _downloadNetwork, _downloadRndis;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numDownloads, _numMetaFilesToDownload;
     bool _installingFromMedia;
