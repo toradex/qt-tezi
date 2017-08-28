@@ -73,6 +73,6 @@ QString getUrlTopDir(const QString& url)
 
 QString getVersionString()
 {
-    return QString(QObject::tr("Toradex Easy Installer v%1 (g%2) - Built: %3"))
+    return QString(QObject::tr("Toradex Easy Installer %1 (g%2) - Built: %3"))
             .arg(VERSION_NUMBER, GIT_VERSION, QString::fromLocal8Bit(__DATE__));
 }
