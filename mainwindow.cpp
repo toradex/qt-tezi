@@ -992,6 +992,7 @@ void MainWindow::downloadImageJsonCompleted()
 
     QString baseurl = getUrlPath(rd->urlString());
     QString basename = getUrlTopDir(baseurl);
+    QString filename = getUrlImageFileName(rd->urlString());
     QString folder = "/var/volatile/" + basename;
     QDir d;
     while (d.exists(folder))
@@ -1003,11 +1004,11 @@ void MainWindow::downloadImageJsonCompleted()
     if (!imagemap.contains("nominal_size"))
         imagemap["nominal_size"] = MediaPollThread::calculateNominalSize(imagemap);
 
-    QFile imageinfo(folder + "/image.json");
+    QFile imageinfo(folder + QDir::separator() + filename);
     imageinfo.open(QIODevice::WriteOnly | QIODevice::Text);
     imageinfo.write(json);
     imageinfo.close();
-    imagemap["image_info"] = "image.json";
+    imagemap["image_info"] = filename;
     imagemap["baseurl"] = baseurl;
     if (baseurl.contains(RNDIS_ADDRESS))
         imagemap["source"] = SOURCE_RNDIS;

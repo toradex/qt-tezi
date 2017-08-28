@@ -11,5 +11,6 @@ void disableBlockDevForceRo(const QString &blockdev);
 bool makeFifo(const QString &file);
 QString getUrlPath(const QString& url);
 QString getUrlTopDir(const QString& url);
+QString getUrlImageFileName(const QString& url);
 QString getVersionString();
 #endif // UTIL_H

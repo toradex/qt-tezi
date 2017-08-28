@@ -163,7 +163,7 @@ QList<QFileInfo> MediaPollThread::findImages(const QString &path, int depth)
     QList<QFileInfo> images;
 
     /* Local image folders, search all subfolders... */
-    QDirIterator it(path, QStringList() << "image.json", QDir::Files | QDir::AllDirs | QDir::NoDotAndDotDot);
+    QDirIterator it(path, QStringList() << "image*.json", QDir::Files | QDir::AllDirs | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
         it.next();
         QFileInfo fi = it.fileInfo();
@@ -202,7 +202,7 @@ QList<QVariantMap> MediaPollThread::listMediaImages(const QString &path, const Q
             imagemap["iconimage"] = iconfile.readAll();
         }
 
-        imagemap["image_info"] = "image.json";
+        imagemap["image_info"] = image.fileName();
         imagemap["image_source_blockdev"] = blockdev;
         images.append(imagemap);
     }
