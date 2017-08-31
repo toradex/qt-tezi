@@ -69,7 +69,7 @@ protected:
     bool _wasOnline, _wasRndis;
     bool _downloadNetwork, _downloadRndis;
     QNetworkAccessManager *_netaccess;
-    int _neededMB, _availableMB, _numDownloads, _numMetaFilesToDownload;
+    int _neededMB, _availableMB, _numMetaFilesToDownload;
     bool _installingFromMedia;
     QTimer _networkStatusPollTimer;
     QTime _time;
@@ -78,14 +78,12 @@ protected:
     UsbGadget *_usbGadget;
     MediaPollThread *_mediaPollThread;
     MultiImageWriteThread *_imageWriteThread;
-    QList<QVariantMap> _netImages;
     QStringList _networkUrlList;
     QStringList _rndisUrlList;
 
     void updateModuleInformation();
     void updateVersion();
     virtual void changeEvent(QEvent * event);
-    static bool orderByIndex(const QVariantMap &m1, const QVariantMap &m2);
     void removeTemporaryFiles(const QVariantMap entry);
     void removeImagesBySource(enum ImageSource source);
     bool hasAddress(const QString &iface, QNetworkAddressEntry *currAddress = NULL);
@@ -105,15 +103,8 @@ signals:
 
 protected slots:
     void pollNetworkStatus();
-    void downloadListJsonCompleted();
-    void downloadListJsonFailed();
-    void downloadImageJsonCompleted();
-    void downloadImageJsonFailed();
-    void downloadIconCompleted();
-    void downloadIconFailed();
     void downloadMetaCompleted();
     void downloadMetaFailed();
-    void downloadFinished();
     void eraseMtd();
     void discardBlockdev();
     void discardOrEraseFinished();
@@ -123,6 +114,9 @@ protected slots:
     void addNewImageUrl(const QString url);
     void addImages(const QListVariantMap images);
     void errorMounting(const QString blockdev);
+
+    /* Events from ImageListDownload */
+    void onImageListDownloadError(const QString &msg);
 
     /* Events from ImageWriterThread */
     void onError(const QString &msg);

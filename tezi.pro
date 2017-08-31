@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     mtderasethread.cpp \
     configblockdialog.cpp \
     moduleinformation.cpp \
-    mediapollthread.cpp
+    mediapollthread.cpp \
+    imagelistdownload.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -81,7 +82,8 @@ HEADERS  += mainwindow.h \
     mtderasethread.h \
     configblockdialog.h \
     moduleinformation.h \
-    mediapollthread.h
+    mediapollthread.h \
+    imagelistdownload.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \
