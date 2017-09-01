@@ -185,8 +185,6 @@ void ConfigBlock::writeToMtddev(QString device, qint64 offset)
 
 void ConfigBlock::writeToBlockdev(QString device, qint64 offset)
 {
-    disableBlockDevForceRo(device);
-
     QFile blockDev("/dev/" + device);
     blockDev.open(QFile::ReadWrite);
     blockDev.seek(calculateAbsoluteOffset(blockDev.handle(), offset));

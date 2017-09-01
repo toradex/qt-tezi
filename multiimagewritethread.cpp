@@ -262,9 +262,6 @@ bool MultiImageWriteThread::processMtdDev(MtdDevInfo *mtddev)
 
 bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
 {
-    /* Make sure block device is writeable */
-    disableBlockDevForceRo(blockdev->name());
-
     if (blockdev->erase()) {
         updateStatus(tr("Erasing partition"));
 

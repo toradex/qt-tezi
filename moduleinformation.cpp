@@ -27,6 +27,17 @@ ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
     }
 }
 
+void ModuleInformation::unlockFlash()
+{
+    switch (_storageClass) {
+    case StorageClass::Block:
+        /* Disable RO on boot partitions, we are a flashing utility... */
+        disableBlockDevForceRo("mmcblk0boot0");
+        disableBlockDevForceRo("mmcblk0boot1");
+        break;
+    }
+}
+
 quint64 ModuleInformation::getStorageSize()
 {
     QString sysfsSize = QString("/sys/class/%1/%2/size")

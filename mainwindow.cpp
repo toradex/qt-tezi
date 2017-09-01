@@ -94,6 +94,9 @@ bool MainWindow::initialize() {
 
     _toradexConfigBlock = _moduleInformation->readConfigBlock();
 
+    // Unlock by default
+    _moduleInformation->unlockFlash();
+
     // No config block found, ask the user to create a new one using Label information
     if (_toradexConfigBlock == NULL) {
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),

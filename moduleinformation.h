@@ -20,6 +20,7 @@ public:
     static ModuleInformation *detectModule(QObject *parent);
     ConfigBlock *readConfigBlock();
     quint64 getStorageSize();
+    void unlockFlash();
 
     inline QList<quint16> &productIds() {
         return _productIds;

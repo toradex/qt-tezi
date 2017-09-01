@@ -51,7 +51,7 @@ struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
     {
         .id = -1,
         .cdrom = 0,
-        .ro = 1,
+        .ro = 0,
         .nofua = 0,
         .removable = 1,
         .file = "/dev/mmcblk0boot0",
@@ -59,7 +59,7 @@ struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
     {
         .id = -1,
         .cdrom = 0,
-        .ro = 1,
+        .ro = 0,
         .nofua = 0,
         .removable = 1,
         .file = "/dev/mmcblk0boot1",
