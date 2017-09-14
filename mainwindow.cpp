@@ -424,17 +424,25 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
 
 void MainWindow::addNewImageUrl(const QString url)
 {
-    /* Check for duplicates */
-    foreach (FeedServer server, _networkFeedServerList) {
-        if (server.url == url)
-            return;
-    }
-
     FeedServer server;
     server.label = tr("Custom Server from Media");
     server.url = url;
     server.enabled = true;
-    _networkFeedServerList.append(server);
+
+    int index = _networkFeedServerList.indexOf(server);
+    if (index < 0) {
+        _networkFeedServerList.append(server);
+    } else {
+        /*
+         * Enable if not yet enabled and refresh list
+         * This allows to force enable a statically added list
+         * using an external media
+         */
+        if (_networkFeedServerList[index].enabled)
+            return;
+        else
+            _networkFeedServerList[index].enabled = true;
+    }
 
     if (url.contains(RNDIS_ADDRESS)) {
         _downloadRndis = true;
@@ -937,10 +945,9 @@ bool MainWindow::downloadLists(const enum ImageSource source)
         QNetworkConfigurationManager manager;
         _netaccess->setConfiguration(manager.defaultConfiguration());
     }
-    qDebug() << "downloadLists";
+
     foreach (FeedServer server, _networkFeedServerList)
     {
-        qDebug() << server.url << ": " << server.enabled;
         bool isRndis = server.url.contains(RNDIS_ADDRESS);
 
         switch (source) {

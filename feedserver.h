@@ -3,10 +3,11 @@
 
 #include <QString>
 
-typedef struct {
+struct FeedServer {
     QString label;
     QString url;
     bool enabled;
-} FeedServer;
+    bool operator==(const FeedServer& rhs) { return rhs.url == url; }
+};
 
 #endif // FEEDSERVER_H
