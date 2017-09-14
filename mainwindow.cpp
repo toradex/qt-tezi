@@ -219,7 +219,6 @@ void MainWindow::showProgressDialog(const QString &labelText)
 void MainWindow::addImages(const QListVariantMap images)
 {
     QSize currentsize = ui->list->iconSize();
-    int validImages = 0;
     bool isAutoinstall = false;
     QVariantMap autoInstallImage;
 
@@ -333,12 +332,10 @@ void MainWindow::addImages(const QListVariantMap images)
         item->setData(Qt::UserRole, m);
         item->setToolTip(description);
 
-        if (supportedImage && supportedConfigFormat) {
+        if (supportedImage && supportedConfigFormat)
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-            validImages++;
-        } else {
+        else
             item->setFlags(Qt::NoItemFlags);
-        }
 
         if (source == SOURCE_USB)
             item->setData(SecondIconRole, _usbIcon);
@@ -364,12 +361,9 @@ void MainWindow::addImages(const QListVariantMap images)
         }
     }
 
-    if (validImages > 0)
-        ui->actionCancel->setEnabled(true);
-
-    /* Hide progress dialog since we have images we could use now... */
+    /* Hide progress dialog as soon as there is something the user might want to look at... */
     if (_qpd) {
-        if (validImages > 0) {
+        if (ui->list->count() > 0) {
             _qpd->hide();
             _qpd->deleteLater();
             _qpd = NULL;
