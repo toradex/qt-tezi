@@ -122,7 +122,23 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else {
-        return NULL;
+        // The Tegras use the machine file instead
+        QFile machineFile("/sys/bus/soc/devices/soc0/machine");
+        if (!machineFile.exists()) {
+            return NULL;
+        }
+        machineFile.open(QFile::ReadOnly);
+        QString machine = machineFile.readLine().trimmed();
+        machineFile.close();
+
+        if (machine == "apalis-tk1") {
+            socid = "TK1";
+            productIds << 34;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
+        } else {
+            return NULL;
+        }
     }
 
     return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
