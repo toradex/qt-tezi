@@ -44,28 +44,41 @@
     </message>
 </context>
 <context>
-    <name>Dialog</name>
+    <name>DiscardThread</name>
+    <message>
+        <source>Discarding content on device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FeedsDialog</name>
     <message>
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Registration Code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>This image needs registration. Please visit the following URL to register and proceed with the provided registration code.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>http://www.partner.com/toradex</source>
+        <source>Custom Server</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>DiscardThread</name>
+    <name>ImageListDownload</name>
     <message>
-        <source>Discarding content on device %1 failed</source>
+        <source>Error parsing list JSON downloaded from server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Image list config format not supported!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading image list: %1
+URL: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error downloading image list: HTTP status code %1
+URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -171,10 +184,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error parsing list JSON downloaded from server</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>In case recovery mode has been used a power cycle will be necessary.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -212,10 +221,6 @@
     </message>
     <message>
         <source>I Agree</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Image list config format not supported!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -299,16 +304,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error downloading image list: %1
-URL: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error downloading image list: HTTP status code %1
-URL: %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ethernet</source>
         <translation type="unfinished"></translation>
     </message>
@@ -382,6 +377,22 @@ URL: %2</source>
     </message>
     <message>
         <source>Reloading images from network...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Feeds (f)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Add/remove Feed Server sources.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>F</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Custom Server from Media</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -503,15 +514,23 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Failed to get size of URL %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Erasing partition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Discarding content on device %1 failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error unmounting file system</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error calculating checksum</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to get size of file at URL %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -572,10 +591,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Toradex Easy Installer v%1 (g%2) - Built: %3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Config Block information not valid</source>
         <translation type="unfinished"></translation>
     </message>
@@ -601,6 +616,10 @@ URL: %2</source>
     </message>
     <message>
         <source>This module is an early sample which is not supported by the Toradex Easy Installer due to chip issues.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Toradex Easy Installer %1 (g%2) - Built: %3</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

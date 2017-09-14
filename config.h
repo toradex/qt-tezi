@@ -26,6 +26,7 @@
 /* Location to download the list of available distributions from
  * Multiple lists can be specified by space separating the URLs */
 #define DEFAULT_IMAGE_SERVER  "http://tezi.toradex.com/image_list.json"
+#define DEFAULT_CI_IMAGE_SERVER  "http://tezi.toradex.com/image_list_ci.json"
 
 /* Size of recovery FAT partition in MB.
  * First partition starts at offset 1 MB (sector 2048)

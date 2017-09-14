@@ -6,15 +6,9 @@
  * Contains the information from os.json, and has a pointer to the partitions
  */
 
+#include "imagesource.h"
 #include <QObject>
 #include <QList>
-
-enum ImageSource {
-    SOURCE_USB,
-    SOURCE_SDCARD,
-    SOURCE_NETWORK,
-    SOURCE_RNDIS,
-};
 
 class BlockDevInfo;
 class MtdDevInfo;

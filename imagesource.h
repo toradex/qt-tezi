@@ -1,0 +1,11 @@
+#ifndef IMAGESOURCE_H
+#define IMAGESOURCE_H
+
+enum ImageSource {
+    SOURCE_USB,
+    SOURCE_SDCARD,
+    SOURCE_NETWORK,
+    SOURCE_RNDIS,
+};
+
+#endif // IMAGESOURCE_H

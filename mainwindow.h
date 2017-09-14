@@ -18,6 +18,7 @@
 #include "mediapollthread.h"
 #include "multiimagewritethread.h"
 #include "moduleinformation.h"
+#include "feedserver.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QSplashScreen>
@@ -78,8 +79,7 @@ protected:
     UsbGadget *_usbGadget;
     MediaPollThread *_mediaPollThread;
     MultiImageWriteThread *_imageWriteThread;
-    QStringList _networkUrlList;
-    QStringList _rndisUrlList;
+    QList<FeedServer> _networkFeedServerList;
 
     void updateModuleInformation();
     void updateVersion();
@@ -92,7 +92,7 @@ protected:
     QList<QListWidgetItem *> selectedItems();
     void updateNeeded();
     void downloadMetaFile(const QString &url, const QString &saveAs);
-    void downloadLists(const QStringList &urls);
+    bool downloadLists(const enum ImageSource source);
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap &entry);
     bool validateImageJson(QVariantMap &entry);
@@ -133,6 +133,7 @@ private slots:
     void on_actionUsbRndis_triggered(bool checked);
     void on_actionEraseModule_triggered();
     void on_actionShowLicense_triggered();
+    void on_actionEditFeeds_triggered();
     void on_actionEdit_config_triggered();
     void on_list_currentItemChanged();
     void on_list_itemDoubleClicked();

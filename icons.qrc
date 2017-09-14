@@ -38,5 +38,7 @@
         <file>icons/download_cloud.png</file>
         <file>icons/refresh_cloud.png</file>
         <file>tezi.schema</file>
+        <file>icons/server_choice.png</file>
+        <file>icons/add.png</file>
     </qresource>
 </RCC>

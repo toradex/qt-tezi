@@ -312,6 +312,7 @@
    </attribute>
    <addaction name="actionInstall"/>
    <addaction name="actionRefreshCloud"/>
+   <addaction name="actionEditFeeds"/>
    <addaction name="actionWifi"/>
    <addaction name="actionBrowser"/>
    <addaction name="actionUsbMassStorage"/>
@@ -371,6 +372,24 @@
    </property>
    <property name="shortcut">
     <string>R</string>
+   </property>
+  </action>
+  <action name="actionEditFeeds">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/icons/server_choice.png</normaloff>:/icons/server_choice.png</iconset>
+   </property>
+   <property name="text">
+    <string>Feeds (f)</string>
+   </property>
+   <property name="toolTip">
+    <string>Add/remove Feed Server sources.</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionCancel">

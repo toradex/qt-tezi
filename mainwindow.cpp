@@ -15,6 +15,7 @@
 #include "discardthread.h"
 #include "mtderasethread.h"
 #include "imagelistdownload.h"
+#include "feedsdialog.h"
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMap>
@@ -161,7 +162,16 @@ bool MainWindow::initialize() {
     }
 
     // Add static server list
-    _networkUrlList.append(QString(DEFAULT_IMAGE_SERVER).split(' ', QString::SkipEmptyParts));
+    FeedServer srv;
+    srv.label = "Toradex Image Server";
+    srv.url = DEFAULT_IMAGE_SERVER;
+    srv.enabled = true;
+    _networkFeedServerList.append(srv);
+
+    srv.label = "Toradex Continous Integration Server (testing)";
+    srv.url = DEFAULT_CI_IMAGE_SERVER;
+    srv.enabled = false;
+    _networkFeedServerList.append(srv);
 
     qRegisterMetaType<QListVariantMap>("QListVariantMap");
 
@@ -420,18 +430,24 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
 
 void MainWindow::addNewImageUrl(const QString url)
 {
+    /* Check for duplicates */
+    foreach (FeedServer server, _networkFeedServerList) {
+        if (server.url == url)
+            return;
+    }
+
+    FeedServer server;
+    server.label = tr("Custom Server from Media");
+    server.url = url;
+    server.enabled = true;
+    _networkFeedServerList.append(server);
+
     if (url.contains(RNDIS_ADDRESS)) {
-        if (!_rndisUrlList.contains(url)) {
-            _rndisUrlList.append(url);
-            _downloadRndis = true;
-            removeImagesBySource(SOURCE_RNDIS);
-        }
+        _downloadRndis = true;
+        removeImagesBySource(SOURCE_RNDIS);
     } else {
-        if (!_networkUrlList.contains(url)) {
-            _networkUrlList.append(url);
-            _downloadNetwork = true;
-            removeImagesBySource(SOURCE_NETWORK);
-        }
+        _downloadNetwork = true;
+        removeImagesBySource(SOURCE_NETWORK);
     }
 }
 
@@ -667,6 +683,13 @@ void MainWindow::on_actionShowLicense_triggered()
     license.exec();
 }
 
+void MainWindow::on_actionEditFeeds_triggered()
+{
+    FeedsDialog feeds(_networkFeedServerList, this);
+    if (feeds.exec() == QDialog::Accepted)
+        on_actionRefreshCloud_triggered();
+}
+
 void MainWindow::on_actionInstall_triggered()
 {
     if (!ui->list->currentItem())
@@ -691,21 +714,15 @@ void MainWindow::on_actionRefreshCloud_triggered()
     showProgressDialog(tr("Reloading images from network..."));
     removeImagesBySource(SOURCE_NETWORK);
     if (hasAddress("eth0")) {
-        if (!_networkUrlList.empty()) {
-            downloadLists(_networkUrlList);
-            downloading = true;
-        }
+        downloading = downloadLists(SOURCE_NETWORK);
     }
 
     removeImagesBySource(SOURCE_RNDIS);
     if (hasAddress("usb0")) {
-        if (!_rndisUrlList.empty()) {
-            downloadLists(_rndisUrlList);
-            downloading = true;
-        }
+        downloading = downloadLists(SOURCE_RNDIS);
     }
 
-    // Hide dialog
+    // Hide dialog if no URLs have been scheduled for download...
     if (_qpd && !downloading)
     {
         _qpd->hide();
@@ -876,7 +893,7 @@ void MainWindow::pollNetworkStatus()
 
         if (_downloadNetwork) {
             _downloadNetwork = false;
-            downloadLists(_networkUrlList);
+            downloadLists(SOURCE_NETWORK);
         }
     } else {
         if (_wasOnline) {
@@ -899,7 +916,7 @@ void MainWindow::pollNetworkStatus()
 
         if (_downloadRndis) {
             _downloadRndis = false;
-            downloadLists(_rndisUrlList);
+            downloadLists(SOURCE_RNDIS);
         }
 
     } else {
@@ -912,8 +929,10 @@ void MainWindow::pollNetworkStatus()
     }
 }
 
-void MainWindow::downloadLists(const QStringList &urls)
+bool MainWindow::downloadLists(const enum ImageSource source)
 {
+    bool downloading = false;
+
     if (!_netaccess)
     {
         _netaccess = new QNetworkAccessManager(this);
@@ -924,13 +943,34 @@ void MainWindow::downloadLists(const QStringList &urls)
         QNetworkConfigurationManager manager;
         _netaccess->setConfiguration(manager.defaultConfiguration());
     }
-
-    foreach (QString url, urls)
+    qDebug() << "downloadLists";
+    foreach (FeedServer server, _networkFeedServerList)
     {
-        ImageListDownload *imageList = new ImageListDownload(url, _netaccess, this);
+        qDebug() << server.url << ": " << server.enabled;
+        bool isRndis = server.url.contains(RNDIS_ADDRESS);
+
+        switch (source) {
+        case SOURCE_NETWORK:
+            if (isRndis)
+                continue;
+            break;
+        case SOURCE_RNDIS:
+            if (!isRndis)
+                continue;
+        default:
+            continue;
+        }
+
+        if (!server.enabled)
+            continue;
+
+        ImageListDownload *imageList = new ImageListDownload(server.url, _netaccess, this);
         connect(imageList, SIGNAL(newImagesToAdd(const QListVariantMap)), this, SLOT(addImages(const QListVariantMap)));
         connect(imageList, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
+        downloading = true;
     }
+
+    return downloading;
 }
 
 void MainWindow::onImageListDownloadError(const QString &msg)

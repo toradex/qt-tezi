@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     configblockdialog.cpp \
     moduleinformation.cpp \
     mediapollthread.cpp \
-    imagelistdownload.cpp
+    imagelistdownload.cpp \
+    feedsdialog.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -83,13 +84,17 @@ HEADERS  += mainwindow.h \
     configblockdialog.h \
     moduleinformation.h \
     mediapollthread.h \
-    imagelistdownload.h
+    imagelistdownload.h \
+    feedsdialog.h \
+    feedserver.h \
+    imagesource.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \
     progressslideshowdialog.ui \
     confeditdialog.ui \
-    configblockdialog.ui
+    configblockdialog.ui \
+    feedsdialog.ui
 
 # Avoid warnings from resources. Unfortunately applied to all files...
 QMAKE_CXXFLAGS += -Wno-unused-variable
