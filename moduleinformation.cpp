@@ -121,6 +121,11 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         productIds << 14 << 15 << 16 << 17;
         storageClass = StorageClass::Block;
         rebootWorks = false;
+    } else if (socid == "i.MX6ULL") {
+        // i.MX6 ULL
+        productIds << 36;
+        storageClass = StorageClass::Mtd;
+        rebootWorks = false;
     } else {
         // The Tegras use the machine file instead
         QFile machineFile("/sys/bus/soc/devices/soc0/machine");
