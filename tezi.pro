@@ -50,7 +50,8 @@ SOURCES += main.cpp\
     moduleinformation.cpp \
     mediapollthread.cpp \
     imagelistdownload.cpp \
-    feedsdialog.cpp
+    feedsdialog.cpp \
+    waitingspinnerwidget.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -87,7 +88,8 @@ HEADERS  += mainwindow.h \
     imagelistdownload.h \
     feedsdialog.h \
     feedserver.h \
-    imagesource.h
+    imagesource.h \
+    waitingspinnerwidget.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

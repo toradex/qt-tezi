@@ -81,6 +81,7 @@ protected:
     MultiImageWriteThread *_imageWriteThread;
     QList<FeedServer> _networkFeedServerList;
 
+    void setWorkingInBackground(bool working, const QString &labelText = "");
     void updateModuleInformation();
     void updateVersion();
     virtual void changeEvent(QEvent * event);

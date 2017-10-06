@@ -16,6 +16,7 @@
 #include "mtderasethread.h"
 #include "imagelistdownload.h"
 #include "feedsdialog.h"
+#include "waitingspinnerwidget.h"
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMap>
@@ -193,6 +194,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setWorkingInBackground(bool working, const QString &labelText)
+{
+    if (working) {
+        ui->waitingSpinner->start();
+        ui->labelBackgroundTask->setText(labelText);
+    } else {
+        ui->waitingSpinner->stop();
+        ui->labelBackgroundTask->setText("");
+    }
+}
+
 void MainWindow::updateModuleInformation()
 {
     ui->moduleType->setText(_toradexProductName);
@@ -204,7 +216,7 @@ void MainWindow::updateModuleInformation()
 void MainWindow::show()
 {
     QWidget::show();
-    showProgressDialog(tr("Wait for external media or network..."));
+    setWorkingInBackground(true, tr("Wait for external media or network..."));
 }
 
 void MainWindow::showProgressDialog(const QString &labelText)
@@ -361,15 +373,12 @@ void MainWindow::addImages(const QListVariantMap images)
         }
     }
 
-    /* Hide progress dialog as soon as there is something the user might want to look at... */
-    if (_qpd) {
-        if (ui->list->count() > 0) {
-            _qpd->hide();
-            _qpd->deleteLater();
-            _qpd = NULL;
-        } else {
-            _qpd->setLabelText(tr("Wait for external media or network..."));
-        }
+    /* Remove waiting spinner as soon as there is something the user might want to look at... */
+    if (ui->list->count() > 0) {
+        if (_imageListDownloadsActive == 0)
+            setWorkingInBackground(false);
+    } else {
+        setWorkingInBackground(true, tr("Wait for external media or network..."));
     }
 
     if (isAutoinstall) {
@@ -711,25 +720,14 @@ void MainWindow::on_actionInstall_triggered()
 
 void MainWindow::on_actionRefreshCloud_triggered()
 {
-    bool downloading = false;
-
-    showProgressDialog(tr("Reloading images from network..."));
     removeImagesBySource(SOURCE_NETWORK);
     if (hasAddress("eth0")) {
-        downloading = downloadLists(SOURCE_NETWORK);
+        downloadLists(SOURCE_NETWORK);
     }
 
     removeImagesBySource(SOURCE_RNDIS);
     if (hasAddress("usb0")) {
-        downloading = downloadLists(SOURCE_RNDIS);
-    }
-
-    // Hide dialog if no URLs have been scheduled for download...
-    if (_qpd && !downloading)
-    {
-        _qpd->hide();
-        _qpd->deleteLater();
-        _qpd = NULL;
+        downloadLists(SOURCE_RNDIS);
     }
 }
 
@@ -887,8 +885,7 @@ void MainWindow::pollNetworkStatus()
             ui->labelEthernetAddress->setText(
                         QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 
-            if (_qpd)
-                _qpd->setLabelText(tr("Downloading image list ..."));
+            setWorkingInBackground(true, tr("Downloading image list ..."));
 
             _wasOnline = true;
         }
