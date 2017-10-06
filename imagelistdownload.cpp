@@ -19,6 +19,7 @@ ImageListDownload::ImageListDownload(const QString &url,
     _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0)
 {
     _numDownloads++;
+    qDebug() << "Downloading image list from " << url;
     ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
     connect(rd, SIGNAL(failed()), this, SLOT(downloadListJsonFailed()));
     connect(rd, SIGNAL(completed()), this, SLOT(downloadListJsonCompleted()));
@@ -138,6 +139,7 @@ void ImageListDownload::downloadFinished()
         // Add all images at once, in the right order...
         qSort(_netImages.begin(), _netImages.end(), orderByIndex);
         emit newImagesToAdd(_netImages);
+        emit finished();
 
         this->deleteLater();
     }

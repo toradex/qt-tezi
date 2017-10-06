@@ -70,7 +70,7 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     ui(new Ui::MainWindow),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _netaccess(NULL)
+    _imageListDownloadsActive(0), _netaccess(NULL)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -93,7 +93,6 @@ bool MainWindow::initialize() {
                               QMessageBox::Close);
         return false;
     }
-
     _toradexConfigBlock = _moduleInformation->readConfigBlock();
 
     // Unlock by default
@@ -964,11 +963,24 @@ bool MainWindow::downloadLists(const enum ImageSource source)
 
         ImageListDownload *imageList = new ImageListDownload(server.url, _netaccess, this);
         connect(imageList, SIGNAL(newImagesToAdd(const QListVariantMap)), this, SLOT(addImages(const QListVariantMap)));
+        connect(imageList, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
         connect(imageList, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
-        downloading = true;
+        _imageListDownloadsActive++;
     }
 
-    return downloading;
+    if (_imageListDownloadsActive > 0)
+        setWorkingInBackground(true, tr("Reloading images from network..."));
+
+    return _imageListDownloadsActive > 0;
+}
+
+void MainWindow::onImageListDownloadFinished()
+{
+    if (_imageListDownloadsActive)
+        _imageListDownloadsActive--;
+
+    if (_imageListDownloadsActive == 0)
+        setWorkingInBackground(false);
 }
 
 void MainWindow::onImageListDownloadError(const QString &msg)

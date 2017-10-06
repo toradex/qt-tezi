@@ -79,23 +79,23 @@
 <context>
     <name>ImageListDownload</name>
     <message>
-        <location filename="imagelistdownload.cpp" line="37"/>
+        <location filename="imagelistdownload.cpp" line="38"/>
         <source>Error parsing list JSON downloaded from server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="imagelistdownload.cpp" line="43"/>
+        <location filename="imagelistdownload.cpp" line="44"/>
         <source>Image list config format not supported!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="imagelistdownload.cpp" line="154"/>
+        <location filename="imagelistdownload.cpp" line="156"/>
         <source>Error downloading image list: %1
 URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="imagelistdownload.cpp" line="156"/>
+        <location filename="imagelistdownload.cpp" line="158"/>
         <source>Error downloading image list: HTTP status code %1
 URL: %2</source>
         <translation type="unfinished"></translation>
@@ -133,78 +133,78 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="262"/>
+        <location filename="mainwindow.ui" line="272"/>
         <source>Unknown Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="350"/>
+        <location filename="mainwindow.ui" line="360"/>
         <source>Install (i)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="353"/>
+        <location filename="mainwindow.ui" line="363"/>
         <source>Installs the selected operating system image onto this SD card.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="356"/>
+        <location filename="mainwindow.ui" line="366"/>
         <source>I</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="368"/>
+        <location filename="mainwindow.ui" line="378"/>
         <source>Refresh (r)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="371"/>
+        <location filename="mainwindow.ui" line="381"/>
         <source>Refresh image list from Internet.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="401"/>
+        <location filename="mainwindow.ui" line="411"/>
         <source>Exit (Esc)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="404"/>
+        <location filename="mainwindow.ui" line="414"/>
         <source>Exits and boots the installed operating system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="419"/>
+        <location filename="mainwindow.ui" line="429"/>
         <source>Advanced</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="431"/>
+        <location filename="mainwindow.ui" line="441"/>
         <source>Mass Storage (u)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="434"/>
+        <location filename="mainwindow.ui" line="444"/>
         <source>Enables USB Mass Storage emulation to access internal eMMC partitions.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="437"/>
+        <location filename="mainwindow.ui" line="447"/>
         <source>U</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="451"/>
+        <location filename="mainwindow.ui" line="461"/>
         <source>RNDIS (n)</source>
         <oldsource>RNDIS (r)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="454"/>
+        <location filename="mainwindow.ui" line="464"/>
         <source>Enables USB RNDIS network connection.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="374"/>
+        <location filename="mainwindow.ui" line="384"/>
         <source>R</source>
         <translation type="unfinished"></translation>
     </message>
@@ -231,7 +231,7 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="134"/>
-        <location filename="mainwindow.cpp" line="1031"/>
+        <location filename="mainwindow.cpp" line="1041"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
@@ -256,225 +256,225 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="457"/>
+        <location filename="mainwindow.ui" line="467"/>
         <source>N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="466"/>
+        <location filename="mainwindow.ui" line="476"/>
         <source>Erase Flash (c)</source>
         <oldsource>Clean Flash (c)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="469"/>
+        <location filename="mainwindow.ui" line="479"/>
         <source>Discards all data on flash.</source>
         <oldsource>Discards all data on eMMC.</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="472"/>
+        <location filename="mainwindow.ui" line="482"/>
         <source>C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="481"/>
-        <location filename="mainwindow.cpp" line="681"/>
+        <location filename="mainwindow.ui" line="491"/>
+        <location filename="mainwindow.cpp" line="691"/>
         <source>License</source>
         <oldsource>License (c)</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="484"/>
+        <location filename="mainwindow.ui" line="494"/>
         <source>License Info.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="383"/>
+        <location filename="mainwindow.ui" line="393"/>
         <source>Feeds (f)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="386"/>
+        <location filename="mainwindow.ui" line="396"/>
         <source>Add/remove Feed Server sources.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="389"/>
+        <location filename="mainwindow.ui" line="399"/>
         <source>F</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="499"/>
+        <location filename="mainwindow.ui" line="509"/>
         <source>Edit config (e)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="502"/>
+        <location filename="mainwindow.ui" line="512"/>
         <source>Opens the config.txt and cmdline.txt for the installed OS in a text editor.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="514"/>
+        <location filename="mainwindow.ui" line="524"/>
         <source>Online help (h)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="517"/>
+        <location filename="mainwindow.ui" line="527"/>
         <source>Opens a web browser displaying the Raspberry Pi Forum.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="535"/>
+        <location filename="mainwindow.ui" line="545"/>
         <source>Wifi networks (w)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="538"/>
+        <location filename="mainwindow.ui" line="548"/>
         <source>Select a wifi network to connect to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.ui" line="541"/>
+        <location filename="mainwindow.ui" line="551"/>
         <source>W</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="207"/>
-        <location filename="mainwindow.cpp" line="377"/>
+        <location filename="mainwindow.cpp" line="218"/>
+        <location filename="mainwindow.cpp" line="380"/>
         <source>Wait for external media or network...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="607"/>
-        <location filename="mainwindow.cpp" line="625"/>
-        <location filename="mainwindow.cpp" line="702"/>
+        <location filename="mainwindow.cpp" line="617"/>
+        <location filename="mainwindow.cpp" line="635"/>
+        <location filename="mainwindow.cpp" line="712"/>
         <source>Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="608"/>
+        <location filename="mainwindow.cpp" line="618"/>
         <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="612"/>
+        <location filename="mainwindow.cpp" line="622"/>
         <source>Erasing internal raw NAND...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="703"/>
+        <location filename="mainwindow.cpp" line="713"/>
         <source>Warning: this will install the selected Image. All existing data on the internal flash will be overwritten.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="562"/>
+        <location filename="mainwindow.cpp" line="572"/>
         <source>The install process will begin shortly.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="569"/>
+        <location filename="mainwindow.cpp" line="579"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="570"/>
+        <location filename="mainwindow.cpp" line="580"/>
         <source>Warning: The mass storage has not been properly removed on the USB host side. Remove USB flash drive anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="762"/>
+        <location filename="mainwindow.cpp" line="761"/>
         <source>Image Installed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="487"/>
-        <location filename="mainwindow.cpp" line="672"/>
-        <location filename="mainwindow.cpp" line="796"/>
-        <location filename="mainwindow.cpp" line="980"/>
+        <location filename="mainwindow.cpp" line="497"/>
+        <location filename="mainwindow.cpp" line="682"/>
+        <location filename="mainwindow.cpp" line="795"/>
+        <location filename="mainwindow.cpp" line="990"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="288"/>
+        <location filename="mainwindow.cpp" line="298"/>
         <source>not compatible with this module</source>
         <oldsource>This image is not compatible with the current module</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="290"/>
+        <location filename="mainwindow.cpp" line="300"/>
         <source>requires a newer version of the installer</source>
         <oldsource>This image requires a newer version of the Toradex Easy Installer</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="440"/>
+        <location filename="mainwindow.cpp" line="436"/>
         <source>Custom Server from Media</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="467"/>
+        <location filename="mainwindow.cpp" line="477"/>
         <source>Error mounting</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="468"/>
+        <location filename="mainwindow.cpp" line="478"/>
         <source>Error mounting external device (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="487"/>
+        <location filename="mainwindow.cpp" line="497"/>
         <source>Image JSON validation failed for &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="626"/>
+        <location filename="mainwindow.cpp" line="636"/>
         <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="630"/>
+        <location filename="mainwindow.cpp" line="640"/>
         <source>Discarding all data on internal eMCC...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="714"/>
+        <location filename="mainwindow.cpp" line="972"/>
         <source>Reloading images from network...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="757"/>
+        <location filename="mainwindow.cpp" line="756"/>
         <source>The Image has been installed successfully.</source>
         <oldsource>The Image has been installed successfully. &lt;b&gt;You can now safely power off or reset the system.&lt;/b&gt;</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="757"/>
+        <location filename="mainwindow.cpp" line="756"/>
         <source>You can now safely power off or reset the system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="764"/>
+        <location filename="mainwindow.cpp" line="763"/>
         <source>Power off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="765"/>
+        <location filename="mainwindow.cpp" line="764"/>
         <source>Reboot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="766"/>
+        <location filename="mainwindow.cpp" line="765"/>
         <source>Return to menu</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="798"/>
+        <location filename="mainwindow.cpp" line="797"/>
         <source>The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="889"/>
+        <location filename="mainwindow.cpp" line="887"/>
         <source>Downloading image list ...</source>
         <oldsource>Downloading image list from Internet...</oldsource>
         <translation type="unfinished"></translation>
@@ -482,34 +482,34 @@ URL: %2</source>
     <message>
         <location filename="mainwindow.ui" line="79"/>
         <location filename="mainwindow.ui" line="99"/>
-        <location filename="mainwindow.cpp" line="900"/>
-        <location filename="mainwindow.cpp" line="924"/>
+        <location filename="mainwindow.cpp" line="898"/>
+        <location filename="mainwindow.cpp" line="922"/>
         <source>No address assigned</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1069"/>
-        <location filename="mainwindow.cpp" line="1097"/>
+        <location filename="mainwindow.cpp" line="1079"/>
+        <location filename="mainwindow.cpp" line="1107"/>
         <source>Download error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1069"/>
+        <location filename="mainwindow.cpp" line="1079"/>
         <source>Error writing downloaded file to initramfs.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1097"/>
+        <location filename="mainwindow.cpp" line="1107"/>
         <source>Error downloading meta file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="1127"/>
+        <location filename="mainwindow.cpp" line="1137"/>
         <source>I Agree</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="760"/>
+        <location filename="mainwindow.cpp" line="759"/>
         <source>In case recovery mode has been used a power cycle will be necessary.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -758,22 +758,22 @@ URL: %2</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="mainwindow.cpp" line="83"/>
+        <location filename="mainwindow.cpp" line="84"/>
         <source>Module Detection failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="84"/>
+        <location filename="mainwindow.cpp" line="85"/>
         <source>Failed to detect the basic module type. Cannot continue.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="90"/>
+        <location filename="mainwindow.cpp" line="91"/>
         <source>Unsupported Module Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="91"/>
+        <location filename="mainwindow.cpp" line="92"/>
         <source>This module is an early sample which is not supported by the Toradex Easy Installer due to chip issues.</source>
         <oldsource>This module type is an early sample which is due to chip issues not supported by the Toradex Easy Installer.</oldsource>
         <translation type="unfinished"></translation>

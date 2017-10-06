@@ -69,6 +69,7 @@ protected:
     LanguageDialog *_ld;
     bool _wasOnline, _wasRndis;
     bool _downloadNetwork, _downloadRndis;
+    int _imageListDownloadsActive;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numMetaFilesToDownload;
     bool _installingFromMedia;
@@ -117,6 +118,7 @@ protected slots:
     void errorMounting(const QString blockdev);
 
     /* Events from ImageListDownload */
+    void onImageListDownloadFinished();
     void onImageListDownloadError(const QString &msg);
 
     /* Events from ImageWriterThread */

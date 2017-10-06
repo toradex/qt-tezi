@@ -18,6 +18,7 @@ public:
 
 signals:
     void newImagesToAdd(const QListVariantMap images);
+    void finished();
     void error(const QString &msg);
 
 public slots:
