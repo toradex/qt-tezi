@@ -145,7 +145,7 @@ bool MainWindow::initialize() {
     _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId);
 
     if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block) {
-        if (_usbGadget->initMassStorage())
+        if (_usbGadget->initMassStorage(_moduleInformation->mainPartition()))
             ui->actionUsbMassStorage->setEnabled(true);
         else
             ui->actionUsbMassStorage->setEnabled(false);

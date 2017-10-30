@@ -20,12 +20,12 @@ UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, QObje
     _gadgetInitialized = true;
 }
 
-bool UsbGadget::initMassStorage()
+bool UsbGadget::initMassStorage(const QString &emmcdev)
 {
     if (!_gadgetInitialized)
         return false;
 
-    if (usbgadget_ms_init()) {
+    if (usbgadget_ms_init(emmcdev.toStdString().c_str())) {
         qDebug() << "USB Gadget: Error initalizing Mass Storage:" << usbgadget_strerror();
         return false;
     }

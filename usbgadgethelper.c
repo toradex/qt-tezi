@@ -147,9 +147,24 @@ int usbgadget_init(const char *serial, const char *productName, uint16_t idProdu
     return 0;
 }
 
-int usbgadget_ms_init()
+int usbgadget_ms_init(const char *basemmcdev)
 {
+    usbg_f_ms *mf = usbg_to_ms_function(f_ms);
     usbg_config *c;
+    char mmcdev[USBG_MAX_PATH_LENGTH];
+
+    /* Set /dev/mmcblkX(boot[01]) */
+    strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
+    strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
+    usbg_f_ms_set_lun_file(mf, 0, mmcdev);
+    strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
+    strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
+    strncat(mmcdev, "boot0", USBG_MAX_PATH_LENGTH);
+    usbg_f_ms_set_lun_file(mf, 1, mmcdev);
+    strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
+    strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
+    strncat(mmcdev, "boot1", USBG_MAX_PATH_LENGTH);
+    usbg_f_ms_set_lun_file(mf, 2, mmcdev);
 
     usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
     if (usbg_ret != USBG_SUCCESS)
@@ -234,11 +249,6 @@ bool usbgadget_ms_safe_to_remove()
 
 int usbgadget_ms_enable()
 {
-    usbg_f_ms *mf = usbg_to_ms_function(f_ms);
-    usbg_f_ms_set_lun_file(mf, 0, "/dev/mmcblk0");
-    usbg_f_ms_set_lun_file(mf, 1, "/dev/mmcblk0boot0");
-    usbg_f_ms_set_lun_file(mf, 2, "/dev/mmcblk0boot1");
-
     usbg_ret = usbg_enable_gadget(g_ms, DEFAULT_UDC);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
