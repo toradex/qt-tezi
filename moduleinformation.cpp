@@ -91,8 +91,8 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     enum StorageClass storageClass;
     bool rebootWorks, moduleSupported = true;
     if (socid == "i.MX7D") {
-
-        if (getFileContents("/proc/device-tree/compatible").contains("colibri_imx7d_emmc")) {
+        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
+        if (compatible.contains("colibri_imx7d_emmc") || compatible.contains("colibri-imx7d-emmc")) {
             storageClass = StorageClass::Block;
             productIds << 39;
         } else {
