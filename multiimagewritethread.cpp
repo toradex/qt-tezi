@@ -459,14 +459,20 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
         {
             BlockDevPartitionInfo *p = partitionMap.value(i);
 
-            partitionTable += QByteArray::number(p->offset())+","+QByteArray::number(p->partitionSizeSectors())+","+p->partitionType();
+            partitionTable.append("start=");
+            partitionTable.append(QByteArray::number(p->offset()));
+            partitionTable.append(",size=");
+            partitionTable.append(QByteArray::number(p->partitionSizeSectors()));
+            partitionTable.append(",type=");
+            partitionTable.append(p->partitionType());
+
             if (p->active())
-                partitionTable += " *";
-            partitionTable += "\n";
+                partitionTable.append(",bootable");
+            partitionTable.append("\n");
         }
         else
         {
-            partitionTable += "0,0\n";
+            partitionTable.append("0,0\n");
         }
     }
 
