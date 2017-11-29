@@ -305,6 +305,23 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
     /* Calculate space requirements, and check special requirements */
     int totalSectors = getFileContents("/sys/class/block/" + blockdev->name() + "/size").trimmed().toULongLong();
 
+    /* Reserve 34 sectors at the end of the disk for the secondary GPT header */
+    if (blockdev->tableType() == "gpt")
+        totalSectors -= 34;
+
+    /* Currently extended partitions are not supported with MBR */
+    int max_part_tables = 4;
+
+    /* With GPT the maximum partition number can be limited by CONFIG_MMC_BLOCK_MINORS. We have set it to 16 for Tezi kernels. */
+    if (blockdev->tableType() == "gpt")
+        max_part_tables = 16;
+
+    if (partitions->count() > max_part_tables) {
+        emit error(tr("The Toradex Easy Installer supports up to %1 partitions on a single device. %2 partitions have been specified.")
+                   .arg(QString::number(max_part_tables), QString::number(partitions->count())));
+        return false;
+    }
+
     /* We need PARTITION_ALIGNMENT sectors at the begining for MBR and general alignment (currently 4MiB) */
     int availableMB = (totalSectors - PARTITION_ALIGNMENT) / 2048;
 
@@ -423,7 +440,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
     }
 
     emit statusUpdate(tr("Writing partition table"));
-    if (!writePartitionTable(blockdev->blockDevice(), partitionMap))
+    if (!writePartitionTable(blockdev->blockDevice(), blockdev->tableType(), partitionMap))
         return false;
 
     /* Zero out first sector of partitions, to make sure to get rid of previous file system (label) */
@@ -449,7 +466,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
 }
 
 
-bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const QMap<int, BlockDevPartitionInfo *> &partitionMap)
+bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, const QString &tableType, const QMap<int, BlockDevPartitionInfo *> &partitionMap)
 {
     /* Write partition table using sfdisk */
     QByteArray partitionTable;
@@ -479,10 +496,15 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
     qDebug() << "New partition table:";
     qDebug() << partitionTable;
 
+    QString sfdiskcmd = "/usr/sbin/sfdisk";
+    QStringList sfdiskargs;
+    sfdiskargs << "-uS" << "--label" << tableType << QString(blockdevpath);
+    qDebug() << "Running Command: " << sfdiskcmd << sfdiskargs;
+
     /* Let sfdisk write a proper partition table */
     QProcess proc;
     proc.setProcessChannelMode(proc.MergedChannels);
-    proc.start("/usr/sbin/sfdisk -uS --label dos " + blockdevpath);
+    proc.start(sfdiskcmd, sfdiskargs);
     proc.write(partitionTable);
     proc.closeWriteChannel();
     proc.waitForFinished(-1);
@@ -499,8 +521,16 @@ bool MultiImageWriteThread::writePartitionTable(QByteArray blockdevpath, const Q
         if (partitionMap.contains(i))
         {
             BlockDevPartitionInfo *p = partitionMap.value(i);
-            while (!QFile::exists(p->partitionDevice()))
+            int timeout = 100;
+
+            while (!QFile::exists(p->partitionDevice()) && --timeout)
                 QThread::msleep(10);
+
+            if (!timeout)
+            {
+                emit error(tr("Timeout waiting for partition device %1.").arg(QString(p->partitionDevice())));
+                return false;
+            }
         }
     }
 

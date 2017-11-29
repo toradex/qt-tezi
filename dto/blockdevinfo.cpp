@@ -6,6 +6,7 @@ BlockDevInfo::BlockDevInfo(const QVariantMap &blockdev, QObject *parent) :
 {
     _name = blockdev.value("name").toString();
     _erase = blockdev.value("erase", false).toBool();
+    _tableType = blockdev.value("table_type", "dos").toString();
 
     /* Partitions within a blockdev */
     if (blockdev.contains("partitions"))
@@ -13,7 +14,7 @@ BlockDevInfo::BlockDevInfo(const QVariantMap &blockdev, QObject *parent) :
         QVariantList parts = blockdev.value("partitions").toList();
         foreach (QVariant pv, parts)
         {
-            _partitions.append(new BlockDevPartitionInfo(pv.toMap(), this));
+            _partitions.append(new BlockDevPartitionInfo(pv.toMap(), _tableType, this));
         }
     }
 

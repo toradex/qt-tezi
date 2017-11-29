@@ -29,6 +29,11 @@ public:
         return _name;
     }
 
+    inline QString tableType()
+    {
+        return _tableType;
+    }
+
     inline ContentInfo *content()
     {
         return _content;
@@ -50,6 +55,7 @@ protected:
     QByteArray _blockDevice;
     QList<BlockDevPartitionInfo *> _partitions;
     QString _name;
+    QString _tableType;
     ContentInfo *_content;
 };
 

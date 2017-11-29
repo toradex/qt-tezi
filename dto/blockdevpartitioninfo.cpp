@@ -1,6 +1,6 @@
 #include "blockdevpartitioninfo.h"
 
-BlockDevPartitionInfo::BlockDevPartitionInfo(const QVariantMap &m, QObject *parent) :
+BlockDevPartitionInfo::BlockDevPartitionInfo(const QVariantMap &m, const QString &tableType, QObject *parent) :
     QObject(parent), _content(NULL)
 {
     _wantMaximised = m.value("want_maximised", false).toBool();
@@ -16,18 +16,34 @@ BlockDevPartitionInfo::BlockDevPartitionInfo(const QVariantMap &m, QObject *pare
 
         /* Get partiton type from filesystem type of content */
         QByteArray fstype = _content->fsType();
-        if (fstype.contains("fat"))
-            defaultPartType = "0c"; /* FAT32 LBA */
-        else if (fstype == "swap")
-            defaultPartType = "82";
-        else if (fstype.contains("ntfs"))
-            defaultPartType = "07";
-        else if (fstype.contains("raw"))
-            defaultPartType = "00";
-        else
-            defaultPartType = "83"; /* Linux native */
+        if (tableType == "gpt") {
+            if (fstype.contains("fat"))
+                defaultPartType = "EBD0A0A2-B9E5-4433-87C0-68B6B72699C7"; /* Microsoft Basic data partition */
+            else if (fstype == "swap")
+                defaultPartType = "0657FD6D-A4AB-43C4-84E5-0933C84B4F4F";
+            else if (fstype.contains("ntfs"))
+                defaultPartType = "EBD0A0A2-B9E5-4433-87C0-68B6B72699C7";
+            else if (fstype.contains("raw"))
+                defaultPartType = "00000000-0000-0000-0000-000000000000";
+            else
+                defaultPartType = "0FC63DAF-8483-4772-8E79-3D69D8477DE4"; /* Linux filesystem data */
+        } else {
+            if (fstype.contains("fat"))
+                defaultPartType = "0c"; /* FAT32 LBA */
+            else if (fstype == "swap")
+                defaultPartType = "82";
+            else if (fstype.contains("ntfs"))
+                defaultPartType = "07";
+            else if (fstype.contains("raw"))
+                defaultPartType = "00";
+            else
+                defaultPartType = "83"; /* Linux native */
+        }
     } else {
-        defaultPartType = "00";
+        if (tableType == "gpt")
+            defaultPartType = "00000000-0000-0000-0000-000000000000";
+        else
+            defaultPartType = "00";
     }
 
     _partitionType = m.value("partition_type", defaultPartType).toByteArray();

@@ -63,7 +63,7 @@ protected:
     bool isLabelAvailable(const QByteArray &label);
     void patchConfigTxt();
     QString getUncompressCommand(const QString &file, bool md5sum);
-    bool writePartitionTable(QByteArray blockdevpath, const QMap<int, BlockDevPartitionInfo *> &partitionMap);
+    bool writePartitionTable(const QByteArray &blockdevpath, const QString &tableType, const QMap<int, BlockDevPartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
 
     ImageInfo *_image;

@@ -16,7 +16,7 @@ class BlockDevPartitionInfo : public QObject
     Q_OBJECT
 public:
     /* Constructor. Gets called from OsInfo with info from json file */
-    explicit BlockDevPartitionInfo(const QVariantMap &m, QObject *parent = 0);
+    explicit BlockDevPartitionInfo(const QVariantMap &m, const QString &tableType, QObject *parent = 0);
 
     explicit BlockDevPartitionInfo(int partitionNr, int offset, int sectors, const QByteArray &partType, QObject *parent = 0);
 
