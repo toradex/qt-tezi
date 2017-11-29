@@ -169,6 +169,11 @@ bool MainWindow::initialize() {
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
+    srv.label = "Toradex 3rd Party Image Server";
+    srv.url = DEFAULT_3RDPARTY_IMAGE_SERVER;
+    srv.enabled = true;
+    _networkFeedServerList.append(srv);
+
     srv.label = "Toradex Continous Integration Server (testing)";
     srv.url = DEFAULT_CI_IMAGE_SERVER;
     srv.enabled = false;
