@@ -149,9 +149,20 @@ int usbgadget_init(const char *serial, const char *productName, uint16_t idProdu
 
 int usbgadget_ms_init(const char *basemmcdev)
 {
-    usbg_f_ms *mf = usbg_to_ms_function(f_ms);
+    usbg_f_ms *mf;
     usbg_config *c;
     char mmcdev[USBG_MAX_PATH_LENGTH];
+
+    usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    usbg_ret = (usbg_error)usbg_create_function(g_ms, F_MASS_STORAGE, "",
+                    &f_ms_attrs, &f_ms);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    mf = usbg_to_ms_function(f_ms);
 
     /* Set /dev/mmcblkX(boot[01]) */
     strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
@@ -165,15 +176,6 @@ int usbgadget_ms_init(const char *basemmcdev)
     strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
     strncat(mmcdev, "boot1", USBG_MAX_PATH_LENGTH);
     usbg_f_ms_set_lun_file(mf, 2, mmcdev);
-
-    usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
-    if (usbg_ret != USBG_SUCCESS)
-        return -1;
-
-    usbg_ret = (usbg_error)usbg_create_function(g_ms, F_MASS_STORAGE, "",
-                    &f_ms_attrs, &f_ms);
-    if (usbg_ret != USBG_SUCCESS)
-        return -1;
 
     /* NULL can be passed to use kernel defaults */
     usbg_ret = usbg_create_config(g_ms, 1, "Mass Storage", NULL, &c_strs_ms, &c);
