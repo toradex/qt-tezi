@@ -14,7 +14,12 @@ class ImageListDownload : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImageListDownload(const QString &url, QNetworkAccessManager *netaccess, QObject *parent);
+    explicit ImageListDownload(const QString &url, int index, QNetworkAccessManager *netaccess, QObject *parent);
+
+    inline int index()
+    {
+        return _index;
+    }
 
 signals:
     void newImagesToAdd(const QListVariantMap images);
@@ -39,7 +44,7 @@ protected:
     QNetworkAccessManager *_netaccess;
     QObject *_parent;
     QList<QVariantMap> _netImages;
-    int _numDownloads;
+    int _numDownloads, _index;
 };
 
 #endif // IMAGELISTDOWNLOAD_H

@@ -51,7 +51,8 @@ SOURCES += main.cpp\
     mediapollthread.cpp \
     imagelistdownload.cpp \
     feedsdialog.cpp \
-    waitingspinnerwidget.cpp
+    waitingspinnerwidget.cpp \
+    qlistimagewidgetitem.cpp
 
 HEADERS  += mainwindow.h \
     languagedialog.h \
@@ -89,7 +90,8 @@ HEADERS  += mainwindow.h \
     feedsdialog.h \
     feedserver.h \
     imagesource.h \
-    waitingspinnerwidget.h
+    waitingspinnerwidget.h \
+    qlistimagewidgetitem.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

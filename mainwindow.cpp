@@ -17,6 +17,7 @@
 #include "imagelistdownload.h"
 #include "feedsdialog.h"
 #include "waitingspinnerwidget.h"
+#include "qlistimagewidgetitem.h"
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMap>
@@ -229,13 +230,19 @@ void MainWindow::showProgressDialog(const QString &labelText)
 
 void MainWindow::addImages(const QListVariantMap images)
 {
+    ImageListDownload *ild = qobject_cast<ImageListDownload *>(sender());
     QSize currentsize = ui->list->iconSize();
     bool isAutoinstall = false;
+    int feedindex = -1; // Use -1 so that local media will be displayed first.
     QVariantMap autoInstallImage;
+
+    if (ild != NULL)
+        feedindex = ild->index();
 
     foreach (const QVariantMap m, images)
     {
         int config_format = m.value("config_format").toInt();
+        int imageindex = m.value("index").toInt();
         QString name = m.value("name").toString();
         QString foldername = m.value("foldername").toString();
         QString description = m.value("description").toString();
@@ -338,7 +345,7 @@ void MainWindow::addImages(const QListVariantMap images)
             }
         }
 
-        QListWidgetItem *item = new QListWidgetItem(icon, friendlyname);
+        QListImageWidgetItem *item = new QListImageWidgetItem(icon, friendlyname, feedindex, imageindex);
 
         item->setData(Qt::UserRole, m);
         item->setToolTip(description);
@@ -359,6 +366,7 @@ void MainWindow::addImages(const QListVariantMap images)
         item->setSizeHint(QSize(ui->list->width() - 24, ui->list->iconSize().height()));
         ui->list->addItem(item);
     }
+    ui->list->sortItems();
 
     /* Giving items without icon a dummy icon to make them have equal height and text alignment */
     QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
@@ -930,6 +938,7 @@ void MainWindow::pollNetworkStatus()
 bool MainWindow::downloadLists(const enum ImageSource source)
 {
     bool downloading = false;
+    int index = 0;
 
     if (!_netaccess)
     {
@@ -961,11 +970,12 @@ bool MainWindow::downloadLists(const enum ImageSource source)
         if (!server.enabled)
             continue;
 
-        ImageListDownload *imageList = new ImageListDownload(server.url, _netaccess, this);
+        ImageListDownload *imageList = new ImageListDownload(server.url, index, _netaccess, this);
         connect(imageList, SIGNAL(newImagesToAdd(const QListVariantMap)), this, SLOT(addImages(const QListVariantMap)));
         connect(imageList, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
         connect(imageList, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
         _imageListDownloadsActive++;
+        index++;
     }
 
     if (_imageListDownloadsActive > 0)

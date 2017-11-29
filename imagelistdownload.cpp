@@ -14,9 +14,9 @@
  *
  * Initial author: Stefan Agner
  */
-ImageListDownload::ImageListDownload(const QString &url,
+ImageListDownload::ImageListDownload(const QString &url, int index,
     QNetworkAccessManager *netaccess, QObject *parent) : QObject(parent),
-    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0)
+    _imageListUrl(url), _index(index), _netaccess(netaccess), _parent(parent), _numDownloads(0)
 {
     _numDownloads++;
     qDebug() << "Downloading image list from " << url;
