@@ -745,7 +745,27 @@ void MainWindow::on_actionRefreshCloud_triggered()
 
 void MainWindow::on_actionCancel_triggered()
 {
-    close();
+    QMessageBox msgbox(QMessageBox::Information, tr("Exit Toradex Easy Installer"),
+                       tr("Do you want to power off or reboot the module?"),
+                       QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
+    msgbox.button(QMessageBox::Yes)->setText(tr("Power off"));
+    msgbox.button(QMessageBox::No)->setText(tr("Reboot"));
+    msgbox.button(QMessageBox::Cancel)->setText(tr("Return to menu"));
+
+    int value = msgbox.exec();
+
+    switch (value) {
+    case QMessageBox::Yes:
+        close();
+        QApplication::exit(LINUX_POWEROFF);
+        break;
+    case QMessageBox::No:
+        close();
+        QApplication::exit(LINUX_REBOOT);
+        break;
+    case QMessageBox::Cancel:
+        break;
+    }
 }
 
 void MainWindow::onCompleted()
