@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 /* Version number */
-#define VERSION_NUMBER "1.3"
+#define VERSION_NUMBER "1.4"
 
 /* Supported config format */
 #define IMAGE_LIST_CONFIG_FORMAT 1
