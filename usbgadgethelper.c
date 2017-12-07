@@ -11,7 +11,7 @@
 #include <usbg/function/net.h>
 
 /* Set Toradex product id at runtime... */
-usbg_gadget_attrs g_attrs_ms = {
+struct usbg_gadget_attrs g_attrs_ms = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
@@ -22,7 +22,7 @@ usbg_gadget_attrs g_attrs_ms = {
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
-usbg_gadget_attrs g_attrs_rndis = {
+struct usbg_gadget_attrs g_attrs_rndis = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
@@ -33,10 +33,10 @@ usbg_gadget_attrs g_attrs_rndis = {
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
-usbg_gadget_strs g_strs = {
-    .str_ser = "00000000", /* Serial number */
-    .str_mnf = "Toradex", /* Manufacturer */
-    .str_prd = "Apalis iMX6" /* Product string */
+struct usbg_gadget_strs g_strs = {
+    .manufacturer = "Toradex", /* Manufacturer */
+    .product = "Apalis iMX6", /* Product string */
+    .serial = "00000000", /* Serial number */
 };
 
 struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
@@ -79,7 +79,7 @@ struct usbg_f_ms_attrs f_ms_attrs = {
     .luns = f_ms_luns,
 };
 
-usbg_config_strs c_strs_ms = {
+struct usbg_config_strs c_strs_ms = {
         "Mass Storage"
 };
 
@@ -90,17 +90,17 @@ struct usbg_f_net_attrs f_net_attrs = {
     .qmult = 5,
 };
 
-const usbg_config_strs c_strs_rndis = {
+const struct usbg_config_strs c_strs_rndis = {
     .configuration = "RNDIS"
 };
 
-const usbg_gadget_os_descs os_desc_rndis = {
+const struct usbg_gadget_os_descs os_desc_rndis = {
     .use = 1,
     .b_vendor_code = 0xcd,
     .qw_sign = "MSFT100",
 };
 
-const usbg_function_os_desc os_desc_f_rndis = {
+const struct usbg_function_os_desc os_desc_f_rndis = {
     .compatible_id = "RNDIS",
     .sub_compatible_id = "5162001",
 };
@@ -117,8 +117,8 @@ usbg_error usbg_ret;
 
 int usbgadget_init(const char *serial, const char *productName, uint16_t idProduct)
 {
-    strncpy(g_strs.str_ser, serial, USBG_MAX_STR_LENGTH);
-    strncpy(g_strs.str_prd, productName, USBG_MAX_STR_LENGTH);
+    g_strs.serial = strdup(serial);
+    g_strs.product = strdup(productName);
     g_attrs_ms.idProduct = idProduct;
     g_attrs_rndis.idProduct = idProduct;
 
@@ -151,13 +151,13 @@ int usbgadget_ms_init(const char *basemmcdev)
 {
     usbg_f_ms *mf;
     usbg_config *c;
-    char mmcdev[USBG_MAX_PATH_LENGTH];
+    char mmcdev[PATH_MAX];
 
     usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_create_function(g_ms, F_MASS_STORAGE, "",
+    usbg_ret = (usbg_error)usbg_create_function(g_ms, USBG_F_MASS_STORAGE, "",
                     &f_ms_attrs, &f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
@@ -165,16 +165,16 @@ int usbgadget_ms_init(const char *basemmcdev)
     mf = usbg_to_ms_function(f_ms);
 
     /* Set /dev/mmcblkX(boot[01]) */
-    strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
-    strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
+    strncpy(mmcdev, "/dev/", PATH_MAX);
+    strncat(mmcdev, basemmcdev, PATH_MAX);
     usbg_f_ms_set_lun_file(mf, 0, mmcdev);
-    strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
-    strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
-    strncat(mmcdev, "boot0", USBG_MAX_PATH_LENGTH);
+    strncpy(mmcdev, "/dev/", PATH_MAX);
+    strncat(mmcdev, basemmcdev, PATH_MAX);
+    strncat(mmcdev, "boot0", PATH_MAX);
     usbg_f_ms_set_lun_file(mf, 1, mmcdev);
-    strncpy(mmcdev, "/dev/", USBG_MAX_PATH_LENGTH);
-    strncat(mmcdev, basemmcdev, USBG_MAX_PATH_LENGTH);
-    strncat(mmcdev, "boot1", USBG_MAX_PATH_LENGTH);
+    strncpy(mmcdev, "/dev/", PATH_MAX);
+    strncat(mmcdev, basemmcdev, PATH_MAX);
+    strncat(mmcdev, "boot1", PATH_MAX);
     usbg_f_ms_set_lun_file(mf, 2, mmcdev);
 
     /* NULL can be passed to use kernel defaults */
@@ -297,12 +297,12 @@ int usbgadget_rndis_init()
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_create_function(g_rndis, F_RNDIS, "usb0",
+    usbg_ret = (usbg_error)usbg_create_function(g_rndis, USBG_F_RNDIS, "usb0",
                     &f_net_attrs, &f_rndis);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_set_interf_os_desc(f_rndis, &os_desc_f_rndis);
+    usbg_ret = (usbg_error)usbg_set_interf_os_desc(f_rndis, "rndis", &os_desc_f_rndis);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
