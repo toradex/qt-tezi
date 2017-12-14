@@ -137,11 +137,9 @@ int usbgadget_init(const char *serial, const char *productName, uint16_t idProdu
     return 0;
 }
 
-int usbgadget_ms_init(const char *basemmcdev)
+int usbgadget_ms_init()
 {
-    usbg_f_ms *mf;
     usbg_config *c;
-    char mmcdev[PATH_MAX];
 
     usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
     if (usbg_ret != USBG_SUCCESS)
@@ -151,20 +149,6 @@ int usbgadget_ms_init(const char *basemmcdev)
                     &f_ms_attrs, &f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
-    mf = usbg_to_ms_function(f_ms);
-
-    /* Set /dev/mmcblkX(boot[01]) */
-    strncpy(mmcdev, "/dev/", PATH_MAX);
-    strncat(mmcdev, basemmcdev, PATH_MAX);
-    usbg_f_ms_set_lun_file(mf, 0, mmcdev);
-    strncpy(mmcdev, "/dev/", PATH_MAX);
-    strncat(mmcdev, basemmcdev, PATH_MAX);
-    strncat(mmcdev, "boot0", PATH_MAX);
-    usbg_f_ms_set_lun_file(mf, 1, mmcdev);
-    strncpy(mmcdev, "/dev/", PATH_MAX);
-    strncat(mmcdev, basemmcdev, PATH_MAX);
-    strncat(mmcdev, "boot1", PATH_MAX);
-    usbg_f_ms_set_lun_file(mf, 2, mmcdev);
 
     /* NULL can be passed to use kernel defaults */
     usbg_ret = usbg_create_config(g_ms, 1, "ms", NULL, &c_strs_ms, &c);
@@ -238,8 +222,24 @@ bool usbgadget_ms_safe_to_remove()
     return true;
 }
 
-int usbgadget_ms_enable()
+int usbgadget_ms_enable(const char *basemmcdev)
 {
+    usbg_f_ms *mf = usbg_to_ms_function(f_ms);
+    char mmcdev[PATH_MAX];
+
+    /* Set /dev/mmcblkX(boot[01]) */
+    strncpy(mmcdev, "/dev/", PATH_MAX);
+    strncat(mmcdev, basemmcdev, PATH_MAX);
+    usbg_f_ms_set_lun_file(mf, 0, mmcdev);
+    strncpy(mmcdev, "/dev/", PATH_MAX);
+    strncat(mmcdev, basemmcdev, PATH_MAX);
+    strncat(mmcdev, "boot0", PATH_MAX);
+    usbg_f_ms_set_lun_file(mf, 1, mmcdev);
+    strncpy(mmcdev, "/dev/", PATH_MAX);
+    strncat(mmcdev, basemmcdev, PATH_MAX);
+    strncat(mmcdev, "boot1", PATH_MAX);
+    usbg_f_ms_set_lun_file(mf, 2, mmcdev);
+
     usbg_ret = usbg_enable_gadget(g_ms, DEFAULT_UDC);
     if (usbg_ret != USBG_SUCCESS)
         return -1;

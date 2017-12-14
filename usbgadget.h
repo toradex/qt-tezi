@@ -7,8 +7,8 @@ class UsbGadget : public QObject
 {
     Q_OBJECT
 public:
-    explicit UsbGadget(QString &serial, QString &productName, int idProduct, QObject *parent = 0);
-    bool initMassStorage(const QString &emmcdev);
+    explicit UsbGadget(QString &serial, QString &productName, int idProduct, const QString &eMMCDev, QObject *parent = 0);
+    bool initMassStorage();
     void enableMassStorage(bool enable);
     bool isMassStorageSafeToRemove();
 
@@ -25,6 +25,7 @@ public slots:
 
 private:
     bool _gadgetInitialized, _gadgetIsMassStorage;
+    QString _eMMCDev;
 };
 
 #endif // USBGADGET_H

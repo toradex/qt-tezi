@@ -7,8 +7,8 @@
 #include "usbgadgethelper.h"
 #include <usbg/usbg.h>
 
-UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, QObject *parent) : QObject(parent),
-    _gadgetInitialized(false), _gadgetIsMassStorage(false)
+UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, const QString &eMMCDev, QObject *parent) : QObject(parent),
+    _gadgetInitialized(false), _gadgetIsMassStorage(false), _eMMCDev(eMMCDev)
 {
     uint16_t productId = 0x4000 + idProduct;
 
@@ -20,12 +20,12 @@ UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, QObje
     _gadgetInitialized = true;
 }
 
-bool UsbGadget::initMassStorage(const QString &emmcdev)
+bool UsbGadget::initMassStorage()
 {
     if (!_gadgetInitialized)
         return false;
 
-    if (usbgadget_ms_init(emmcdev.toStdString().c_str())) {
+    if (usbgadget_ms_init()) {
         qDebug() << "USB Gadget: Error initalizing Mass Storage:" << usbgadget_strerror();
         return false;
     }
@@ -36,7 +36,7 @@ bool UsbGadget::initMassStorage(const QString &emmcdev)
 void UsbGadget::enableMassStorage(bool enable)
 {
     if (enable) {
-        if (usbgadget_ms_enable()) {
+        if (usbgadget_ms_enable(_eMMCDev.toStdString().c_str())) {
             qDebug() << "USB Gadget: Error enabling Mass Storage" << usbgadget_strerror();
             return;
         }

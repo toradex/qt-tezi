@@ -143,10 +143,10 @@ bool MainWindow::initialize() {
 
     _availableMB = _moduleInformation->getStorageSize() / (1024 * 1024);
 
-    _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId);
+    _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId, _moduleInformation->mainPartition());
 
     if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block) {
-        if (_usbGadget->initMassStorage(_moduleInformation->mainPartition()))
+        if (_usbGadget->initMassStorage())
             ui->actionUsbMassStorage->setEnabled(true);
         else
             ui->actionUsbMassStorage->setEnabled(false);
