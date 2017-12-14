@@ -482,6 +482,9 @@ void MainWindow::on_list_currentItemChanged()
 
 void MainWindow::on_list_itemDoubleClicked()
 {
+    if (!ui->actionInstall->isEnabled())
+        return;
+
     on_actionInstall_triggered();
 }
 
