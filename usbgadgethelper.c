@@ -127,23 +127,13 @@ int usbgadget_init(const char *serial, const char *productName, uint16_t idProdu
         return -1;
 
     /* Delete old states if there... */
-    /*
-     * This is supposed to work, but with more complex configurations there
-     * seems to be a problem in rereading the configuration currenlty:
-     * usbg_parse_state()  unable to parse /sys/kernel/config/usb_gadget
-     *
-     * This is only problematic in development, just get rid of config
-     * manually by using:
-     * rm -rf /sys/kernel/config/usb_gadget/
-     */
-/*
     g_ms = usbg_get_gadget(s, "gms");
     if (g_ms)
         usbg_rm_gadget(g_ms, USBG_RM_RECURSE);
     g_rndis = usbg_get_gadget(s, "grndis");
     if (g_rndis)
         usbg_rm_gadget(g_rndis, USBG_RM_RECURSE);
-*/
+
     return 0;
 }
 
@@ -157,11 +147,10 @@ int usbgadget_ms_init(const char *basemmcdev)
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_create_function(g_ms, USBG_F_MASS_STORAGE, "",
+    usbg_ret = (usbg_error)usbg_create_function(g_ms, USBG_F_MASS_STORAGE, "emmc",
                     &f_ms_attrs, &f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
-
     mf = usbg_to_ms_function(f_ms);
 
     /* Set /dev/mmcblkX(boot[01]) */
@@ -178,11 +167,11 @@ int usbgadget_ms_init(const char *basemmcdev)
     usbg_f_ms_set_lun_file(mf, 2, mmcdev);
 
     /* NULL can be passed to use kernel defaults */
-    usbg_ret = usbg_create_config(g_ms, 1, "Mass Storage", NULL, &c_strs_ms, &c);
+    usbg_ret = usbg_create_config(g_ms, 1, "ms", NULL, &c_strs_ms, &c);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = usbg_add_config_function(c, "Mass Storage Function", f_ms);
+    usbg_ret = usbg_add_config_function(c, "msf", f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
