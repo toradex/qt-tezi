@@ -112,11 +112,11 @@
                 },
                 "nonfs_size": {
                     "description": "Non-FS size in megabyte (maximum size of the WinCE image).",
-                    "type": "number"
+                    "type": "integer"
                 },
                 "size": {
                     "description": "The size of the image in megabytes (used for progress bar)",
-                    "type": "number"
+                    "type": "integer"
                 }
             },
             "required": [ "image_filename", "nonfs_size" ]
