@@ -736,14 +736,10 @@ void MainWindow::on_actionInstall_triggered()
 void MainWindow::on_actionRefreshCloud_triggered()
 {
     removeImagesBySource(SOURCE_NETWORK);
-    if (hasAddress("eth0")) {
-        downloadLists(SOURCE_NETWORK);
-    }
+    downloadLists(SOURCE_NETWORK);
 
     removeImagesBySource(SOURCE_RNDIS);
-    if (hasAddress("usb0")) {
-        downloadLists(SOURCE_RNDIS);
-    }
+    downloadLists(SOURCE_RNDIS);
 }
 
 void MainWindow::on_actionCancel_triggered()
@@ -900,8 +896,10 @@ bool MainWindow::hasAddress(const QString &iface, QNetworkAddressEntry *currAddr
     foreach (QNetworkAddressEntry ae, addresses)
     {
         QHostAddress a = ae.ip();
+
+        /* Check whether this is an address of global scope and a IPv4 address */
         if (a != QHostAddress::LocalHost && a != QHostAddress::LocalHostIPv6 &&
-            a.scopeId() == "") {
+            a.scopeId() == "" && a.protocol() == QAbstractSocket::IPv4Protocol) {
             if (currAddress != NULL)
                 *currAddress = ae;
             return true;
