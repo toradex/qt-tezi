@@ -90,7 +90,24 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     QList<quint16> productIds;
     enum StorageClass storageClass;
     bool rebootWorks, moduleSupported = true;
-    if (socid == "i.MX7D") {
+    if (socid == "48") {
+        // Tegra 3
+        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
+        if (compatible.contains("apalis")) {
+            productIds << 25 << 26 << 31;
+        } else {
+            productIds << 23 << 30;
+        }
+        socid = "T30";
+        storageClass = StorageClass::Block;
+        rebootWorks = true;
+    } else if (socid == "64") {
+        // Tegra K1
+        socid = "TK1";
+        productIds << 34;
+        storageClass = StorageClass::Block;
+        rebootWorks = true;
+    } else if (socid == "i.MX7D") {
         QByteArray compatible = getFileContents("/proc/device-tree/compatible");
         if (compatible.contains("colibri_imx7d_emmc") || compatible.contains("colibri-imx7d-emmc")) {
             storageClass = StorageClass::Block;
@@ -127,7 +144,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         storageClass = StorageClass::Mtd;
         rebootWorks = false;
     } else {
-        // The Tegras use the machine file instead
+        // Downstream the tegras use the machine file instead
         QFile machineFile("/sys/bus/soc/devices/soc0/machine");
         if (!machineFile.exists()) {
             return NULL;
