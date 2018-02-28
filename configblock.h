@@ -12,7 +12,7 @@
 #define TAG_INVALID	0xffff
 
 #define TAG_FLAG_VALID	0x1
-#define TORADEX_MODULE_COUNT 41
+#define TORADEX_MODULE_COUNT 43
 
 extern const char* const toradex_modules[TORADEX_MODULE_COUNT];
 
