@@ -20,9 +20,11 @@ public:
 
 public slots:
     virtual void accept();
+    virtual bool eventFilter(QObject *target, QEvent *event);
 
 private:
     Ui::ConfigBlockDialog *ui;
+    QString cfgBlock;
 };
 
 #endif // CONFIGBLOCKDIALOG_H
