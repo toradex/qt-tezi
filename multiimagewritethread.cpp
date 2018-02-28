@@ -981,8 +981,12 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
 
     QString tarargs;
 
+    /*
+     * In Tezi we extract a rootfs for somebody else. Always use the numeric user/group id
+     * as stored in the tar file when extracting.
+     */
     if (linuxfs)
-        tarargs = "--xattrs --acl --selinux";
+        tarargs = "--xattrs --acl --selinux --numeric-owner";
     else
         tarargs = "--no-same-owner";
 
