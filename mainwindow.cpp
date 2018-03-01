@@ -571,6 +571,10 @@ void MainWindow::installImage(QVariantMap entry)
             QString script = entry.value("wrapup_script").toString();
             downloadMetaFile(url + script, folder + "/" + script);
         }
+        if (entry.contains("u_boot_env")) {
+            QString envtxt = entry.value("u_boot_env").toString();
+            downloadMetaFile(url + envtxt, folder + "/" + envtxt);
+        }
         if (entry.contains("license")) {
             QString script = entry.value("license").toString();
             downloadMetaFile(url + script, folder + "/" + script);

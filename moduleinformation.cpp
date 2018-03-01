@@ -15,12 +15,14 @@ ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
         _configBlockOffset = Q_INT64_C(-512);
         _erasePartitions << "mmcblk0" << "mmcblk0boot0" << "mmcblk0boot1";
         _mainPartition = "mmcblk0";
+        _fwEnvConfig = "/etc/fw_env_mmcblk0boot0.config";
         break;
     case StorageClass::Mtd:
         _configBlockPartition = "mtd1";
         _configBlockOffset = Q_INT64_C(0x800);
         _erasePartitions << "mtd2" << "mtd3" <<  "mtd4" <<  "mtd5";
         _mainPartition = "mtd0";
+        _fwEnvConfig = "/etc/fw_env_mtd4.config";
         break;
     default:
         qDebug() << "Unknown Storage class";

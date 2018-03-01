@@ -46,6 +46,10 @@ public:
         return _mainPartition;
     }
 
+    inline QString &fwEnvConfig() {
+        return _fwEnvConfig;
+    }
+
     inline const QString getStorageClassString() {
         switch (_storageClass) {
         case StorageClass::Mtd:
@@ -85,6 +89,7 @@ private:
     qint64 _configBlockOffset;
     QList<QString> _erasePartitions;
     QString _mainPartition;
+    QString _fwEnvConfig;
 
     ConfigBlock *_configBlock;
     bool _rebootWorks;

@@ -125,6 +125,23 @@ void MultiImageWriteThread::run()
         _configBlock->needsWrite = false;
     }
 
+    /* Set U-Boot environment */
+    if (!_image->uBootEnv().isEmpty()) {
+        QString uBootEnv = _image->folder() + "/" + _image->uBootEnv();
+        QByteArray output;
+        QStringList fwargs;
+        fwargs << "--config";
+        fwargs << _moduleInformation->fwEnvConfig();
+        fwargs << "--script";
+        fwargs << uBootEnv;
+
+        if (!runCommand("fw_setenv", fwargs, output))
+        {
+            emit error(tr("Error setting U-Boot environment") + "\n" + output);
+            return;
+        }
+    }
+
     /* Run wrap-up script */
     if (!_image->wrapupScript().isEmpty()) {
         QString wrapupScript = _image->folder() + "/" + _image->wrapupScript();
