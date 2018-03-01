@@ -571,7 +571,11 @@ bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString 
         QList<RawFileInfo *> rawFiles = filterRawFileInfo(contentInfo->rawFiles());
 
         if (rawFiles.count() > 1)
-            qDebug() << "Warning: UBI volumes support only one raw file per partition";
+            qDebug() << "Warning: UBI volumes support only one raw file per partition. Will only flash first file.";
+
+        /* E.g. when no raw file for this product id... */
+        if (rawFiles.count() < 1)
+            return true;
 
         /* Typically Kernel/Device Tree */
         if (!ubiflash(_image->baseUrl(), ubivoldev, rawFiles.first()))
