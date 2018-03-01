@@ -12,6 +12,7 @@
 #include <QProcess>
 #include <QDebug>
 #include <QList>
+#include <QDir>
 
 /*
  * Convenience functions
@@ -83,4 +84,27 @@ QString getVersionString()
 {
     return QString(QObject::tr("Toradex Easy Installer %1 (g%2) - Built: %3"))
             .arg(VERSION_NUMBER, GIT_VERSION, QString::fromLocal8Bit(__DATE__));
+}
+
+bool removeDir(const QString & dirName)
+{
+    bool result = true;
+    QDir dir(dirName);
+
+    if (dir.exists()) {
+        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst)) {
+            if (info.isDir()) {
+                result = removeDir(info.absoluteFilePath());
+            }
+            else {
+                result = QFile::remove(info.absoluteFilePath());
+            }
+
+            if (!result) {
+                return result;
+            }
+        }
+        result = QDir().rmdir(dirName);
+    }
+    return result;
 }

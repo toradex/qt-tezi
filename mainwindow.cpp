@@ -1165,6 +1165,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
     _imageWriteThread = new MultiImageWriteThread(_toradexConfigBlock, _moduleInformation);
     enum ImageSource imageSource = (enum ImageSource)entry.value("source").toInt();
     QString folder = entry.value("folder").toString();
+    QString slidesFolder = "/var/volatile/marketing/";
     QStringList slidesFolders;
 
     if (entry.contains("license") && !_isAutoinstall) {
@@ -1196,24 +1197,27 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         }
     }
 
+    /* Delete old slides if exist */
+    if (QFile::exists(slidesFolder))
+        removeDir(slidesFolder);
+
+    QDir().mkdir(slidesFolder);
+
     if (entry.contains("marketing"))
     {
-        folder = entry.value("folder").toString();
-
         QString marketingTar = folder + "/marketing.tar";
         if (QFile::exists(marketingTar))
         {
             /* Extract tarball with slides */
-            QProcess::execute("tar xf "+marketingTar+" -C "+folder);
-            QFile::remove(marketingTar);
+            QProcess::execute("tar xf " + marketingTar + " -C " + slidesFolder);
+            if (!_installingFromMedia)
+                QFile::remove(marketingTar);
         }
     }
 
     slidesFolders.clear();
-    if (QFile::exists(folder+"/slides_vga"))
-    {
-        slidesFolders.append(folder+"/slides_vga");
-    }
+    if (QFile::exists(slidesFolder+"/slides_vga"))
+        slidesFolders.append(slidesFolder+"/slides_vga");
 
     _imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), imageSource);
