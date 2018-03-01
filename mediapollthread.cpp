@@ -104,7 +104,7 @@ bool MediaPollThread::mountMedia(const QString &blockdev)
             break; // the folder is not mounted anymore, manual user intervene? Just reuse the lock */
     }
 
-    if (QProcess::execute("mount " + blockdev + " " SRC_MOUNT_FOLDER) != 0)
+    if (QProcess::execute("mount -o ro " + blockdev + " " SRC_MOUNT_FOLDER) != 0)
     {
         mountMutex.unlock();
         qDebug() << "Error mounting external device" << blockdev << "to" << SRC_MOUNT_FOLDER;
