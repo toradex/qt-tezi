@@ -1043,9 +1043,9 @@ bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &devi
         QString url = baseurl + file;
         // Get Size of file first...
         QByteArray output;
-        QStringList wgetargs;
-        wgetargs << "--quiet" << "--server-response" << "--spider" << url;
-        if (runCommand("wget", wgetargs, output))
+        QStringList curlargs;
+        curlargs << "--head" << url;
+        if (runCommand("curl", curlargs, output))
         {
             foreach(QByteArray line, output.split('\n')) {
                 int colon = line.indexOf(':');

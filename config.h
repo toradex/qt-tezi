@@ -48,8 +48,8 @@
 /* Temporary mount folder */
 #define TEMP_MOUNT_FOLDER "/run/media/tmp"
 
-/* Default wget command line options, wait just 10s then declare a connection as dead */
-#define DOWNLOAD_COMMAND "wget --no-verbose --tries=10 --read-timeout=10 -O- "
+/* Default curl command line options */
+#define DOWNLOAD_COMMAND "curl --connect-timeout 10 --retry 10 "
 
 /* Use named pipe to communicate data to md5sum */
 #define MD5SUM_NAMEDPIPE "/var/volatile/md5sumpipe"
