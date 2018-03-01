@@ -682,7 +682,7 @@ bool MultiImageWriteThread::processWinCEImage(WinCEImage *image, QByteArray mtdd
     const QString& file = image->imageFilename();
     const QString& baseurl = _image->baseUrl();
     if (!baseurl.isEmpty())
-        getfile = WGET_COMMAND + baseurl + file;
+        getfile = DOWNLOAD_COMMAND + baseurl + file;
     else
         getfile = "cat " + file;
 
@@ -953,7 +953,7 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, co
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile += WGET_COMMAND + baseurl + file;
+        getfile += DOWNLOAD_COMMAND + baseurl + file;
     else
         getfile += "cat " + file;
 
@@ -973,7 +973,7 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile = WGET_COMMAND + baseurl + tarball;
+        getfile = DOWNLOAD_COMMAND + baseurl + tarball;
     else
         getfile = "cat " + tarball;
 
@@ -1002,7 +1002,7 @@ bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, Ra
     QString getfile;
     const QString& file = rawFile->filename();
     if (!baseurl.isEmpty())
-        getfile = WGET_COMMAND + baseurl + file;
+        getfile = DOWNLOAD_COMMAND + baseurl + file;
     else
         getfile = "cat " + file;
 
@@ -1020,7 +1020,7 @@ bool MultiImageWriteThread::nandflash(const QString &baseurl, const QString &dev
     QString getfile;
     const QString& file = rawFile->filename();
     if (!baseurl.isEmpty())
-        getfile = WGET_COMMAND + baseurl + file;
+        getfile = DOWNLOAD_COMMAND + baseurl + file;
     else
         getfile = "cat " + file;
 
@@ -1064,7 +1064,7 @@ bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &devi
             return false;
         }
 
-        getfile = WGET_COMMAND + url;
+        getfile = DOWNLOAD_COMMAND + url;
     } else {
         size = QFile(_image->folder() + QDir::separator() + file).size();
         getfile = "cat " + file;
@@ -1119,7 +1119,7 @@ bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QStr
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile = WGET_COMMAND + baseurl + image;
+        getfile = DOWNLOAD_COMMAND + baseurl + image;
     else
         getfile = "cat " + image;
 
