@@ -185,6 +185,10 @@
                 "$ref": "#/definitions/product_id"
             }
         },
+        "u_boot_env": {
+            "description": "U-Boot environment to write. If there is already a valid U-Boot environment variables will be added or existing ones overwritten",
+            "type": "string"
+        },
         "isinstaller": {
             "description": "This is a special property which marks the image as being the Toradex Easy Installer itself.",
             "type": "boolean"
@@ -202,6 +206,10 @@
                     "erase": {
                         "description": "Discards all data on block device before writing (preserves Toradex Config Block on boot partition).",
                         "type": "boolean"
+                    },
+                    "table_type": {
+                        "description": "Partition table type (dos (default) or gpt).",
+                        "type": "string"
                     },
                     "content": {
                         "$ref": "#/definitions/content",
