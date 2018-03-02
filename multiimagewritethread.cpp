@@ -857,6 +857,12 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
         if (!label.isEmpty())
             args << "-n" << label;
     }
+    else if (fstype == "ext2")
+    {
+        cmd = "/sbin/mkfs.ext2";
+        if (!label.isEmpty())
+            args << "-L" << label;
+    }
     else if (fstype == "ext3")
     {
         cmd = "/sbin/mkfs.ext3";
@@ -874,6 +880,10 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
         args << "--fast";
         if (!label.isEmpty())
             args << "-L" << label;
+    }
+    else {
+        emit error(tr("Unkown file system type"));
+        return false;
     }
 
     if (!mkfsopt.isEmpty()) {

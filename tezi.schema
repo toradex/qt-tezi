@@ -8,9 +8,9 @@
             "type": "object",
             "properties": {
                 "filesystem_type": {
-                    "description": "File system to create ext3/ext4/swap/fat/ntfs/raw (defaults to raw)",
+                    "description": "File system to create ext2/ext3/ext4/swap/fat/ntfs/raw (defaults to raw)",
                     "type": "string",
-                    "enum": [ "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "ubifs", "raw" ]
+                    "enum": [ "ext2", "ext3", "ext4", "swap", "fat", "FAT", "ntfs", "ubifs", "raw" ]
                 },
                 "label": {
                     "description": "File system label used when creating the file system (ext3/ext4/fat/ntfs only)",
