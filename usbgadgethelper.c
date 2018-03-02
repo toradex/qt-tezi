@@ -35,7 +35,7 @@ struct usbg_gadget_attrs g_attrs_rndis = {
 
 struct usbg_gadget_strs g_strs = {
     .manufacturer = "Toradex", /* Manufacturer */
-    .product = "Apalis iMX6", /* Product string */
+    .product = "Toradex Module", /* Product string */
     .serial = "00000000", /* Serial number */
 };
 
@@ -107,6 +107,7 @@ const struct usbg_function_os_desc os_desc_f_rndis = {
 
 usbg_state *s;
 usbg_gadget *g_ms;
+usbg_config *c_ms;
 usbg_function *f_ms;
 
 usbg_gadget *g_rndis;
@@ -139,23 +140,7 @@ int usbgadget_init(const char *serial, const char *productName, uint16_t idProdu
 
 int usbgadget_ms_init()
 {
-    usbg_config *c;
-
     usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
-    if (usbg_ret != USBG_SUCCESS)
-        return -1;
-
-    usbg_ret = (usbg_error)usbg_create_function(g_ms, USBG_F_MASS_STORAGE, "emmc",
-                    &f_ms_attrs, &f_ms);
-    if (usbg_ret != USBG_SUCCESS)
-        return -1;
-
-    /* NULL can be passed to use kernel defaults */
-    usbg_ret = usbg_create_config(g_ms, 1, "ms", NULL, &c_strs_ms, &c);
-    if (usbg_ret != USBG_SUCCESS)
-        return -1;
-
-    usbg_ret = usbg_add_config_function(c, "msf", f_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
@@ -224,8 +209,24 @@ bool usbgadget_ms_safe_to_remove()
 
 int usbgadget_ms_enable(const char *basemmcdev)
 {
-    usbg_f_ms *mf = usbg_to_ms_function(f_ms);
+    usbg_f_ms *mf;
     char mmcdev[PATH_MAX];
+
+    usbg_ret = (usbg_error)usbg_create_function(g_ms, USBG_F_MASS_STORAGE, "emmc",
+                    &f_ms_attrs, &f_ms);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    /* NULL can be passed to use kernel defaults */
+    usbg_ret = usbg_create_config(g_ms, 1, "ms", NULL, &c_strs_ms, &c_ms);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    usbg_ret = usbg_add_config_function(c_ms, "msf", f_ms);
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    mf = usbg_to_ms_function(f_ms);
 
     /* Set /dev/mmcblkX(boot[01]) */
     strncpy(mmcdev, "/dev/", PATH_MAX);
@@ -238,7 +239,7 @@ int usbgadget_ms_enable(const char *basemmcdev)
     strncpy(mmcdev, "/dev/", PATH_MAX);
     strncat(mmcdev, basemmcdev, PATH_MAX);
     strncat(mmcdev, "boot1", PATH_MAX);
-    usbg_f_ms_set_lun_file(mf, 2, mmcdev);
+    usbg_f_ms_set_lun_file(mf, 1, mmcdev);
 
     usbg_ret = usbg_enable_gadget(g_ms, DEFAULT_UDC);
     if (usbg_ret != USBG_SUCCESS)
@@ -251,6 +252,10 @@ int usbgadget_ms_disable()
     usbg_ret = usbg_disable_gadget(g_ms);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
+
+    usbg_rm_config(c_ms, USBG_RM_RECURSE);
+    usbg_rm_function(f_ms, USBG_RM_RECURSE);
+
     return 0;
 }
 
