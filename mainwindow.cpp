@@ -174,7 +174,7 @@ bool MainWindow::initialize() {
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
-    srv.label = "Toradex Continous Integration Server (testing)";
+    srv.label = "Toradex Continuous Integration Server (testing)";
     srv.url = DEFAULT_CI_IMAGE_SERVER;
     srv.enabled = false;
     _networkFeedServerList.append(srv);
