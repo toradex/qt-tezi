@@ -25,9 +25,11 @@ ProgressSlideshowDialog::ProgressSlideshowDialog(const QStringList &slidesDirect
     ui(new Ui::ProgressSlideshowDialog)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    setWindowState(Qt::WindowMaximized);
 
     ui->setupUi(this);
+    if (parent->windowState() & Qt::WindowFullScreen)
+        setWindowState(Qt::WindowFullScreen);
+
     setLabelText(statusMsg);
 
     foreach (QString slidesDirectory, slidesDirectories)
