@@ -49,7 +49,7 @@
 #define TEMP_MOUNT_FOLDER "/run/media/tmp"
 
 /* Default curl command line options */
-#define DOWNLOAD_COMMAND "curl --connect-timeout 10 --retry 10 "
+#define DOWNLOAD_COMMAND "curl --silent --show-error --connect-timeout 10 --retry 10 "
 
 /* Use named pipe to communicate data to md5sum */
 #define MD5SUM_NAMEDPIPE "/var/volatile/md5sumpipe"
