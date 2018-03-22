@@ -55,6 +55,8 @@
 
 #ifdef Q_WS_QWS
 #include <QWSServer>
+#include <QMouseDriverFactory>
+#include <QKbdDriverFactory>
 #endif
 
 /* Main window
@@ -68,7 +70,7 @@
 
 MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
+    ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
     _imageListDownloadsActive(0), _netaccess(NULL)
@@ -77,6 +79,44 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setWindowState(Qt::WindowMaximized);
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
+
+#ifdef Q_WS_QWS
+    /* Poor mans hotplug... */
+    _fileSystemWatcher->addPath("/dev/input/");
+    connect(_fileSystemWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(inputDirectoryChanged(QString)));
+
+    /* Make sure we add all input devices initially found... */
+    inputDirectoryChanged("/dev/input/");
+#endif
+}
+
+void MainWindow::inputDirectoryChanged(const QString& path)
+{
+#ifdef Q_WS_QWS
+    QWSServer* pQwsServer = QWSServer::instance();
+
+    /* Remove all currently loaded Mouse/Keyboard handlers */
+    pQwsServer->closeMouse();
+    pQwsServer->closeKeyboard();
+
+    QDir dir(path);
+    if (dir.exists()) {
+        qDebug() << "Reload input devices...";
+        QStringList filters;
+        filters << "event*";
+        dir.setNameFilters(filters);
+
+        /* We cannot distingush keyboard/touchscreen/mouse, but there seem to be no harm registering as both... */
+        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System)) {
+            qDebug() << info.absoluteFilePath();
+            QWSMouseHandler *mh = QMouseDriverFactory::create("LinuxInput", info.absoluteFilePath());
+            pQwsServer->setMouseHandler(mh);
+
+            QWSKeyboardHandler *kh = QKbdDriverFactory::create("LinuxInput", info.absoluteFilePath());
+            pQwsServer->setKeyboardHandler(kh);
+        }
+    }
+#endif
 }
 
 bool MainWindow::initialize() {

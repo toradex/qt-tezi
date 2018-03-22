@@ -27,6 +27,7 @@
 #include <QTime>
 #include <QUrl>
 #include <QSet>
+#include <QFileSystemWatcher>
 
 enum RebootMode {
     LINUX_UNKNOWN,
@@ -58,6 +59,7 @@ public:
 
 protected:
     Ui::MainWindow *ui;
+    QFileSystemWatcher *_fileSystemWatcher;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
     ModuleInformation *_moduleInformation;
@@ -125,6 +127,9 @@ protected slots:
     void onError(const QString &msg);
     void onCompleted();
     void onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer);
+
+    /* QFileSystemWatcher */
+    void inputDirectoryChanged(const QString& path);
 
 private slots:
     /* UI events */
