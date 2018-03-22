@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
     LongPressHandler lph;
 
     bool autoinstall = false;
+    bool fullscreen = false;
 
     QString defaultLang = "en";
     QString defaultKeyboard = "us";
@@ -68,6 +69,10 @@ int main(int argc, char *argv[])
         // Flag to indicate first boot
         if (strcmp(argv[i], "-autoinstall") == 0)
             autoinstall = true;
+
+        // Flag to indicate full screen
+        if (strcmp(argv[i], "-fullscreen") == 0)
+            fullscreen = true;
     }
 
     // Intercept right mouse clicks sent to the title bar
@@ -138,7 +143,10 @@ int main(int argc, char *argv[])
     int mode = LINUX_POWEROFF;
 
     if (mw.initialize()) {
-        mw.show();
+        if (fullscreen)
+            mw.showFullScreen();
+        else
+            mw.show();
         mode = a.exec();
     }
 
