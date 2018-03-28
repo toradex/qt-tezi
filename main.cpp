@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 
     bool autoinstall = false;
     bool fullscreen = false;
+    bool hotplugfb = false;
 
     QString defaultLang = "en";
     QString defaultKeyboard = "us";
@@ -73,6 +74,10 @@ int main(int argc, char *argv[])
         // Flag to indicate full screen
         if (strcmp(argv[i], "-fullscreen") == 0)
             fullscreen = true;
+
+        // Flag to indicate that framebuffers get added on hotplug
+        if (strcmp(argv[i], "-hotplugfb") == 0)
+            hotplugfb = true;
     }
 
     // Intercept right mouse clicks sent to the title bar
@@ -139,7 +144,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Main window in the middle of screen
-    MainWindow mw(splash, ld, autoinstall);
+    MainWindow mw(splash, ld, autoinstall, hotplugfb);
     int mode = LINUX_POWEROFF;
 
     if (mw.initialize()) {

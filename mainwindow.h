@@ -51,7 +51,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, QWidget *parent = 0);
+    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent = 0);
     ~MainWindow();
     void show();
     void showProgressDialog(const QString &labelText);
@@ -60,6 +60,7 @@ public:
 protected:
     Ui::MainWindow *ui;
     QFileSystemWatcher *_fileSystemWatcher;
+    QFileSystemWatcher *_fileSystemWatcherFb;
     QProgressDialog *_qpd;
     ProgressSlideshowDialog *_psd;
     ModuleInformation *_moduleInformation;
@@ -130,6 +131,7 @@ protected slots:
 
     /* QFileSystemWatcher */
     void inputDirectoryChanged(const QString& path);
+    void fbFileChanged(const QString& path);
 
 private slots:
     /* UI events */

@@ -68,9 +68,9 @@
  *
  */
 
-MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
+MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher),
+    ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
     _imageListDownloadsActive(0), _netaccess(NULL)
@@ -87,7 +87,33 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
 
     /* Make sure we add all input devices initially found... */
     inputDirectoryChanged("/dev/input/");
+
+    /* If /dev/fb0 might get added on hotplug, make sure we watch /dev/ until fb0 appears */
+    if (hotplugFb) {
+        _fileSystemWatcherFb->addPath("/dev/");
+        connect(_fileSystemWatcherFb, SIGNAL(directoryChanged(QString)), this, SLOT(fbFileChanged(QString)));
+
+        fbFileChanged("/dev/");
+    }
 #endif
+}
+
+void MainWindow::fbFileChanged(const QString& path)
+{
+    static bool fb0Added = false;
+
+    if (QFile::exists("/dev/fb0") && !fb0Added) {
+        qDebug() << "Enabling /dev/fb0...";
+        if (QScreen::instance()->connect("LinuxFB:/dev/fb0")) {
+            QWSServer::instance()->refresh();
+
+            // From QLinuxFbScreenPrivate::openTty()
+            // No blankin' screen, no blinkin' cursor!, no cursor!
+            const char termctl[] = "\033[9;0]\033[?33l\033[?25l\033[?1c";
+            putFileContents("/dev/tty0", termctl);
+            fb0Added = true;
+        }
+    }
 }
 
 void MainWindow::inputDirectoryChanged(const QString& path)
@@ -98,6 +124,7 @@ void MainWindow::inputDirectoryChanged(const QString& path)
     /* Remove all currently loaded Mouse/Keyboard handlers */
     pQwsServer->closeMouse();
     pQwsServer->closeKeyboard();
+    //QScreen::instance()->connect()
 
     QDir dir(path);
     if (dir.exists()) {
