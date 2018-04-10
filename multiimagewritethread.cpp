@@ -1036,6 +1036,14 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
     else
         tarargs = "--no-same-owner";
 
+    /*
+     * Disable timestamp warnings since we might have no working RTC
+     * Disable unkown keyword warnings which appear on every file when
+     * the tarball has been created using bsdtar (and are not really
+     * helpful)
+     */
+    tarargs += " --warning=no-timestamp --warning=no-unknown-keyword";
+
     QString cmd = QString("%1 | %2 | tar -x %3 -C %4")
         .arg(getfile, uncompresscmd, tarargs, TEMP_MOUNT_FOLDER);
 
