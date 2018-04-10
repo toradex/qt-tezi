@@ -304,7 +304,6 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
             return false;
     }
 
-    /* Writing raw content ignoring parition layout to this blockdev */
     ContentInfo *content = blockdev->content();
     if (content != NULL) {
         QByteArray device = blockdev->blockDevice();
