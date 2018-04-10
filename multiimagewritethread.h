@@ -54,6 +54,7 @@ protected:
     bool processWinCEImage(WinCEImage *image, QByteArray mtddevice);
     bool mkfs(const QByteArray &device, const QByteArray &fstype = "ext4", const QByteArray &label = "", const QByteArray &mkfsopt = "");
     bool runwritecmd(const QString &cmd, bool checkmd5sum);
+    bool pollpipeview();
     bool partclone_restore(const QString &baseurl, const QString &image, const QString &device);
     bool untar(const QString &baseurl, const QString &tarball, bool linuxfs);
     bool copy(const QString &baseurl, const QString &file, const QString &md5sum = "");

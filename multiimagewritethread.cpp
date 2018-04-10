@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <linux/fs.h>
 #include <sys/ioctl.h>
+#include <QtCore>
 #include <QtEndian>
 
 MultiImageWriteThread::MultiImageWriteThread(ConfigBlock *configBlock, ModuleInformation *moduleInformation, QObject *parent) :
@@ -905,6 +906,36 @@ bool MultiImageWriteThread::isLabelAvailable(const QByteArray &label)
     return (QProcess::execute("/sbin/findfs LABEL="+label) != 0);
 }
 
+bool MultiImageWriteThread::pollpipeview()
+{
+    /* Parse pipe viewer output for progress */
+    QFile pv(PIPEVIEWER_NAMEDPIPE);
+    if (!pv.open(QIODevice::ReadOnly | QIODevice::Text))
+        qDebug() << "Could not open pipe viewers named pipe";
+
+    qint64 bytes = 0;
+
+    while (true) {
+        QByteArray line = pv.readLine();
+
+        if (line == "")
+            break;
+
+        bool ok;
+        qint64 tmp = line.trimmed().toLongLong(&ok);
+
+        if (ok) {
+            bytes = tmp;
+            emit imageProgress(_bytesWritten + bytes);
+        }
+    }
+    _bytesWritten += bytes;
+
+    pv.close();
+
+    return true;
+}
+
 bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
 {
     QTime t1;
@@ -927,34 +958,16 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
     p.closeWriteChannel();
     p.setReadChannel(QProcess::StandardError);
 
-    /* Parse pipe viewer output for progress */
-    QFile pv(PIPEVIEWER_NAMEDPIPE);
-    if (!pv.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        emit error(tr("Error downloading or writing image")+"\n" + "Could not open pipe viewers named pipe");
-        return false;
-    }
-
-    qint64 bytes = 0;
-    while (true) {
-        /* This will block unless the pipe is EOF */
-        QByteArray line = pv.readLine();
-
-        if (line == "")
-            break;
-
-        bool ok;
-        qint64 tmp = line.trimmed().toLongLong(&ok);
-
-        if (ok) {
-            bytes = tmp;
-            emit imageProgress(_bytesWritten + bytes);
-        }
-    }
-
-    _bytesWritten += bytes;
-    pv.close();
+    /*
+     * Since we do not use the UI thread here, we use QProcess without an event loop.
+     * In this case, the process will block once stderr wrote 64KiB of data (pipe capacity)
+     * if we do not read stderr data... Hence we cannot poll pipe view here...
+     */
+    QFuture<bool> pvfuture = QtConcurrent::run( this, &MultiImageWriteThread::pollpipeview );
 
     p.waitForFinished(-1);
+
+    pvfuture.waitForFinished();
 
     if (checkmd5sum)
         md5sum.waitForFinished(-1);
@@ -964,6 +977,9 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
         emit error(tr("Error downloading or writing image")+"\n" + p.readAll());
         return false;
     }
+
+    /* Save stderr to log file even on success, printed warnings might be helpful */
+    qDebug() << "Write pipe stderr output:" << p.readAll();
     qDebug() << "Finished writing after" << (t1.elapsed()/1000.0) << "seconds," << _bytesWritten << "bytes total so far.";
 
     if (checkmd5sum)
