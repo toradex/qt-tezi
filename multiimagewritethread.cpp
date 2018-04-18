@@ -334,8 +334,8 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
         max_part_tables = 16;
 
     if (partitions->count() > max_part_tables) {
-        emit error(tr("The Toradex Easy Installer supports up to %1 partitions on a single device. %2 partitions have been specified.")
-                   .arg(QString::number(max_part_tables), QString::number(partitions->count())));
+        emit error(tr("The Toradex Easy Installer supports up to %1 partitions on a single device using %2 partition table. %3 partitions have been specified.")
+                   .arg(QString::number(max_part_tables), blockdev->tableType().toUpper(),QString::number(partitions->count())));
         return false;
     }
 
@@ -404,6 +404,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
 
     /* Set partition starting sectors and sizes. */
     int offset = PARTITION_ALIGNMENT;
+    int id = 0;
     QList<BlockDevPartitionInfo *> partitionList = partitionMap.values();
     foreach (BlockDevPartitionInfo *p, partitionList)
     {
@@ -411,7 +412,8 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
         {
             if (p->offset() <= offset)
             {
-                emit error(tr("Fixed partition offset too low"));
+                emit error(tr("Fixed partition offset too low (partition %1, minimal offset %2, requested offset %3).")
+                           .arg(QString::number(id), QString::number(offset), QString::number(p->offset())));
                 return false;
             }
 
@@ -454,6 +456,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
 
         p->setPartitionSizeSectors(partsizeSectors);
         offset += partsizeSectors;
+        id++;
     }
 
     emit statusUpdate(tr("Writing partition table"));
