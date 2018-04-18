@@ -410,7 +410,7 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
     {
         if (p->offset()) /* OS wants its partition at a fixed offset */
         {
-            if (p->offset() <= offset)
+            if (p->offset() < offset)
             {
                 emit error(tr("Fixed partition offset too low (partition %1, minimal offset %2, requested offset %3).")
                            .arg(QString::number(id), QString::number(offset), QString::number(p->offset())));
