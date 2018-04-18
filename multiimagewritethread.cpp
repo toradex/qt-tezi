@@ -193,7 +193,9 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
     p.setWorkingDirectory(_image->folder());
     p.start("/bin/sh", cmd);
 
-    p.waitForFinished(30000);
+    if (!p.waitForFinished(30000))
+        qDebug() << "Warning: Script took longer than 30s.";
+    p.waitForFinished(-1);
 
     output = p.readAll();
     qDebug() << "Output:" << output;
