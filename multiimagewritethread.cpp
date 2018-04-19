@@ -620,7 +620,7 @@ bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString 
 
         QString tarball = contentInfo->filename();
         QStringList filelist = contentInfo->filelist();
-        result = processFileCopy(_image->baseUrl(), tarball, filelist, true);
+        result = processFileCopy(_image->baseUrl(), tarball, filelist, true, false);
 
         QProcess::execute("umount " TEMP_MOUNT_FOLDER);
     }
@@ -740,7 +740,7 @@ bool MultiImageWriteThread::processMtdContent(ContentInfo *content, QByteArray m
     return true;
 }
 
-bool MultiImageWriteThread::processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist, bool linuxfs)
+bool MultiImageWriteThread::processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist, bool linuxfs, bool hasacl)
 {
     bool resultfile = true;
     bool resultfilelist = true;
@@ -751,7 +751,7 @@ bool MultiImageWriteThread::processFileCopy(const QString &baseurl, const QStrin
         updateStatus(tr("Downloading and extracting file(s)"));
 
     if (!tarball.isEmpty())
-        resultfile = untar(baseurl, tarball, linuxfs);
+        resultfile = untar(baseurl, tarball, linuxfs, hasacl);
 
     if (!filelist.isEmpty()) {
         foreach(QString file,filelist) {
@@ -815,10 +815,19 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
         if (tarball.isEmpty() && filelist.isEmpty())
             return true;
 
+        bool linuxfs = true;
+        if (fstype == "fat" || fstype == "FAT" || fstype == "ntfs") {
+            linuxfs = false;
+        }
+
         emit statusUpdate(tr("Mounting file system"));
 
         QStringList mountargs;
         mountargs << partdevice << TEMP_MOUNT_FOLDER;
+
+        /* All Linux block device FS are assumed to support ACL */
+        if (linuxfs)
+            mountargs << "-o" << "acl";
 
         QString mountcmd;
         if (fstype == "ntfs")
@@ -833,11 +842,7 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
             return false;
         }
 
-        bool linuxfs = true;
-        if (fstype == "fat" || fstype == "FAT" || fstype == "ntfs")
-            linuxfs = false;
-
-        bool resultfilecopy = processFileCopy(_image->baseUrl(), tarball, filelist, linuxfs);
+        bool resultfilecopy = processFileCopy(_image->baseUrl(), tarball, filelist, linuxfs, linuxfs);
 
         if (!runCommand("umount", QStringList() << TEMP_MOUNT_FOLDER, output)) {
             emit error(tr("Error unmounting file system") + "\n" + output);
@@ -1020,7 +1025,7 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, co
     return runwritecmd(cmd, md5sum != "");
 }
 
-bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball, bool linuxfs)
+bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball, bool linuxfs, bool hasacl)
 {
     QString getfile;
     if (!baseurl.isEmpty())
@@ -1037,9 +1042,12 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
      * as stored in the tar file when extracting.
      */
     if (linuxfs)
-        tarargs = "--xattrs --acl --numeric-owner";
+        tarargs = "--xattrs --numeric-owner";
     else
         tarargs = "--no-same-owner";
+
+    if (hasacl)
+        tarargs += " --acl";
 
     /*
      * Disable timestamp warnings since we might have no working RTC

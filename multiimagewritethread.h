@@ -46,7 +46,7 @@ protected:
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions);
     bool processContent(ContentInfo *fs, QByteArray partdevice);
-    bool processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist, bool linuxfs);
+    bool processFileCopy(const QString &baseurl, const QString &tarball, const QStringList &filelist, bool linuxfs, bool hasacl);
     bool processMtdDev(MtdDevInfo *mtddev);
     bool processMtdContent(ContentInfo *content, QByteArray mtddevice);
     bool processUbi(QList<UbiVolumeInfo *> *volumes, QByteArray mtddevice);
@@ -56,7 +56,7 @@ protected:
     bool runwritecmd(const QString &cmd, bool checkmd5sum);
     bool pollpipeview();
     bool partclone_restore(const QString &baseurl, const QString &image, const QString &device);
-    bool untar(const QString &baseurl, const QString &tarball, bool linuxfs);
+    bool untar(const QString &baseurl, const QString &tarball, bool linuxfs, bool hasacl);
     bool copy(const QString &baseurl, const QString &file, const QString &md5sum = "");
     bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool nandflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
