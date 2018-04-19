@@ -123,6 +123,7 @@ bool MediaPollThread::unmountMedia()
             return false;
         }
     }
+    qDebug() << "Umounted external device" << SRC_MOUNT_FOLDER;
 
     mountMutex.unlock();
 
