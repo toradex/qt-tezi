@@ -55,8 +55,8 @@ protected:
     QString _name;
     bool _erase;
     ContentInfo *_content;
-    QList<UbiVolumeInfo *> _ubiVolumes;
     WinCEImage *_winCEImage;
+    QList<UbiVolumeInfo *> _ubiVolumes;
 };
 
 #endif // MTDDEVINFO_H

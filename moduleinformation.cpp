@@ -37,6 +37,9 @@ void ModuleInformation::unlockFlash()
         disableBlockDevForceRo("mmcblk0boot0");
         disableBlockDevForceRo("mmcblk0boot1");
         break;
+    case StorageClass::Mtd:
+        /* No unlock needed */
+        break;
     }
 }
 

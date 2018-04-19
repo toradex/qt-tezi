@@ -54,7 +54,7 @@
         <property name="title">
          <string>Network Information</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout">
+        <layout class="QGridLayout" name="gridLayoutNetwork">
          <item row="0" column="0">
           <layout class="QGridLayout" name="gridLayout_3">
            <property name="sizeConstraint">
