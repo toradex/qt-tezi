@@ -174,12 +174,15 @@ bool MainWindow::initialize() {
 
         ConfigBlockDialog* cbd = new ConfigBlockDialog(_moduleInformation->productIds(), this);
         if (cbd->exec() == QDialog::Accepted) {
-            // The user created a new config block, it will be written to NAND once we flash an image...
+            // The user created a new config block...
             _toradexConfigBlock = cbd->configBlock;
         } else {
             QApplication::exit(LINUX_POWEROFF);
         }
     }
+
+    /* Write Config Block if needed */
+    _moduleInformation->writeConfigBlockIfNeeded(_toradexConfigBlock);
 
     updateVersion();
     _toradexProductName = _toradexConfigBlock->getProductName();

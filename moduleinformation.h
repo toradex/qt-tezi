@@ -19,6 +19,7 @@ protected:
 public:
     static ModuleInformation *detectModule(QObject *parent);
     ConfigBlock *readConfigBlock();
+    void writeConfigBlockIfNeeded(ConfigBlock *configBlock);
     quint64 getStorageSize();
     void unlockFlash();
 

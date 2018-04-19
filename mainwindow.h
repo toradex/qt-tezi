@@ -102,6 +102,7 @@ protected:
     void startImageWrite(QVariantMap &entry);
     bool validateImageJson(QVariantMap &entry);
     void reenableImageChoice();
+    bool writeBootConfigurationBlock();
 
 signals:
     void abortAllDownloads();

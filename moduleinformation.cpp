@@ -79,6 +79,24 @@ ConfigBlock *ModuleInformation::readConfigBlock()
     return configBlock;
 }
 
+void ModuleInformation::writeConfigBlockIfNeeded(ConfigBlock *configBlock)
+{
+    if (!configBlock->needsWrite)
+        return;
+
+    switch (_storageClass) {
+    case ModuleInformation::StorageClass::Block:
+        configBlock->writeToBlockdev(_configBlockPartition, _configBlockOffset);
+        break;
+    case ModuleInformation::StorageClass::Mtd:
+        configBlock->writeToMtddev(_configBlockPartition, _configBlockOffset);
+        break;
+    }
+
+    qDebug() << "Config Block written to" << _configBlockPartition;
+    configBlock->needsWrite = false;
+}
+
 ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 {
     // Try to detect which module we are running on...

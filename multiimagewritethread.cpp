@@ -112,19 +112,8 @@ void MultiImageWriteThread::run()
         }
     }
 
-    /* Write Config Block after flashing (e.g. migration/restore after partition erase) */
-    if (_configBlock->needsWrite) {
-        switch (_moduleInformation->storageClass()) {
-        case ModuleInformation::StorageClass::Block:
-            _configBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
-            break;
-        case ModuleInformation::StorageClass::Mtd:
-            _configBlock->writeToMtddev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
-            break;
-        }
-        qDebug() << "Config Block written to " << _moduleInformation->configBlockPartition();
-        _configBlock->needsWrite = false;
-    }
+    /* (Re)write config block in case auto erase was enabled */
+    _moduleInformation->writeConfigBlockIfNeeded(_configBlock);
 
     /* Set U-Boot environment */
     if (!_image->uBootEnv().isEmpty()) {
