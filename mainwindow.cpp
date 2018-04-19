@@ -146,6 +146,23 @@ void MainWindow::inputDirectoryChanged(const QString& path)
 #endif
 }
 
+bool MainWindow::writeBootConfigurationBlock() {
+    QStringList kobsngargs;
+    QByteArray output;
+
+    /* Start kobs verbose and let it write no boot loader (Tezi image will flash the bootloader later) */
+    kobsngargs << "init" << "-v" << "-w" << "/dev/null";
+
+    if (MultiImageWriteThread::runCommand("kobs-ng", kobsngargs, output, 10000))
+    {
+        qDebug() << "Kobs-ng output:";
+        qDebug() << output;
+        return true;
+    }
+
+    return false;
+}
+
 bool MainWindow::initialize() {
     _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == NULL) {
@@ -168,8 +185,17 @@ bool MainWindow::initialize() {
 
     // No config block found, ask the user to create a new one using Label information
     if (_toradexConfigBlock == NULL) {
+        if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Mtd) {
+            // We have to assume that we need to rebuild the boot ROM specific boot configuration block (BCB/FCB)
+            if (!writeBootConfigurationBlock())
+                QMessageBox::critical(NULL, QObject::tr("Restoring Boot Configuration Block failed"),
+                                      QObject::tr("Restoring Boot Configuration Block failed. Please check the logfile in /var/volatile/tezi.log and contact the Toradex support."),
+                                      QMessageBox::Ok);
+        }
+
         QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
-                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. Please restore the Config Block using the information on the Modules Sticker before continuing."),
+                              QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. "
+                                          "Please restore the Config Block using the information on the Modules Sticker before continuing."),
                               QMessageBox::Ok);
 
         ConfigBlockDialog* cbd = new ConfigBlockDialog(_moduleInformation->productIds(), this);

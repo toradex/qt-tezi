@@ -201,7 +201,8 @@ bool MultiImageWriteThread::runCommand(const QString &cmd, const QStringList &ar
     p.setWorkingDirectory(workdir);
     p.start(cmd, args);
 
-    p.waitForFinished(msecs);
+    if (!p.waitForFinished(msecs))
+        qDebug() << "Warning: Command took longer than" << msecs << "ms.";
 
     output = p.readAll();
     if (p.exitCode() > 0)
