@@ -910,8 +910,10 @@ bool MultiImageWriteThread::pollpipeview()
 {
     /* Parse pipe viewer output for progress */
     QFile pv(PIPEVIEWER_NAMEDPIPE);
-    if (!pv.open(QIODevice::ReadOnly | QIODevice::Text))
+    if (!pv.exists() || !pv.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Could not open pipe viewers named pipe";
+        return false;
+    }
 
     qint64 bytes = 0;
 
@@ -966,6 +968,18 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
     QFuture<bool> pvfuture = QtConcurrent::run( this, &MultiImageWriteThread::pollpipeview );
 
     p.waitForFinished(-1);
+
+    /*
+     * In case pv never got executed (e.g. due to missing source file) pollpipeview will hang
+     * in QFile::open(). This is a default behavior of Linux FIFOs: If the write side never
+     * got opened, the read side open will block. Unfortunately it is not easy to open non-blocking
+     * or detect if the write side got opened. Work around by opening the write side in case
+     * pipe viewer is still running now.
+     */
+    if (!pvfuture.isFinished()) {
+        qDebug() << "Pipeviewer poll did not finish on its own, make sure pipe got opened and received data.";
+        putFileContents(PIPEVIEWER_NAMEDPIPE, "\n");
+    }
 
     pvfuture.waitForFinished();
 
