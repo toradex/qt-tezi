@@ -698,9 +698,9 @@ bool MultiImageWriteThread::processWinCEImage(WinCEImage *image, QByteArray mtdd
     const QString& file = image->imageFilename();
     const QString& baseurl = _image->baseUrl();
     if (!baseurl.isEmpty())
-        getfile = DOWNLOAD_COMMAND + baseurl + file;
+        getfile = DOWNLOAD_COMMAND " '" + baseurl + file + "'";
     else
-        getfile = "cat " + file;
+        getfile = "cat '" + file + "'";
 
     QString uncompresscmd = getUncompressCommand(file, false);
 
@@ -999,9 +999,9 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, co
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile += DOWNLOAD_COMMAND + baseurl + file;
+        getfile += DOWNLOAD_COMMAND " '" + baseurl + file + "'";
     else
-        getfile += "cat " + file;
+        getfile += "cat '" + file + "'";
 
     QString md5sumcmd = "";
     if (md5sum != "")
@@ -1019,9 +1019,9 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile = DOWNLOAD_COMMAND + baseurl + tarball;
+        getfile = DOWNLOAD_COMMAND " '" + baseurl + tarball + "'";
     else
-        getfile = "cat " + tarball;
+        getfile = "cat '" + tarball + "'";
 
     QString uncompresscmd = getUncompressCommand(tarball, false);
 
@@ -1059,9 +1059,9 @@ bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, Ra
     QString getfile;
     const QString& file = rawFile->filename();
     if (!baseurl.isEmpty())
-        getfile = DOWNLOAD_COMMAND + baseurl + file;
+        getfile = DOWNLOAD_COMMAND " '" + baseurl + file + "'";
     else
-        getfile = "cat " + file;
+        getfile = "cat '" + file + "'";
 
     QString uncompresscmd = getUncompressCommand(file, false);
 
@@ -1077,9 +1077,9 @@ bool MultiImageWriteThread::nandflash(const QString &baseurl, const QString &dev
     QString getfile;
     const QString& file = rawFile->filename();
     if (!baseurl.isEmpty())
-        getfile = DOWNLOAD_COMMAND + baseurl + file;
+        getfile = DOWNLOAD_COMMAND " '" + baseurl + file + "'";
     else
-        getfile = "cat " + file;
+        getfile = "cat '" + file + "'";
 
     QString uncompresscmd = getUncompressCommand(file, false);
 
@@ -1121,10 +1121,10 @@ bool MultiImageWriteThread::ubiflash(const QString &baseurl, const QString &devi
             return false;
         }
 
-        getfile = DOWNLOAD_COMMAND + url;
+        getfile = DOWNLOAD_COMMAND " '" + url + "'";;
     } else {
         size = QFile(_image->folder() + QDir::separator() + file).size();
-        getfile = "cat " + file;
+        getfile = "cat '" + file + "'";
     }
 
     QString uncompresscmd = getUncompressCommand(file, false);
@@ -1180,9 +1180,9 @@ bool MultiImageWriteThread::partclone_restore(const QString &baseurl, const QStr
 {
     QString getfile;
     if (!baseurl.isEmpty())
-        getfile = DOWNLOAD_COMMAND + baseurl + image;
+        getfile = DOWNLOAD_COMMAND " '" + baseurl + image + "'";
     else
-        getfile = "cat " + image;
+        getfile = "cat '" + image + "'";
 
     QString uncompresscmd = getUncompressCommand(image, false);
 
