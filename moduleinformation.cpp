@@ -166,6 +166,11 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         productIds << 36 << 40;
         storageClass = StorageClass::Mtd;
         rebootWorks = false;
+    } else if (socid == "i.MX8QM") {
+        // i.MX8QM
+        productIds << 37;
+        storageClass = StorageClass::Block;
+        rebootWorks = false;
     } else {
         // Downstream the tegras use the machine file instead
         QFile machineFile("/sys/bus/soc/devices/soc0/machine");
