@@ -2,7 +2,7 @@
 #define WIFISETTINGSDIALOG_H
 
 /*
- * Wifi network selection dialog
+ * Wi-Fi network selection dialog
  *
  * Initial author: Floris Bos
  * Maintained by Raspberry Pi

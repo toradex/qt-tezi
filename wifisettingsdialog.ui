@@ -19,13 +19,13 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Wifi network selection</string>
+   <string>Wi-Fi network selection</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Wifi network</string>
+      <string>Wi-Fi network</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -61,7 +61,7 @@
          <item>
           <widget class="QRadioButton" name="WpsRadio">
            <property name="text">
-            <string>Pressing the WPS button on my wifi router</string>
+            <string>Pressing the WPS button on my Wi-Fi router</string>
            </property>
           </widget>
          </item>

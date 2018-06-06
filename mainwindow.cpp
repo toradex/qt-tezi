@@ -317,7 +317,7 @@ void MainWindow::updateModuleInformation()
 void MainWindow::show()
 {
     QWidget::show();
-    setWorkingInBackground(true, tr("Wait for external media or network..."));
+    setWorkingInBackground(true, tr("Waiting for external media or network..."));
 }
 
 void MainWindow::showProgressDialog(const QString &labelText)
@@ -486,7 +486,7 @@ void MainWindow::addImages(const QListVariantMap images)
         if (_imageListDownloadsActive == 0)
             setWorkingInBackground(false);
     } else {
-        setWorkingInBackground(true, tr("Wait for external media or network..."));
+        setWorkingInBackground(true, tr("Waiting for external media or network..."));
     }
 
     if (isAutoinstall) {
@@ -685,7 +685,7 @@ void MainWindow::installImage(QVariantMap entry)
     if (_numMetaFilesToDownload == 0)
         startImageWrite(entry);
     else
-        showProgressDialog(tr("The install process will begin shortly."));
+        showProgressDialog(tr("The installation process will begin shortly."));
 }
 
 void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
@@ -732,7 +732,7 @@ void MainWindow::eraseMtd()
     if (QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. "
-                               "After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?"),
+                               "After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?"),
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
         showProgressDialog(tr("Erasing internal raw NAND..."));
@@ -750,7 +750,7 @@ void MainWindow::discardBlockdev()
     if (QMessageBox::warning(this,
                             tr("Confirm"),
                             tr("This discards all data on the internal eMMC, including boot loader and boot loader configuration. "
-                               "After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?"),
+                               "After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?"),
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
         showProgressDialog(tr("Discarding all data on internal eMCC..."));

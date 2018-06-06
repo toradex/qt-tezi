@@ -354,7 +354,7 @@
     <string>Install (i)</string>
    </property>
    <property name="toolTip">
-    <string>Installs the selected operating system image onto this SD card.</string>
+    <string>Installs the selected operating system image to the internal flash.</string>
    </property>
    <property name="shortcut">
     <string>I</string>
@@ -372,7 +372,7 @@
     <string>Refresh (r)</string>
    </property>
    <property name="toolTip">
-    <string>Refresh image list from Internet.</string>
+    <string>Refresh image list from the Internet.</string>
    </property>
    <property name="shortcut">
     <string>R</string>
@@ -536,10 +536,10 @@
      <normaloff>:/icons/network-wireless.png</normaloff>:/icons/network-wireless.png</iconset>
    </property>
    <property name="text">
-    <string>Wifi networks (w)</string>
+    <string>Wi-Fi networks (w)</string>
    </property>
    <property name="toolTip">
-    <string>Select a wifi network to connect to</string>
+    <string>Select a Wi-Fi network to connect to</string>
    </property>
    <property name="shortcut">
     <string>W</string>

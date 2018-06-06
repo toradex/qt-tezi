@@ -144,7 +144,7 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="363"/>
-        <source>Installs the selected operating system image onto this SD card.</source>
+        <source>Installs the selected operating system image to the internal flash.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -159,7 +159,7 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="381"/>
-        <source>Refresh image list from Internet.</source>
+        <source>Refresh image list from the Internet.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -326,12 +326,12 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.ui" line="545"/>
-        <source>Wifi networks (w)</source>
+        <source>Wi-Fi networks (w)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="mainwindow.ui" line="548"/>
-        <source>Select a wifi network to connect to</source>
+        <source>Select a Wi-Fi network to connect to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -342,7 +342,7 @@ URL: %2</source>
     <message>
         <location filename="mainwindow.cpp" line="218"/>
         <location filename="mainwindow.cpp" line="380"/>
-        <source>Wait for external media or network...</source>
+        <source>Waiting for external media or network...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -354,7 +354,7 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="618"/>
-        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -369,7 +369,7 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="572"/>
-        <source>The install process will begin shortly.</source>
+        <source>The installation process will begin shortly.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -429,7 +429,7 @@ URL: %2</source>
     </message>
     <message>
         <location filename="mainwindow.cpp" line="636"/>
-        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -476,7 +476,7 @@ URL: %2</source>
     <message>
         <location filename="mainwindow.cpp" line="887"/>
         <source>Downloading image list ...</source>
-        <oldsource>Downloading image list from Internet...</oldsource>
+        <oldsource>Downloading image list from the Internet...</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -104,7 +104,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Installs the selected operating system image onto this SD card.</source>
+        <source>Installs the selected operating system image to the internal flash.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -140,11 +140,11 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Wifi networks (w)</source>
+        <source>Wi-Fi networks (w)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Select a wifi network to connect to</source>
+        <source>Select a Wi-Fi network to connect to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -156,7 +156,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The install process will begin shortly.</source>
+        <source>The installation process will begin shortly.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -172,7 +172,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Wait for external media or network...</source>
+        <source>Waiting for external media or network...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -240,11 +240,11 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Refresh image list from Internet.</source>
+        <source>Refresh image list from the Internet.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -344,7 +344,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the modules recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

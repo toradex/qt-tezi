@@ -1,5 +1,5 @@
 /*
- * Wifi network selection dialog
+ * Wi-Fi network selection dialog
  *
  * Initial author: Floris Bos
  * Maintained by Raspberry Pi
@@ -41,14 +41,14 @@ WifiSettingsDialog::WifiSettingsDialog(const QString &preferredInterface, QWidge
         }
         else
         {
-            QMessageBox::critical(parent, tr("No wifi interfaces"), tr("No wifi interfaces available"), QMessageBox::Close);
+            QMessageBox::critical(parent, tr("No Wi-Fi interfaces"), tr("No Wi-Fi interfaces available"), QMessageBox::Close);
             close();
         }
     }
 
     _interface = WpaFactory::createInterfaceProxy(_ifpath, this);
     _ifname = _interface->ifname();
-    qDebug() << "Using wifi interface" << _ifname;
+    qDebug() << "Using Wi-Fi interface" << _ifname;
 
     _currentBSS = _interface->currentBSS();
     connect(_interface, SIGNAL(BSSAdded(QDBusObjectPath,QVariantMap)), this, SLOT(onBSSAdded(QDBusObjectPath)));
@@ -196,7 +196,7 @@ void WifiSettingsDialog::on_list_currentItemChanged(QListWidgetItem *current)
     }
     else
     {
-        /* Open wifi (or WEP?) */
+        /* Open Wi-Fi (or WEP?) */
         ui->authGroupbox->setEnabled(false);
     }
 
@@ -231,7 +231,7 @@ void WifiSettingsDialog::onPropertiesChanged(const QVariantMap &properties)
                 /* if we get a "disconnected" state change signal during connecting, authentication has failed */
                 _connecting = false;
                 _qpd->cancel();
-                QMessageBox::critical(this, tr("Connecting to wifi failed"), tr("Connecting to the wifi access point failed. Check your password"), QMessageBox::Close);
+                QMessageBox::critical(this, tr("Connecting to Wi-Fi failed"), tr("Connecting to the Wi-Fi access point failed. Check your password"), QMessageBox::Close);
             }
         }
         _laststate = state;
@@ -326,7 +326,7 @@ bool WifiSettingsDialog::connectToWifi(const QString &ssid, const QString &usern
             config.insert("auth_alg", "OPEN");
         }
 
-        qDebug() << "Connecting to new wifi network, connection parameters:" << config;
+        qDebug() << "Connecting to new Wi-Fi network, connection parameters:" << config;
         /* Set _connectiong to true. If we receive a "state => disconnected"
            property change signal from this point, assume authentication failed */
         _connecting = true;
@@ -358,7 +358,7 @@ bool WifiSettingsDialog::connectToWifi(const QString &ssid, const QString &usern
            So ask wpa_cli to do it for us. */
         QStringList args;
         args << "-i"+_ifname << "save_config";
-        qDebug() << "Saving wifi configuration";
+        qDebug() << "Saving Wi-Fi configuration";
         QProcess::execute("/usr/sbin/wpa_cli", args);
 
         return true;
