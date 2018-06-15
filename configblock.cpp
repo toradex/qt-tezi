@@ -53,6 +53,9 @@ const char* const toradex_modules[] = {
     [40] = "Colibri iMX6ULL 512MB Wi-Fi / Bluetooth IT",
     [41] = "Colibri iMX7 Dual 512MB EPDC",
     [42] = "Apalis TK1 4GB",
+    [43] = "Colibri T20 512MB IT SETEK",
+    [44] = "Colibri iMX6ULL 512MB IT",
+    [45] = "Colibri iMX6ULL 512MB Wi-Fi / Bluetooth",
 };
 
 ConfigBlock::ConfigBlock(const QByteArray &cb, QObject *parent) : QObject(parent),
