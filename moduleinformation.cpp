@@ -127,7 +127,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     } else if (socid == "64") {
         // Tegra K1
         socid = "TK1";
-        productIds << 34;
+        productIds << 34 << 42;
         storageClass = StorageClass::Block;
         rebootWorks = true;
     } else if (socid == "i.MX7D") {
@@ -163,12 +163,17 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = false;
     } else if (socid == "i.MX6ULL") {
         // i.MX6 ULL
-        productIds << 36 << 40;
+        productIds << 36 << 40 << 44 << 45;
         storageClass = StorageClass::Mtd;
         rebootWorks = false;
     } else if (socid == "i.MX8QM") {
         // i.MX8QM
         productIds << 37;
+        storageClass = StorageClass::Block;
+        rebootWorks = false;
+    } else if (socid == "i.MX8QXP") {
+        // i.MX8QM
+        productIds << 38;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else {
