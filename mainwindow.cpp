@@ -219,7 +219,7 @@ bool MainWindow::initialize() {
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
-    ui->list->setIconSize(QSize(40, 40));
+    ui->list->setIconSize(QSize(32, 32));
     ui->advToolBar->setVisible(false);
 
     QString cmdline = getFileContents("/proc/cmdline");
@@ -401,27 +401,29 @@ void MainWindow::addImages(const QListVariantMap images)
             }
         }
 
-        QString friendlyname = name;
+        QString imageName = name;
+        QString imageInfo, imageVersion, space(" "), eol("\n");
+        imageInfo += description + eol;
         if (!supportedImage)
-            friendlyname += " [" + tr("not compatible with this module") + "]";
+            imageVersion += " [" + tr("image not compatible with this module") + "]";
         else if (!supportedConfigFormat)
-            friendlyname += " [" + tr("requires a newer version of the installer") + "]";
+            imageVersion += " [" + tr("image requires a newer version of the installer") + "]";
 
-        friendlyname += "\n";
         if (!version.isEmpty())
-            friendlyname += version;
+            imageVersion += version + space;
         else
-            friendlyname += "Unknown Version";
+            imageVersion += "Unknown version" + space;
+
         if (!releasedate.isEmpty())
-            friendlyname += ", " + releasedate;
+            imageVersion += "(" + releasedate + ")" + eol;
 
         if (source == SOURCE_USB)
-            friendlyname += ", usb:/" + foldername;
+            imageInfo += "usb:/" + foldername;
         else if (source == SOURCE_SDCARD)
-            friendlyname += ", sdcard:/" + foldername;
+            imageInfo += "sdcard:/" + foldername;
         else {
             QString url = m.value("baseurl").value<QString>();
-            friendlyname += ", " + url;
+            imageInfo +=  url;
         }
 
         QPixmap pix;
@@ -441,15 +443,18 @@ void MainWindow::addImages(const QListVariantMap images)
                 {
                     /* Make all icons as large as the largest icon we have */
                     currentsize = QSize(qMax(iconsize.width(), currentsize.width()),qMax(iconsize.height(), currentsize.height()));
-                    ui->list->setIconSize(currentsize);
                 }
             }
         }
 
-        QListImageWidgetItem *item = new QListImageWidgetItem(icon, friendlyname, feedindex, imageindex);
+        QListImageWidgetItem *item = new QListImageWidgetItem(icon, imageName, feedindex, imageindex);
 
         item->setData(Qt::UserRole, m);
-        item->setToolTip(description);
+        item->setData(Qt::DecorationRole, icon);
+        item->setData(NameRole, name);
+        item->setData(VersionRole, imageVersion);
+        item->setData(InfoRole, imageInfo);
+        item->setToolTip(name + eol + imageVersion + imageInfo);
 
         if (supportedImage && supportedConfigFormat)
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
