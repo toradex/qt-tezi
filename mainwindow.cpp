@@ -220,7 +220,6 @@ bool MainWindow::initialize() {
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
     ui->list->setIconSize(QSize(32, 32));
-    ui->advToolBar->setVisible(false);
 
     QString cmdline = getFileContents("/proc/cmdline");
     if (cmdline.contains("showall"))
@@ -969,11 +968,6 @@ void MainWindow::updateVersion()
     QString version = getVersionString();
     setWindowTitle(version);
     ui->version->setText(version);
-}
-
-void MainWindow::on_actionAdvanced_triggered(bool checked)
-{
-    ui->advToolBar->setVisible(checked);
 }
 
 void MainWindow::on_actionEdit_config_triggered()

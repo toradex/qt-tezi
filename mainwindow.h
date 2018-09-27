@@ -139,7 +139,6 @@ private slots:
     void on_actionInstall_triggered();
     void on_actionRefreshCloud_triggered();
     void on_actionCancel_triggered();
-    void on_actionAdvanced_triggered(bool checked);
     void on_actionUsbMassStorage_triggered(bool checked);
     void on_actionUsbRndis_triggered(bool checked);
     void on_actionEraseModule_triggered();
