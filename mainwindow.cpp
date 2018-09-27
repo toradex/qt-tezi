@@ -1355,3 +1355,18 @@ void MainWindow::on_actionWifi_triggered()
     }
     */
 }
+
+void MainWindow::on_list_itemSelectionChanged()
+{
+    auto iconSize = ui->list->iconSize();
+    QListWidgetItem *item;
+
+    for (int i = 0; i != ui->list->count(); ++i) {
+       item = ui->list->item(i);
+       if (item->isSelected()) {
+           item->setSizeHint(iconSize*2);
+       } else {
+           item->setSizeHint(iconSize);
+       }
+   }
+}

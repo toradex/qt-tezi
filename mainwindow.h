@@ -149,6 +149,7 @@ private slots:
     void on_list_currentItemChanged();
     void on_list_itemDoubleClicked();
     void on_actionWifi_triggered();
+    void on_list_itemSelectionChanged();
 };
 
 #endif // MAINWINDOW_H
