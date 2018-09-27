@@ -282,6 +282,7 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
     connect(_mediaPollThread, SIGNAL (newImagesToAdd(const QListVariantMap)), this, SLOT (addImages(const QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
+    connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
 
     _mediaPollThread->start();
 
@@ -593,6 +594,14 @@ void MainWindow::errorMounting(const QString blockdev)
     QMessageBox::critical(this, tr("Error mounting"),
                           tr("Error mounting external device (%1)").arg(blockdev),
                           QMessageBox::Close);
+}
+
+void MainWindow::disableFeed(const QString feedname)
+{
+        if (feedname == TEZI_CONFIG_JSON_DEFAULT_FEED)
+            _networkFeedServerList[0].enabled = false;
+        else if (feedname == TEZI_CONFIG_JSON_3RDPARTY_FEED)
+            _networkFeedServerList[1].enabled = false;
 }
 
 bool MainWindow::validateImageJson(QVariantMap &entry)

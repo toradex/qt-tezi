@@ -120,6 +120,7 @@ protected slots:
     void addNewImageUrl(const QString url);
     void addImages(const QListVariantMap images);
     void errorMounting(const QString blockdev);
+    void disableFeed(const QString feedname);
 
     /* Events from ImageListDownload */
     void onImageListDownloadFinished();

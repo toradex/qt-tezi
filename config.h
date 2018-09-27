@@ -29,6 +29,10 @@
 #define DEFAULT_3RDPARTY_IMAGE_SERVER  "http://tezi.toradex.com/image_list_3rdparty.json"
 #define DEFAULT_CI_IMAGE_SERVER  "http://tezi.toradex.com/image_list_ci.json"
 
+/* Keys in tezi_config.json */
+#define TEZI_CONFIG_JSON_DEFAULT_FEED "show_default_feed"
+#define TEZI_CONFIG_JSON_3RDPARTY_FEED "show_3rdparty_feed"
+
 /* Size of recovery FAT partition in MB.
  * First partition starts at offset 1 MB (sector 2048)
  * If you want the second partition to start at offset 1024 MB, enter 1023 */

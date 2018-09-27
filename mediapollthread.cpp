@@ -239,6 +239,19 @@ void MediaPollThread::parseTeziConfig(const QString &path)
         return;
 
     QVariantMap teziconfig = Json::loadFromFile(configjson).toMap();
+
+    // Enable/Disable default feeds
+    if (teziconfig.contains(TEZI_CONFIG_JSON_DEFAULT_FEED)
+            && !teziconfig.value(TEZI_CONFIG_JSON_DEFAULT_FEED, true).toBool()) {
+        emit disableFeed(TEZI_CONFIG_JSON_DEFAULT_FEED);
+        qDebug() << "Default feed disabled";
+    }
+    if (teziconfig.contains(TEZI_CONFIG_JSON_3RDPARTY_FEED)
+            && !teziconfig.value(TEZI_CONFIG_JSON_3RDPARTY_FEED, true).toBool()) {
+        emit disableFeed(TEZI_CONFIG_JSON_3RDPARTY_FEED);
+        qDebug() << "3rd Party feed disabled";
+    }
+
     if (!teziconfig.contains("image_lists"))
         return;
 
