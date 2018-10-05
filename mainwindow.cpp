@@ -219,8 +219,7 @@ bool MainWindow::initialize() {
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this));
-    ui->list->setIconSize(QSize(40, 40));
-    ui->advToolBar->setVisible(false);
+    ui->list->setIconSize(QSize(32, 32));
 
     QString cmdline = getFileContents("/proc/cmdline");
     if (cmdline.contains("showall"))
@@ -283,6 +282,7 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
     connect(_mediaPollThread, SIGNAL (newImagesToAdd(const QListVariantMap)), this, SLOT (addImages(const QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
+    connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
 
     _mediaPollThread->start();
 
@@ -401,27 +401,29 @@ void MainWindow::addImages(const QListVariantMap images)
             }
         }
 
-        QString friendlyname = name;
+        QString imageName = name;
+        QString imageInfo, imageVersion, space(" "), eol("\n");
+        imageInfo += description + eol;
         if (!supportedImage)
-            friendlyname += " [" + tr("not compatible with this module") + "]";
+            imageVersion += " [" + tr("image not compatible with this module") + "]";
         else if (!supportedConfigFormat)
-            friendlyname += " [" + tr("requires a newer version of the installer") + "]";
+            imageVersion += " [" + tr("image requires a newer version of the installer") + "]";
 
-        friendlyname += "\n";
         if (!version.isEmpty())
-            friendlyname += version;
+            imageVersion += version + space;
         else
-            friendlyname += "Unknown Version";
+            imageVersion += "Unknown version" + space;
+
         if (!releasedate.isEmpty())
-            friendlyname += ", " + releasedate;
+            imageVersion += "(" + releasedate + ")" + eol;
 
         if (source == SOURCE_USB)
-            friendlyname += ", usb:/" + foldername;
+            imageInfo += "usb:/" + foldername;
         else if (source == SOURCE_SDCARD)
-            friendlyname += ", sdcard:/" + foldername;
+            imageInfo += "sdcard:/" + foldername;
         else {
             QString url = m.value("baseurl").value<QString>();
-            friendlyname += ", " + url;
+            imageInfo +=  url;
         }
 
         QPixmap pix;
@@ -441,15 +443,18 @@ void MainWindow::addImages(const QListVariantMap images)
                 {
                     /* Make all icons as large as the largest icon we have */
                     currentsize = QSize(qMax(iconsize.width(), currentsize.width()),qMax(iconsize.height(), currentsize.height()));
-                    ui->list->setIconSize(currentsize);
                 }
             }
         }
 
-        QListImageWidgetItem *item = new QListImageWidgetItem(icon, friendlyname, feedindex, imageindex);
+        QListImageWidgetItem *item = new QListImageWidgetItem(icon, imageName, feedindex, imageindex);
 
         item->setData(Qt::UserRole, m);
-        item->setToolTip(description);
+        item->setData(Qt::DecorationRole, icon);
+        item->setData(NameRole, name);
+        item->setData(VersionRole, imageVersion);
+        item->setData(InfoRole, imageInfo);
+        item->setToolTip(name + eol + imageVersion + imageInfo);
 
         if (supportedImage && supportedConfigFormat)
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -589,6 +594,14 @@ void MainWindow::errorMounting(const QString blockdev)
     QMessageBox::critical(this, tr("Error mounting"),
                           tr("Error mounting external device (%1)").arg(blockdev),
                           QMessageBox::Close);
+}
+
+void MainWindow::disableFeed(const QString feedname)
+{
+        if (feedname == TEZI_CONFIG_JSON_DEFAULT_FEED)
+            _networkFeedServerList[0].enabled = false;
+        else if (feedname == TEZI_CONFIG_JSON_3RDPARTY_FEED)
+            _networkFeedServerList[1].enabled = false;
 }
 
 bool MainWindow::validateImageJson(QVariantMap &entry)
@@ -964,11 +977,6 @@ void MainWindow::updateVersion()
     QString version = getVersionString();
     setWindowTitle(version);
     ui->version->setText(version);
-}
-
-void MainWindow::on_actionAdvanced_triggered(bool checked)
-{
-    ui->advToolBar->setVisible(checked);
 }
 
 void MainWindow::on_actionEdit_config_triggered()
@@ -1349,4 +1357,19 @@ void MainWindow::on_actionWifi_triggered()
         }
     }
     */
+}
+
+void MainWindow::on_list_itemSelectionChanged()
+{
+    auto iconSize = ui->list->iconSize();
+    QListWidgetItem *item;
+
+    for (int i = 0; i != ui->list->count(); ++i) {
+       item = ui->list->item(i);
+       if (item->isSelected()) {
+           item->setSizeHint(iconSize*2);
+       } else {
+           item->setSizeHint(iconSize);
+       }
+   }
 }

@@ -47,6 +47,7 @@ signals:
     void removedBlockdev(const QString blockdev);
     void newImageUrl(const QString url);
     void newImagesToAdd(const QListVariantMap images);
+    void disableFeed(const QString feedname);
 
 protected:
     ModuleInformation *_moduleInformation;

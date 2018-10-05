@@ -120,6 +120,7 @@ protected slots:
     void addNewImageUrl(const QString url);
     void addImages(const QListVariantMap images);
     void errorMounting(const QString blockdev);
+    void disableFeed(const QString feedname);
 
     /* Events from ImageListDownload */
     void onImageListDownloadFinished();
@@ -139,7 +140,6 @@ private slots:
     void on_actionInstall_triggered();
     void on_actionRefreshCloud_triggered();
     void on_actionCancel_triggered();
-    void on_actionAdvanced_triggered(bool checked);
     void on_actionUsbMassStorage_triggered(bool checked);
     void on_actionUsbRndis_triggered(bool checked);
     void on_actionEraseModule_triggered();
@@ -149,6 +149,7 @@ private slots:
     void on_list_currentItemChanged();
     void on_list_itemDoubleClicked();
     void on_actionWifi_triggered();
+    void on_list_itemSelectionChanged();
 };
 
 #endif // MAINWINDOW_H

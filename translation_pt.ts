@@ -204,10 +204,6 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Mass Storage (u)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Enables USB Mass Storage emulation to access internal eMMC partitions.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -244,7 +240,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This discards all data on the internal eMMC, including boot loader and boot loader configuration. After this operation you either need to install an image or use the module&apos;s recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -316,19 +312,7 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Product</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Version</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Serial</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -344,19 +328,11 @@ URL: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?</source>
+        <source>This erases all data on the internal raw NAND flash, including boot loader and boot loader configuration as well as wear leveling information. After this operation you either need to install an image or use the module&apos;s recovery mode to boot back into Toradex Easy Installer. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Erasing internal raw NAND...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>not compatible with this module</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>requires a newer version of the installer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -395,6 +371,39 @@ URL: %2</source>
         <source>Custom Server from Media</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Ver.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>S/N</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Storage (u)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Erase
+ Flash (c)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>image not compatible with this module</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>image requires a newer version of the installer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Exit Toradex Easy Installer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Do you want to power off or reboot the module?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MtdEraseThread</name>
@@ -415,10 +424,6 @@ URL: %2</source>
     </message>
     <message>
         <source>Not enough disk space. Need %1 MB, got %2 MB</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Fixed partition offset too low</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -533,6 +538,26 @@ URL: %2</source>
         <source>Failed to get size of file at URL %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Error setting U-Boot environment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The Toradex Easy Installer supports up to %1 partitions on a single device using %2 partition table. %3 partitions have been specified.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fixed partition offset too low (partition %1, minimal offset %2, requested offset %3).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Timeout waiting for partition device %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unkown file system type</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ProgressSlideshowDialog</name>
@@ -620,6 +645,18 @@ URL: %2</source>
     </message>
     <message>
         <source>Toradex Easy Installer %1 (g%2) - Built: %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This product ID is not valid for the module Toradex Easy Installer is running on.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restoring Boot Configuration Block failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restoring Boot Configuration Block failed. Please check the logfile in /var/volatile/tezi.log and contact the Toradex support.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
