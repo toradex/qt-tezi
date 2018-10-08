@@ -17,6 +17,7 @@ ImageInfo::ImageInfo(const QString &folder, const QString &infofile, const QStri
     _isInstaller = m.value("isinstaller", false).toBool();
     _prepareScript = m.value("prepare_script").toString();
     _wrapupScript = m.value("wrapup_script").toString();
+    _errorScript = m.value("error_script").toString();
     _uBootEnv = m.value("u_boot_env").toString();
     QVariantList productids = m.value("supported_product_ids").toList();
     foreach (QVariant prid, productids) {

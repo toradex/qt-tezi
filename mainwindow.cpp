@@ -680,6 +680,10 @@ void MainWindow::installImage(QVariantMap entry)
             QString script = entry.value("wrapup_script").toString();
             downloadMetaFile(url + script, folder + "/" + script);
         }
+        if (entry.contains("error_script")) {
+            QString script = entry.value("error_script").toString();
+            downloadMetaFile(url + script, folder + "/" + script);
+        }
         if (entry.contains("u_boot_env")) {
             QString envtxt = entry.value("u_boot_env").toString();
             downloadMetaFile(url + envtxt, folder + "/" + envtxt);
@@ -934,13 +938,22 @@ void MainWindow::onError(const QString &msg)
 {
     qDebug() << "Error:" << msg;
 
+    QString errMsg = tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system.\n");
+    QString errorScript =_imageWriteThread->getImageInfo()->folder() +
+            "/" + _imageWriteThread->getImageInfo()->errorScript();
+    QByteArray output;
+    if (!errorScript.isEmpty()) {
+        if (_imageWriteThread->runScript(errorScript, output))
+            errMsg += tr("\nThe error script ") + errorScript + tr(" was executed.");
+        else
+            errMsg += tr("\nError executing error script ") + errorScript + ": " + tr(output);
+    } else
+        qDebug() << "No error script found";
+
     if (_installingFromMedia)
         _mediaPollThread->unmountMedia();
 
-    QMessageBox::critical(this, tr("Error"),
-                          msg  + "\n\n" +
-                          tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system."),
-                          QMessageBox::Ok);
+    QMessageBox::critical(this, tr("Error"), msg  + "\n\n" + errMsg, QMessageBox::Ok);
 
     _psd->close();
     _psd->deleteLater();
