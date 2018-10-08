@@ -31,6 +31,7 @@ public:
     static QByteArray getFsType(const QString &part);
 
     static bool runCommand(const QString &cmd, const QStringList &args, QByteArray &output, int msecs = 30000, const QString &workdir = "/");
+    bool runScript(QString script, QByteArray &output);
     static bool eraseMtdDevice(const QByteArray &mtddevice, QByteArray &output);
     static bool eraseBlockDevice(const QByteArray &blockdevice, qint64 start, qint64 end, QByteArray &output);
 
@@ -41,7 +42,6 @@ public:
 protected:
     virtual void run();
     void updateStatus(QString status);
-    bool runScript(QString script, QByteArray &output);
     QList<RawFileInfo *> filterRawFileInfo(QList<RawFileInfo *> *rawFiles);
     bool processBlockDev(BlockDevInfo *blockdev);
     bool processPartitions(BlockDevInfo *blockdev, QList<BlockDevPartitionInfo *> *partitions);

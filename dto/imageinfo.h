@@ -66,6 +66,11 @@ public:
         return _wrapupScript;
     }
 
+    inline QString errorScript()
+    {
+        return _errorScript;
+    }
+
     inline QString uBootEnv()
     {
         return _uBootEnv;
@@ -100,7 +105,7 @@ public:
 
 protected:
     QString _folder, _infofile, _baseUrl;
-    QString _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript, _uBootEnv;
+    QString _name, _description, _version, _releaseDate, _prepareScript, _wrapupScript, _errorScript, _uBootEnv;
     bool _bootable, _isInstaller;
     QList<BlockDevInfo *> _blockdevs;
     QList<MtdDevInfo *> _mtddevs;
