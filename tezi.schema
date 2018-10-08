@@ -162,6 +162,10 @@
             "description": "Filename of script which will get executed after the image has been successfully installed.",
             "type": "string"
         },
+        "error_script": {
+            "description": "Filename of script which will get executed when there is an error during installation process.",
+            "type": "string"
+        },
         "marketing": {
             "description": "Filename of a tar file with images which will be shown during installation process.",
             "type": "string"
