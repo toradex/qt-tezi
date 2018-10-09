@@ -939,10 +939,11 @@ void MainWindow::onError(const QString &msg)
     qDebug() << "Error:" << msg;
 
     QString errMsg = tr("The image has not been written completely. Please restart the process, otherwise you might end up in a non-bootable system.\n");
+    QString errorScriptFilename = _imageWriteThread->getImageInfo()->errorScript();
     QString errorScript =_imageWriteThread->getImageInfo()->folder() +
-            "/" + _imageWriteThread->getImageInfo()->errorScript();
+            "/" + errorScriptFilename;
     QByteArray output;
-    if (!errorScript.isEmpty()) {
+    if (!errorScriptFilename.isEmpty()) {
         if (_imageWriteThread->runScript(errorScript, output))
             errMsg += tr("\nThe error script ") + errorScript + tr(" was executed.");
         else
