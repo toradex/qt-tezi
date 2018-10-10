@@ -15,9 +15,11 @@
 #include <QtDebug>
 
 
-TwoIconsDelegate::TwoIconsDelegate(QObject *parent) :
+TwoIconsDelegate::TwoIconsDelegate(QObject *parent, QListWidget *listwidget) :
     QStyledItemDelegate(parent)
 {
+    _listWidget = listwidget;
+    _selectionModel = listwidget->selectionModel();
 }
 
 void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -43,7 +45,6 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         painter->setBrush(gradientSelected);
         painter->setPen(gradientPen);
         painter->drawRect(r);
-    } else {
     }
     painter->setPen(fontMarkedPen);
 
@@ -60,20 +61,20 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     itemFont.setBold(true);
     painter->setFont(itemFont);
 
-    r = option.rect.adjusted(_left_margin, _title_top_margin, 0, -10);
     QSize iconSize = option.decorationSize;
-    painter->drawText(r.left() + iconSize.width() + imageSpace, r.top(), r.width(), r.height(), Qt::AlignLeft, imageTitle, &r);
+    r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _title_top_margin, 0, -10);
+    painter->drawText(r.left() , r.top(), r.width(), r.height(), Qt::AlignLeft, imageTitle, &r);
 
     // Version
-    r = option.rect.adjusted(_left_margin, _version_top_margin, 0, 0);
+    r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _version_top_margin, 0, 0);
     itemFont.setBold(false);
     painter->setFont(itemFont);
-    painter->drawText(r.left() + iconSize.width() + imageSpace, r.top(), r.width(), r.height(), Qt::AlignLeft, imageVersion, &r);
+    painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft, imageVersion, &r);
 
     // Info
     if(option.state & QStyle::State_Selected){
-        r = option.rect.adjusted(_left_margin, _info_top_margin, 0, 0);
-        painter->drawText(r.left() + iconSize.width() + imageSpace, r.top(), r.width(), r.height(), Qt::AlignLeft, imageInfo, &r);
+        r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _info_top_margin, -iconSize.width() - imageSpace, 0);
+        painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft | Qt::TextWordWrap, imageInfo, &r);
     }
 
     // Second Icon
@@ -92,11 +93,18 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 
 QSize TwoIconsDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    int width = option.rect.width();
-    int height = option.rect.height();
-    if(option.state & QStyle::State_Selected) {
-        return QStyledItemDelegate::sizeHint(option, index)*1.5;
-    } else {
-        return QStyledItemDelegate::sizeHint(option, index);
+    QFontMetrics fm(option.font);
+    QString text;
+    int textHeight;
+    if (_selectionModel->isSelected(index)) {
+        const QAbstractItemModel* model = index.model();
+        text = model->data(index, NameRole).toString();
+        textHeight = fm.boundingRect(option.rect, Qt::TextWordWrap, text).height();
+        text = model->data(index, VersionRole).toString();
+        textHeight += fm.boundingRect(option.rect, Qt::TextWordWrap, text).height();
+        text = model->data(index, InfoRole).toString();
+        textHeight += fm.boundingRect(option.rect, Qt::TextWordWrap, text).height();
+        return QSize(option.rect.width(), textHeight + _bottom_margin);
     }
+    return QStyledItemDelegate::sizeHint(option, index);
 }

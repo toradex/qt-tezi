@@ -218,7 +218,7 @@ bool MainWindow::initialize() {
     _toradexProductNumber = _toradexConfigBlock->getProductNumber();
     updateModuleInformation();
 
-    ui->list->setItemDelegate(new TwoIconsDelegate(this));
+    ui->list->setItemDelegate(new TwoIconsDelegate(this, ui->list));
     ui->list->setIconSize(QSize(32, 32));
 
     QString cmdline = getFileContents("/proc/cmdline");
@@ -405,9 +405,9 @@ void MainWindow::addImages(const QListVariantMap images)
         QString imageInfo, imageVersion, space(" "), eol("\n");
         imageInfo += description + eol;
         if (!supportedImage)
-            imageVersion += " [" + tr("image not compatible with this module") + "]";
+            imageVersion += " [" + tr("image not compatible with this module") + "] ";
         else if (!supportedConfigFormat)
-            imageVersion += " [" + tr("image requires a newer version of the installer") + "]";
+            imageVersion += " [" + tr("image requires a newer version of the installer") + "] ";
 
         if (!version.isEmpty())
             imageVersion += version + space;
@@ -468,8 +468,6 @@ void MainWindow::addImages(const QListVariantMap images)
         else if (ImageInfo::isNetwork(source))
             item->setData(SecondIconRole, _internetIcon);
 
-        // Limit width of item so that we always see the right icon and don't get a horizontal scrollbar
-        item->setSizeHint(QSize(ui->list->width() - 24, ui->list->iconSize().height()));
         ui->list->addItem(item);
     }
     ui->list->sortItems();
@@ -1375,15 +1373,16 @@ void MainWindow::on_actionWifi_triggered()
 
 void MainWindow::on_list_itemSelectionChanged()
 {
+    // Hack to recalculate item sizes
     auto iconSize = ui->list->iconSize();
     QListWidgetItem *item;
 
     for (int i = 0; i != ui->list->count(); ++i) {
-       item = ui->list->item(i);
-       if (item->isSelected()) {
-           item->setSizeHint(iconSize*2);
-       } else {
-           item->setSizeHint(iconSize);
-       }
-   }
+        item = ui->list->item(i);
+        if (item->isSelected()) {
+              item->setSizeHint(iconSize + QSize(1,1));
+        } else {
+              item->setSizeHint(iconSize);
+        }
+    }
 }
