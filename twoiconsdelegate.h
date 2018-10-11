@@ -35,6 +35,7 @@ class TwoIconsDelegate : public QStyledItemDelegate
     QItemSelectionModel* _selectionModel;
     QListWidget* _listWidget;
 
+    QPixmap &setAlpha(QPixmap &pix, int val) const;
 
 public:
     explicit TwoIconsDelegate(QObject *parent = 0, QListWidget *listwidget = 0);

@@ -15,6 +15,16 @@
 #include <QtDebug>
 
 
+QPixmap &TwoIconsDelegate::setAlpha(QPixmap &pix, int val) const
+{
+    QPixmap alpha = pix;
+    QPainter p(&alpha);
+    p.fillRect(alpha.rect(), QColor(val, val, val));
+    p.end();
+    pix.setAlphaChannel(alpha);
+    return pix;
+}
+
 TwoIconsDelegate::TwoIconsDelegate(QObject *parent, QListWidget *listwidget) :
     QStyledItemDelegate(parent)
 {
@@ -26,6 +36,7 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 {
     QPen lineMarkedPen(QColor::fromRgb(0,90,131), 3, Qt::SolidLine);
     QPen fontMarkedPen(Qt::black, 1, Qt::SolidLine);
+    QPen greyedMarkedPen(Qt::gray, 1, Qt::SolidLine);
     QPen gradientPen(Qt::white, 0, Qt::NoPen);
 
     QString imageTitle = index.data(NameRole).toString();
@@ -34,8 +45,9 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     QVariant vIcon = index.data(Qt::DecorationRole);
     QIcon ic = vIcon.value<QIcon>();
     QRect r = option.rect;
+    QFont itemFont = painter->font();
 
-    // On selection
+    // Background on selection
     if(option.state & QStyle::State_Selected){
         QLinearGradient gradientSelected(r.left(), r.top() - r.height()/2, r.right(), r.top() - r.height()/2);
         gradientSelected.setColorAt(0.0, QColor::fromRgb(255,255,255));
@@ -46,20 +58,26 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         painter->setPen(gradientPen);
         painter->drawRect(r);
     }
+    painter->save();
+    painter->setFont(itemFont);
     painter->setPen(fontMarkedPen);
 
     // Icon
     int imageSpace = 10;
     if (!ic.isNull()) {
+        if(!(option.state & QStyle::State_Enabled)) {
+            QPixmap pixIcon = ic.pixmap(option.decorationSize);
+            ic = QIcon(setAlpha(pixIcon, 50));
+        }
         ic.paint(painter, r, Qt::AlignVCenter|Qt::AlignLeft);
     }
 
-    painter->save();
-
     // Title
-    QFont itemFont = painter->font();
     itemFont.setBold(true);
-    painter->setFont(itemFont);
+    if(option.state & QStyle::State_Enabled)
+        painter->setPen(fontMarkedPen);
+    else 
+        painter->setPen(greyedMarkedPen);
 
     QSize iconSize = option.decorationSize;
     r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _title_top_margin, 0, -10);
@@ -72,7 +90,7 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft, imageVersion, &r);
 
     // Info
-    if(option.state & QStyle::State_Selected){
+    if(option.state & QStyle::State_Selected) {
         r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _info_top_margin, -iconSize.width() - imageSpace, 0);
         painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft | Qt::TextWordWrap, imageInfo, &r);
     }
@@ -83,7 +101,10 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     {
         QIcon icon = v.value<QIcon>();
         QSize size = icon.availableSizes().first();
-
+        if(!(option.state & QStyle::State_Enabled)) {
+            QPixmap pixIcon = icon.pixmap(size);
+            icon = QIcon(setAlpha(pixIcon, 50));
+        }
         painter->drawPixmap(option.rect.right()-size.width(), option.rect.top(), icon.pixmap(size));
     }
 
