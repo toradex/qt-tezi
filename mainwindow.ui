@@ -47,7 +47,11 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
-       <widget class="QListWidget" name="list"/>
+       <widget class="QListWidget" name="list">
+        <property name="wordWrap">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
