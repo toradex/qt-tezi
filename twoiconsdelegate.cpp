@@ -59,7 +59,6 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         painter->drawRect(r);
     }
     painter->save();
-    painter->setFont(itemFont);
     painter->setPen(fontMarkedPen);
 
     // Icon
@@ -73,7 +72,6 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     }
 
     // Title
-    itemFont.setBold(true);
     if(option.state & QStyle::State_Enabled)
         painter->setPen(fontMarkedPen);
     else 
@@ -81,7 +79,9 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 
     QSize iconSize = option.decorationSize;
     r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _title_top_margin, 0, -10);
-    painter->drawText(r.left() , r.top(), r.width(), r.height(), Qt::AlignLeft, imageTitle, &r);
+    itemFont.setBold(true);
+    painter->setFont(itemFont);
+    painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft, imageTitle, &r);
 
     // Version
     r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _version_top_margin, 0, 0);
