@@ -454,7 +454,7 @@ void MainWindow::addImages(const QListVariantMap images)
         item->setData(NameRole, name);
         item->setData(VersionRole, imageVersion);
         item->setData(InfoRole, imageInfo);
-        item->setToolTip(name + eol + imageVersion + imageInfo);
+        item->setToolTip("<nobr>" + name + "</nobr>" + "<br>" + imageVersion + "<br>" + imageInfo);
 
         if (supportedImage && supportedConfigFormat)
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
