@@ -402,8 +402,8 @@ void MainWindow::addImages(const QListVariantMap images)
         }
 
         QString imageName = name;
-        QString imageInfo, imageVersion, space(" "), eol("\n");
-        imageInfo += description + eol;
+        QString imageInfo, imageURI, imageVersion, space(" "), eol("\n");
+        imageInfo += description;
         if (!supportedImage)
             imageVersion += " [" + tr("image not compatible with this module") + "] ";
         else if (!supportedConfigFormat)
@@ -418,12 +418,12 @@ void MainWindow::addImages(const QListVariantMap images)
             imageVersion += "(" + releasedate + ")" + eol;
 
         if (source == SOURCE_USB)
-            imageInfo += "usb:/" + foldername;
+            imageURI += "usb:/" + foldername;
         else if (source == SOURCE_SDCARD)
-            imageInfo += "sdcard:/" + foldername;
+            imageURI += "sdcard:/" + foldername;
         else {
             QString url = m.value("baseurl").value<QString>();
-            imageInfo +=  url;
+            imageURI +=  url;
         }
 
         QPixmap pix;
@@ -454,7 +454,8 @@ void MainWindow::addImages(const QListVariantMap images)
         item->setData(NameRole, name);
         item->setData(VersionRole, imageVersion);
         item->setData(InfoRole, imageInfo);
-        item->setToolTip("<nobr>" + name + "</nobr>" + "<br>" + imageVersion + "<br>" + imageInfo);
+        item->setData(URIRole, imageURI);
+        item->setToolTip("<nobr>" + name + "</nobr>" + "<br>" + imageVersion + "<br>" + imageInfo + "<br>" + imageURI);
 
         if (supportedImage && supportedConfigFormat)
             item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
