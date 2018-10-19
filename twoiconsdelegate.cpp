@@ -42,6 +42,7 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     QString imageTitle = index.data(NameRole).toString();
     QString imageVersion = index.data(VersionRole).toString();
     QString imageInfo = index.data(InfoRole).toString();
+    QString imageURI = index.data(URIRole).toString();
     QVariant vIcon = index.data(Qt::DecorationRole);
     QIcon ic = vIcon.value<QIcon>();
     QRect r = option.rect;
@@ -62,7 +63,6 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->setPen(fontMarkedPen);
 
     // Icon
-    int imageSpace = 10;
     if (!ic.isNull()) {
         if(!(option.state & QStyle::State_Enabled)) {
             QPixmap pixIcon = ic.pixmap(option.decorationSize);
@@ -78,21 +78,21 @@ void TwoIconsDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         painter->setPen(greyedMarkedPen);
 
     QSize iconSize = option.decorationSize;
-    r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _title_top_margin, 0, -10);
+    r = option.rect.adjusted(_left_margin + iconSize.width(), _title_top_margin, 0, -10);
     itemFont.setBold(true);
     painter->setFont(itemFont);
     painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft, imageTitle, &r);
 
     // Version
-    r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _version_top_margin, 0, 0);
+    r = option.rect.adjusted(_left_margin + iconSize.width(), _version_top_margin, 0, 0);
     itemFont.setBold(false);
     painter->setFont(itemFont);
     painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft, imageVersion, &r);
 
     // Info
     if(option.state & QStyle::State_Selected) {
-        r = option.rect.adjusted(_left_margin + iconSize.width() + imageSpace, _info_top_margin, -iconSize.width() - imageSpace, 0);
-        painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft | Qt::TextWordWrap, imageInfo, &r);
+        r = option.rect.adjusted(_left_margin + iconSize.width(), _info_top_margin, -iconSize.width(), 0);
+        painter->drawText(r.left(), r.top(), r.width(), r.height(), Qt::AlignLeft | Qt::TextWordWrap, imageInfo + "\n" + imageURI, &r);
     }
 
     // Second Icon
@@ -116,15 +116,19 @@ QSize TwoIconsDelegate::sizeHint(const QStyleOptionViewItem &option, const QMode
 {
     QFontMetrics fm(option.font);
     QString text;
+    QSize iconSize = option.decorationSize;
+    QRect r = option.rect.adjusted(_left_margin + iconSize.width(), 0, -iconSize.width(), 0);
     int textHeight;
     if (_selectionModel->isSelected(index)) {
         const QAbstractItemModel* model = index.model();
         text = model->data(index, NameRole).toString();
-        textHeight = fm.boundingRect(option.rect, Qt::TextWordWrap, text).height();
+        textHeight = fm.boundingRect(r, Qt::TextWordWrap, text).height();
         text = model->data(index, VersionRole).toString();
-        textHeight += fm.boundingRect(option.rect, Qt::TextWordWrap, text).height();
+        textHeight += fm.boundingRect(r, Qt::TextWordWrap, text).height();
         text = model->data(index, InfoRole).toString();
-        textHeight += fm.boundingRect(option.rect, Qt::TextWordWrap, text).height();
+        textHeight += fm.boundingRect(r, Qt::TextWordWrap, text).height();
+        text = model->data(index, URIRole).toString();
+        textHeight += fm.boundingRect(r, Qt::TextWordWrap, text).height();
         return QSize(option.rect.width(), textHeight + _bottom_margin);
     }
     return QStyledItemDelegate::sizeHint(option, index);
