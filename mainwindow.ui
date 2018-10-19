@@ -18,64 +18,47 @@
   <property name="focusPolicy">
    <enum>Qt::NoFocus</enum>
   </property>
-  <property name="styleSheet">
-   <string notr="true">QToolButton
-{
-    height: 60px;
-    width: 70px;
-    font-size: 12px;
-    margin-top: 13px; 
-}</string>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <property name="leftMargin">
-     <number>6</number>
-    </property>
+   <layout class="QGridLayout" name="gridLayout_2">
     <property name="topMargin">
-     <number>3</number>
-    </property>
-    <property name="rightMargin">
-     <number>6</number>
+     <number>9</number>
     </property>
     <property name="bottomMargin">
-     <number>6</number>
+     <number>9</number>
     </property>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <item>
-       <widget class="QListWidget" name="list">
-        <property name="wordWrap">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+    <item row="1" column="0">
+     <widget class="QListWidget" name="list">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+       </font>
+      </property>
+      <property name="spacing">
+       <number>1</number>
+      </property>
+     </widget>
     </item>
-    <item>
+    <item row="2" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QGroupBox" name="groupBoxNetwork">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>65</height>
+         </size>
+        </property>
         <property name="title">
          <string>Network Information</string>
         </property>
         <layout class="QGridLayout" name="gridLayoutNetwork">
-         <property name="topMargin">
-          <number>3</number>
-         </property>
-         <property name="bottomMargin">
-          <number>3</number>
-         </property>
          <item row="0" column="0">
           <layout class="QGridLayout" name="gridLayout_3">
            <property name="sizeConstraint">
             <enum>QLayout::SetDefaultConstraint</enum>
-           </property>
-           <property name="verticalSpacing">
-            <number>3</number>
            </property>
            <item row="0" column="0">
             <widget class="QLabel" name="labelEthernet">
@@ -128,12 +111,6 @@
          <string>Module Version</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <property name="topMargin">
-          <number>3</number>
-         </property>
-         <property name="bottomMargin">
-          <number>3</number>
-         </property>
          <item>
           <layout class="QGridLayout" name="gridLayout_4">
            <item row="1" column="0">
@@ -153,7 +130,7 @@
               <widget class="QLabel" name="label_6">
                <property name="maximumSize">
                 <size>
-                 <width>30</width>
+                 <width>25</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -179,7 +156,7 @@
               <widget class="QLabel" name="label_4">
                <property name="maximumSize">
                 <size>
-                 <width>30</width>
+                 <width>25</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -204,16 +181,16 @@
       </item>
       <item>
        <widget class="QGroupBox" name="groupBoxSpace">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>65</height>
+         </size>
+        </property>
         <property name="title">
          <string>Flash Space</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
-         <property name="topMargin">
-          <number>3</number>
-         </property>
-         <property name="bottomMargin">
-          <number>3</number>
-         </property>
          <item row="0" column="0">
           <layout class="QGridLayout" name="gridLayout_5">
            <item row="0" column="0">
@@ -251,11 +228,8 @@
       </item>
      </layout>
     </item>
-    <item>
+    <item row="3" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="spacing">
-       <number>0</number>
-      </property>
       <item>
        <widget class="WaitingSpinnerWidget" name="waitingSpinner"/>
       </item>
@@ -314,7 +288,7 @@
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -325,15 +299,6 @@
      <height>0</height>
     </size>
    </property>
-   <property name="baseSize">
-    <size>
-     <width>0</width>
-     <height>0</height>
-    </size>
-   </property>
-   <property name="cursor">
-    <cursorShape>ArrowCursor</cursorShape>
-   </property>
    <property name="focusPolicy">
     <enum>Qt::NoFocus</enum>
    </property>
@@ -343,13 +308,10 @@
    <property name="movable">
     <bool>false</bool>
    </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
    <property name="iconSize">
     <size>
-     <width>32</width>
-     <height>32</height>
+     <width>40</width>
+     <height>40</height>
     </size>
    </property>
    <property name="toolButtonStyle">
@@ -372,8 +334,8 @@
    <addaction name="actionUsbMassStorage"/>
    <addaction name="actionUsbRndis"/>
    <addaction name="actionEraseModule"/>
-   <addaction name="actionShowLicense"/>
    <addaction name="actionCancel"/>
+   <addaction name="actionShowLicense"/>
   </widget>
   <action name="actionInstall">
    <property name="enabled">
@@ -465,10 +427,7 @@
      <normaloff>:/icons/flashdisk_logo.png</normaloff>:/icons/flashdisk_logo.png</iconset>
    </property>
    <property name="text">
-    <string>Storage (u)</string>
-   </property>
-   <property name="iconText">
-    <string>Storage (u)</string>
+    <string>Mass Storage (u)</string>
    </property>
    <property name="toolTip">
     <string>Enables USB Mass Storage emulation to access internal eMMC partitions.</string>
@@ -504,10 +463,6 @@
    </property>
    <property name="text">
     <string>Erase Flash (c)</string>
-   </property>
-   <property name="iconText">
-    <string>Erase
- Flash (c)</string>
    </property>
    <property name="toolTip">
     <string>Discards all data on flash.</string>
