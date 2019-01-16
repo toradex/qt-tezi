@@ -769,7 +769,7 @@ void MainWindow::discardBlockdev()
                                "After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?"),
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
-        showProgressDialog(tr("Discarding all data on internal eMCC..."));
+        showProgressDialog(tr("Discarding all data on internal eMMC..."));
         /*
          * Note: In the eMMC case we discard all partitons. It is not easy to carve out
          * small portitions of blocks since discard seems to operate on erase bock size.
