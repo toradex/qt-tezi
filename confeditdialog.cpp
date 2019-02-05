@@ -12,7 +12,7 @@
 #include "config.h"
 #include <QDir>
 #include <QFile>
-#include <QtGui/QPlainTextEdit>
+#include <QPlainTextEdit>
 #include <QProcess>
 #include <QMessageBox>
 #include <unistd.h>

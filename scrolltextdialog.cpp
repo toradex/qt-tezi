@@ -1,7 +1,7 @@
 #include "scrolltextdialog.h"
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QtGui/QScrollArea>
+#include <QScrollArea>
 #include <QGridLayout>
 #include <QStyle>
 #include <QDebug>
