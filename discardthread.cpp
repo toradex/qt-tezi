@@ -21,7 +21,7 @@ bool DiscardThread::discard(QString blkdev, qint64 start, qint64 end)
 {
     QByteArray output;
 
-    if (!MultiImageWriteThread::eraseBlockDevice(blkdev.toAscii(), start, end, output)) {
+    if (!MultiImageWriteThread::eraseBlockDevice(blkdev.toLatin1(), start, end, output)) {
         emit error(tr("Discarding content on device %1 failed").arg(blkdev) + "\n" + output);
         return false;
     }

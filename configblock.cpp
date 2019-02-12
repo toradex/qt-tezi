@@ -156,7 +156,7 @@ QString ConfigBlock::getProductName()
     quint16 productId = getProductId();
     if (productId >= ARRAY_SIZE(toradex_modules))
         return QString("UNKNOWN");
-    return QString::fromAscii(toradex_modules[getProductId()]);
+    return QString::fromLatin1(toradex_modules[getProductId()]);
 }
 
 qint64 ConfigBlock::calculateAbsoluteOffset(int blockdevHandle, qint64 offset)
@@ -238,7 +238,7 @@ ConfigBlock *ConfigBlock::readConfigBlockFromMtd(const QString &dev, qint64 offs
 
 ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QString &version, const QString &serial)
 {
-    QByteArray asciiver = version.toAscii();
+    QByteArray asciiver = version.toLatin1();
     ConfigBlockHw hw;
     ConfigBlockEthAddr eth;
 

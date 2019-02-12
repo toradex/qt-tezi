@@ -43,7 +43,7 @@ public:
 
     void save()
     {
-        QByteArray txt = _textEdit->toPlainText().toAscii();
+        QByteArray txt = _textEdit->toPlainText().toLatin1();
 
         if (!_ro && txt != _origData)
         {

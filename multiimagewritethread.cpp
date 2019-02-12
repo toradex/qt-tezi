@@ -81,7 +81,7 @@ void MultiImageWriteThread::run()
     foreach (BlockDevInfo *blockdev, *blockdevs) {
         qDebug() << "Processing blockdev: " << blockdev->name();
 
-        QByteArray blockDevice = "/dev/" + blockdev->name().toAscii();
+        QByteArray blockDevice = "/dev/" + blockdev->name().toLatin1();
         if (!QFile::exists(blockDevice)) {
             emit error(tr("Block device '%1' does not exist").arg(QString(blockDevice)));
             return;
@@ -100,7 +100,7 @@ void MultiImageWriteThread::run()
             QString mtddevname = mtdNameDev.translate(mtdname);
             qDebug() << "Processing mtddev: " << mtddevname;
 
-            QByteArray mtdDevice = "/dev/" + mtddevname.toAscii();
+            QByteArray mtdDevice = "/dev/" + mtddevname.toLatin1();
             if (!QFile::exists(mtdDevice)) {
                 emit error(tr("Mtd device '%1' does not exist").arg(QString(mtdDevice)));
                 return;
