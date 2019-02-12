@@ -1,8 +1,6 @@
 # Qt Project for Toradex Installer
 
-QT       += core gui network dbus
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core gui network dbus concurrent widgets
 
 TARGET = tezi
 target.files = tezi

@@ -22,6 +22,7 @@
 #include <sys/ioctl.h>
 #include <QtCore>
 #include <QtEndian>
+#include <QtConcurrent>
 
 MultiImageWriteThread::MultiImageWriteThread(ConfigBlock *configBlock, ModuleInformation *moduleInformation, QObject *parent) :
     QThread(parent), _configBlock(configBlock), _moduleInformation(moduleInformation),  _extraSpacePerPartition(0), _bytesWritten(0)
