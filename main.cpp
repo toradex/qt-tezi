@@ -23,9 +23,6 @@
 #include <QTime>
 #include <QMessageBox>
 
-#ifdef Q_WS_QWS
-#include <QWSServer>
-#endif
 
 /*
  * Author: Stefan Agner
@@ -37,10 +34,6 @@
 
 void tezi_reboot(int mode)
 {
-#ifdef Q_WS_QWS
-    QWSServer::setBackground(BACKGROUND_COLOR);
-    QWSServer::setCursorVisible(true);
-#endif
 
     // Shut down networking
     QProcess::execute("ifdown -a");
@@ -86,17 +79,11 @@ int main(int argc, char *argv[])
     // Treat long holds as double-clicks
     a.installEventFilter(&lph);
 
-#ifdef Q_WS_QWS
-    QWSServer::setCursorVisible(false);
-#endif
 
     // Set wallpaper and icon, if we have resource files for that
     if (QFile::exists(":/icons/toradex_icon.png"))
         a.setWindowIcon(QIcon(":/icons/toradex_icon.png"));
 
-#ifdef Q_WS_QWS
-        QWSServer::setBackground(BACKGROUND_COLOR);
-#endif
         QSplashScreen *splash = new QSplashScreen(QPixmap(":/wallpaper.png"));
         splash->show();
         QApplication::processEvents();
@@ -131,9 +118,6 @@ int main(int argc, char *argv[])
     }
     bailout = false;*/
 
-#ifdef Q_WS_QWS
-    QWSServer::setCursorVisible(true);
-#endif
 
     LanguageDialog* ld = NULL;
 #ifdef ENABLE_LANGUAGE_CHOOSER

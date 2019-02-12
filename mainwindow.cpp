@@ -53,11 +53,6 @@
 #include <linux/reboot.h>
 #include <sys/time.h>
 
-#ifdef Q_WS_QWS
-#include <QWSServer>
-#include <QMouseDriverFactory>
-#include <QKbdDriverFactory>
-#endif
 
 /* Main window
  *
@@ -79,71 +74,6 @@ MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAuto
     setWindowState(Qt::WindowMaximized);
     setContextMenuPolicy(Qt::NoContextMenu);
     ui->setupUi(this);
-
-#ifdef Q_WS_QWS
-    /* Poor mans hotplug... */
-    _fileSystemWatcher->addPath("/dev/input/");
-    connect(_fileSystemWatcher, SIGNAL(directoryChanged(QString)), this, SLOT(inputDirectoryChanged(QString)));
-
-    /* Make sure we add all input devices initially found... */
-    inputDirectoryChanged("/dev/input/");
-
-    /* If /dev/fb0 might get added on hotplug, make sure we watch /dev/ until fb0 appears */
-    if (hotplugFb) {
-        _fileSystemWatcherFb->addPath("/dev/");
-        connect(_fileSystemWatcherFb, SIGNAL(directoryChanged(QString)), this, SLOT(fbFileChanged(QString)));
-
-        fbFileChanged("/dev/");
-    }
-#endif
-}
-
-void MainWindow::fbFileChanged(const QString& path)
-{
-    static bool fb0Added = false;
-
-    if (QFile::exists("/dev/fb0") && !fb0Added) {
-        qDebug() << "Enabling /dev/fb0...";
-        if (QScreen::instance()->connect("LinuxFB:/dev/fb0")) {
-            QWSServer::instance()->refresh();
-
-            // From QLinuxFbScreenPrivate::openTty()
-            // No blankin' screen, no blinkin' cursor!, no cursor!
-            const char termctl[] = "\033[9;0]\033[?33l\033[?25l\033[?1c";
-            putFileContents("/dev/tty0", termctl);
-            fb0Added = true;
-        }
-    }
-}
-
-void MainWindow::inputDirectoryChanged(const QString& path)
-{
-#ifdef Q_WS_QWS
-    QWSServer* pQwsServer = QWSServer::instance();
-
-    /* Remove all currently loaded Mouse/Keyboard handlers */
-    pQwsServer->closeMouse();
-    pQwsServer->closeKeyboard();
-    //QScreen::instance()->connect()
-
-    QDir dir(path);
-    if (dir.exists()) {
-        qDebug() << "Reload input devices...";
-        QStringList filters;
-        filters << "event*";
-        dir.setNameFilters(filters);
-
-        /* We cannot distingush keyboard/touchscreen/mouse, but there seem to be no harm registering as both... */
-        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System)) {
-            qDebug() << info.absoluteFilePath();
-            QWSMouseHandler *mh = QMouseDriverFactory::create("LinuxInput", info.absoluteFilePath());
-            pQwsServer->setMouseHandler(mh);
-
-            QWSKeyboardHandler *kh = QKbdDriverFactory::create("LinuxInput", info.absoluteFilePath());
-            pQwsServer->setKeyboardHandler(kh);
-        }
-    }
-#endif
 }
 
 bool MainWindow::writeBootConfigurationBlock() {

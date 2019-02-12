@@ -18,8 +18,6 @@
 #include <QDir>
 #include <QLocale>
 #include <QKeyEvent>
-#include <QWSServer>
-#include <QKbdDriverFactory>
 #include <QProcess>
 #include <QSettings>
 
@@ -112,38 +110,7 @@ LanguageDialog::~LanguageDialog()
 
 void LanguageDialog::changeKeyboardLayout(const QString &langcode)
 {
-#ifdef Q_WS_QWS
-    QString keymapfile = QString(KEYMAP_DIR "%1.qmap").arg(langcode);
-
-    if (QFile::exists(keymapfile))
-    {
-        QWSServer *q = QWSServer::instance();
-        q->closeKeyboard();
-
-        // This basically does what QWSServer::openKeyboard is doing...
-        QString device;
-        QString type;
-        QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
-        QStringList keyboards = environment.value("QWS_KEYBOARD", "TTY").split(QLatin1Char(' '));
-
-        for (int i = keyboards.size() - 1; i >= 0; --i) {
-            const QString spec = keyboards.at(i);
-            int colon=spec.indexOf(QLatin1Char(':'));
-            if (colon>=0) {
-                type = spec.left(colon);
-                device = spec.mid(colon+1);
-                device += ":keymap=" + keymapfile;
-            } else {
-                type = spec;
-                device = "keymap=" + keymapfile;
-            }
-            QWSKeyboardHandler *handler = QKbdDriverFactory::create(type, device);
-            q->setKeyboardHandler(handler);
-        }
-    }
-#else
     Q_UNUSED(langcode)
-#endif
 
         // TODO: Save new language choice to INI files
 }

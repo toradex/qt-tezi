@@ -131,10 +131,6 @@ protected slots:
     void onCompleted();
     void onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer);
 
-    /* QFileSystemWatcher */
-    void inputDirectoryChanged(const QString& path);
-    void fbFileChanged(const QString& path);
-
 private slots:
     /* UI events */
     void on_actionInstall_triggered();
