@@ -20,8 +20,8 @@ QPixmap &TwoIconsDelegate::setAlpha(QPixmap &pix, int val) const
     QPixmap alpha = pix;
     QPainter p(&alpha);
     p.fillRect(alpha.rect(), QColor(val, val, val));
+    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
     p.end();
-    pix.setAlphaChannel(alpha);
     return pix;
 }
 
