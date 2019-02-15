@@ -41,6 +41,7 @@ using valijson::adapters::RapidJsonAdapter;
 
 QVariant Json::parse(const QByteArray &json)
 {
+#if 0
     QJson::Parser parser;
     bool ok;
     QVariant result = parser.parse (json, &ok);
@@ -52,10 +53,13 @@ QVariant Json::parse(const QByteArray &json)
     }
 
     return result;
+#endif
+    return QVariant();
 }
 
 QVariant Json::loadFromFile(const QString &filename)
 {
+#if 0
     QFile f(filename);
     QJson::Parser parser;
     bool ok;
@@ -76,6 +80,8 @@ QVariant Json::loadFromFile(const QString &filename)
     }
 
     return result;
+#endif
+    return QVariant();
 }
 
 /*
@@ -146,6 +152,7 @@ bool Json::validate(const QByteArray &schemastr, const QByteArray &filestr, QStr
 
 QByteArray Json::serialize(const QVariant &json)
 {
+#if 0
     QJson::Serializer serializer;
     bool ok;
 
@@ -158,10 +165,13 @@ QByteArray Json::serialize(const QVariant &json)
     }
 
     return result;
+#endif
+    return NULL;
 }
 
 void Json::saveToFile(const QString &filename, const QVariant &json)
 {
+#if 0
     QFile f(filename);
     QJson::Serializer serializer;
     bool ok;
@@ -179,4 +189,5 @@ void Json::saveToFile(const QString &filename, const QVariant &json)
     {
         qDebug() << "Error serializing json to file:" << filename;
     }
+#endif
 }
