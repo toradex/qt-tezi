@@ -7,7 +7,6 @@ target.files = tezi
 target.path = /var/volatile
 INSTALLS = target
 TEMPLATE = app
-LIBS += -lqjson
 CONFIG += link_pkgconfig
 PKGCONFIG += libusbgx
 

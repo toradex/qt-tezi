@@ -1,6 +1,4 @@
 #include "json.h"
-#include <qjson/parser.h>
-#include <qjson/serializer.h>
 #include <QDebug>
 #include <QStringBuilder>
 #include <QFile>
