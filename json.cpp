@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QStringBuilder>
 #include <QFile>
+#include <QJsonDocument>
 
 
 #include <fstream>
@@ -41,6 +42,14 @@ using valijson::adapters::RapidJsonAdapter;
 
 QVariant Json::parse(const QByteArray &json)
 {
+    QJsonDocument doc(QJsonDocument::fromJson(json));
+    if (doc.isNull())
+    {
+        qDebug() << "Error parsing json";
+        qDebug() << "Json input:" << json;
+    }
+
+    return doc.toVariant();
 #if 0
     QJson::Parser parser;
     bool ok;
@@ -59,6 +68,24 @@ QVariant Json::parse(const QByteArray &json)
 
 QVariant Json::loadFromFile(const QString &filename)
 {
+    QFile f(filename);
+
+    if (!f.open(f.ReadOnly))
+    {
+        qDebug() << "Error opening file:" << filename;
+        return QVariant();
+    }
+
+    QByteArray json = f.readAll();
+    QJsonDocument doc(QJsonDocument::fromJson(json));
+    f.close();
+
+    if (doc.isNull())
+    {
+        qDebug() << "Error parsing json file:" << filename;
+    }
+
+    return doc.toVariant();
 #if 0
     QFile f(filename);
     QJson::Parser parser;
@@ -152,6 +179,8 @@ bool Json::validate(const QByteArray &schemastr, const QByteArray &filestr, QStr
 
 QByteArray Json::serialize(const QVariant &json)
 {
+    QJsonDocument doc(QJsonDocument::fromVariant(json));
+    return doc.toBinaryData();
 #if 0
     QJson::Serializer serializer;
     bool ok;
@@ -171,6 +200,22 @@ QByteArray Json::serialize(const QVariant &json)
 
 void Json::saveToFile(const QString &filename, const QVariant &json)
 {
+    QFile f(filename);
+    QJsonDocument doc(QJsonDocument::fromVariant(json));
+
+    if (!f.open(f.WriteOnly))
+    {
+        qDebug() << "Error opening file for writing: " << filename;
+        return;
+    }
+
+    QByteArray data = doc.toBinaryData();
+    if (f.write(data) != data.count())
+    {
+        qDebug() << "Error writing data to file: " << filename;
+        return;
+    }
+
 #if 0
     QFile f(filename);
     QJson::Serializer serializer;
