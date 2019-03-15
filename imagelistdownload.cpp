@@ -73,6 +73,7 @@ void ImageListDownload::downloadImageJsonCompleted()
     QByteArray json = rd->data();
     QVariantMap imagemap = Json::parse(json).toMap();
 
+    int index = rd->index();
     QString baseurl = getUrlPath(rd->urlString());
     QString basename = getUrlTopDir(baseurl);
     QString filename = getUrlImageFileName(rd->urlString());
@@ -82,7 +83,7 @@ void ImageListDownload::downloadImageJsonCompleted()
         folder += '_';
     d.mkpath(folder);
     imagemap["folder"] = folder;
-    imagemap["index"] = rd->index();
+    imagemap["index"] = index;
 
     if (!imagemap.contains("nominal_size"))
         imagemap["nominal_size"] = MediaPollThread::calculateNominalSize(imagemap);
@@ -106,7 +107,7 @@ void ImageListDownload::downloadImageJsonCompleted()
             iconurl = imagemap["baseurl"].toString() + icon;
 
         _numDownloads++;
-        ResourceDownload *rd = new ResourceDownload(_netaccess, iconurl, icon);
+        ResourceDownload *rd = new ResourceDownload(_netaccess, iconurl, icon, index);
         connect(rd, SIGNAL(failed()), this, SLOT(downloadIconFailed()));
         connect(rd, SIGNAL(completed()), this, SLOT(downloadIconCompleted()));
         connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
@@ -178,7 +179,7 @@ void ImageListDownload::downloadIconCompleted()
     for (QList<QVariantMap>::iterator i = _netImages.begin(); i != _netImages.end(); ++i)
     {
         // Assign icon...
-        if (i->value("icon") == rd->saveAs())
+        if (i->value("index") == rd->index())
             i->insert("iconimage", rd->data());
     }
 }
