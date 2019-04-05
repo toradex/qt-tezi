@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QTime>
 #include <QMessageBox>
+#include <QFont>
 
 
 /*
@@ -78,6 +79,11 @@ int main(int argc, char *argv[])
 
     // Treat long holds as double-clicks
     a.installEventFilter(&lph);
+
+    // Set default font, required for Qt5/Wayland
+    QFont font = QApplication::font();
+    font.setPointSize(12);
+    QApplication::setFont(font);
 
 
     // Set wallpaper and icon, if we have resource files for that
