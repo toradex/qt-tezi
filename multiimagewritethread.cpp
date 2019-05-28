@@ -1047,7 +1047,7 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
      * as stored in the tar file when extracting.
      */
     if (linuxfs)
-        tarargs = "--xattrs --numeric-owner";
+        tarargs = "--xattrs --xattrs-include='*' --numeric-owner";
     else
         tarargs = "--no-same-owner";
 
