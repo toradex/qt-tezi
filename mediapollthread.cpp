@@ -84,6 +84,10 @@ void MediaPollThread::checkSDcard()
                 continue;
         }
 
+        /* Avoid imx8 I/O hang with rpmb partition on emmcs */
+        if (blockdev.contains("rpmb"))
+            continue;
+
         /* Try raw blockdev without any partition table... */
         processMedia(SOURCE_SDCARD, blockdev);
 
