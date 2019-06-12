@@ -300,7 +300,7 @@ void MainWindow::addImages(const QListVariantMap images)
             if (isInstaller) {
                 bool isNewer = false;
                 QStringList installerversion = QString(VERSION_NUMBER).split('.');
-                QStringList imageversion = version.remove(QRegExp("[^0-9|.]")).split('.');
+                QStringList imageversion = QString(version).remove(QRegExp("[^0-9|.]")).split('.');
 
                 /* Get minimal version length */
                 int versionl = installerversion.length();
