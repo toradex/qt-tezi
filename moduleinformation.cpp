@@ -168,7 +168,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = false;
     } else if (socid == "i.MX8QM") {
         // i.MX8QM
-        productIds << 37;
+        productIds << 37 << 47 << 48 << 49;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX8QXP") {
