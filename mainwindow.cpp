@@ -31,7 +31,6 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <QScreen>
-#include <QSplashScreen>
 #include <QDesktopWidget>
 #include <QSettings>
 #include <QtNetwork/QNetworkAccessManager>
@@ -63,11 +62,11 @@
  *
  */
 
-MainWindow::MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent) :
+MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
-    _splash(splash), _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
+    _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
     _imageListDownloadsActive(0), _netaccess(NULL)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);

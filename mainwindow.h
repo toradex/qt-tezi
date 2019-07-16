@@ -21,7 +21,6 @@
 #include "feedserver.h"
 #include <QMainWindow>
 #include <QModelIndex>
-#include <QSplashScreen>
 #include <QMessageBox>
 #include <QTimer>
 #include <QTime>
@@ -51,7 +50,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QSplashScreen *splash, LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent = 0);
+    explicit MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent = 0);
     ~MainWindow();
     void show();
     void showProgressDialog(const QString &labelText);
@@ -68,7 +67,6 @@ protected:
     QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
     int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll, _newInstallerAvailable;
-    QSplashScreen *_splash;
     LanguageDialog *_ld;
     bool _wasOnline, _wasRndis;
     bool _downloadNetwork, _downloadRndis;

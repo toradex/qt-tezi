@@ -14,7 +14,6 @@
 #include <QApplication>
 #include <QStyle>
 #include <QDesktopWidget>
-#include <QSplashScreen>
 #include <QFile>
 #include <QIcon>
 #include <QProcess>
@@ -86,12 +85,10 @@ int main(int argc, char *argv[])
     QApplication::setFont(font);
 
 
-    // Set wallpaper and icon, if we have resource files for that
+    // Set icon, if we have a resource file for that
     if (QFile::exists(":/icons/toradex_icon.png"))
         a.setWindowIcon(QIcon(":/icons/toradex_icon.png"));
 
-        QSplashScreen *splash = new QSplashScreen(QPixmap(":/wallpaper.png"));
-        splash->show();
         QApplication::processEvents();
 
     // If -runinstaller is not specified, only continue if SHIFT is pressed, GPIO is triggered,
@@ -134,7 +131,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Main window in the middle of screen
-    MainWindow mw(splash, ld, autoinstall, hotplugfb);
+    MainWindow mw(ld, autoinstall, hotplugfb);
     int mode = LINUX_POWEROFF;
 
     if (mw.initialize()) {

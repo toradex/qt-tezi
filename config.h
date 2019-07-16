@@ -16,9 +16,6 @@
 /* Highlight color of installed OS */
 #define INSTALLED_OS_BACKGROUND_COLOR  QColor(0xef,0xff,0xef)
 
-/* Places background.png resource file in center of screen */
-#define CENTER_BACKGROUND_IMAGE
-
 /* Disable language selection */
 #undef ENABLE_LANGUAGE_CHOOSER
 
