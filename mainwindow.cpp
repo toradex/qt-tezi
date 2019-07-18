@@ -1055,8 +1055,10 @@ bool MainWindow::downloadLists(const enum ImageSource source)
     }
 
     if (_imageListDownloadsActive > 0)
+    {
         setWorkingInBackground(true, tr("Reloading images from network..."));
-
+        this->ui->actionRefreshCloud->setDisabled(true);
+    }
     return _imageListDownloadsActive > 0;
 }
 
@@ -1067,6 +1069,7 @@ void MainWindow::onImageListDownloadFinished()
 
     if (_imageListDownloadsActive == 0)
         setWorkingInBackground(false);
+    this->ui->actionRefreshCloud->setDisabled(false);
 }
 
 void MainWindow::onImageListDownloadError(const QString &msg)
