@@ -80,7 +80,7 @@ LanguageDialog::LanguageDialog(const QString &defaultLang, const QString &defaul
         /* QString languagename = QLocale::languageToString(loc.language()); */
         /* should Display languagename in native language, e.g. Deutsch, Français  */
         QString languagename = loc.nativeLanguageName();
-        QString iconfilename = ":/icons/"+langcode+".png";
+        QString iconfilename = ":/icons/" + langcode + ".png";
 
         if (QFile::exists(iconfilename))
             ui->langCombo->addItem(QIcon(iconfilename), languagename, langcode);
@@ -136,10 +136,10 @@ void LanguageDialog::changeLanguage(const QString &langcode)
         /* qt_<languagecode>.qm are generic language translation files provided by the Qt team
          * this can translate common things like the "OK" and "Cancel" button of dialog boxes
          * Unfortuneately, they are not available for all languages, but use one if we have one. */
-        if ( QFile::exists(QT_LANG_DIR "/qt_"+langcode+".qm"))
+        if ( QFile::exists(QT_LANG_DIR "/qt_" + langcode + ".qm"))
         {
             _qttrans = new QTranslator();
-            _qttrans->load("qt_" + langcode+".qm", QT_LANG_DIR);
+            _qttrans->load("qt_" + langcode + ".qm", QT_LANG_DIR);
             QApplication::installTranslator(_qttrans);
         }
 
@@ -147,10 +147,10 @@ void LanguageDialog::changeLanguage(const QString &langcode)
          * The translation_<languagecode>.qm file is specific to our application
          * this files are built-in resources (hence :).
          */
-        if ( QFile::exists(":/translation_"+langcode+".qm"))
+        if ( QFile::exists(":/translation_" + langcode + ".qm"))
         {
             _trans = new QTranslator();
-            _trans->load(":/translation_"+langcode+".qm");
+            _trans->load(":/translation_" + langcode + ".qm");
             QApplication::installTranslator(_trans);
         }
     }

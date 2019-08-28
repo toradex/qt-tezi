@@ -17,9 +17,9 @@ GpioInput::GpioInput(int number)
     _numberStr = QByteArray::number(_number);
     QFile f("/sys/class/gpio/export");
     f.open(f.WriteOnly);
-    f.write(_numberStr+"\n");
+    f.write(_numberStr + "\n");
     f.close();
-    f.setFileName("/sys/class/gpio/gpio"+_numberStr+"/direction");
+    f.setFileName("/sys/class/gpio/gpio" + _numberStr + "/direction");
     f.open(f.WriteOnly);
     f.write("in\n");
     f.close();
@@ -29,7 +29,7 @@ GpioInput::~GpioInput()
 {
     QFile f("/sys/class/gpio/unexport");
     f.open(f.WriteOnly);
-    f.write(_numberStr+"\n");
+    f.write(_numberStr + "\n");
     f.close();
 }
 
@@ -37,7 +37,7 @@ int GpioInput::value()
 {
     bool ok;
 
-    QFile f("/sys/class/gpio/gpio"+_numberStr+"/value");
+    QFile f("/sys/class/gpio/gpio" + _numberStr + "/value");
     f.open(f.ReadOnly);
     int value = f.readAll().trimmed().toInt(&ok);
     f.close();

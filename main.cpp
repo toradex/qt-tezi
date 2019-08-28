@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     QString defaultKeyboard = "us";
 
     // Process command-line arguments
-    for (int i=1; i<argc; i++)
+    for (int i = 1; i < argc; i++)
     {
         // Flag to indicate first boot
         if (strcmp(argv[i], "-autoinstall") == 0)

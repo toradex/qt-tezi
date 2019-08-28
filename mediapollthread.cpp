@@ -173,7 +173,7 @@ QList<QFileInfo> MediaPollThread::findImages(const QString &path, int depth)
         it.next();
         QFileInfo fi = it.fileInfo();
         if (fi.isDir() && depth < 3)
-            images << findImages(fi.filePath(), depth+1);
+            images << findImages(fi.filePath(), depth + 1);
         if (fi.isFile())
             images << fi;
     }

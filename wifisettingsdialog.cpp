@@ -126,14 +126,14 @@ void WifiSettingsDialog::onBSSAdded(const QDBusObjectPath &path)
 
     QListWidgetItem *item = new QListWidgetItem(QIcon(icon), ssid);
     item->setData(Qt::UserRole, properties);
-    item->setData(Qt::UserRole+1, signal);
+    item->setData(Qt::UserRole + 1, signal);
     if (path == _currentBSS)
         item->setData(SecondIconRole, QIcon(":/icons/tick.png"));
 
     /* Insert the discovered BSS before entries with lower strength */
-    for (int i=0; i<ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
-        if (ui->list->item(i)->data(Qt::UserRole+1).toInt() < signal)
+        if (ui->list->item(i)->data(Qt::UserRole + 1).toInt() < signal)
         {
             ui->list->insertItem(i, item);
             if (path == _currentBSS)
@@ -256,7 +256,7 @@ void WifiSettingsDialog::accept()
 bool WifiSettingsDialog::connectToWifi(const QString &ssid, const QString &username, const QString &password, bool useWPS)
 {
     /* Clear the icon showing the current connection (if any) */
-    for (int i=0; i< ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
         QListWidgetItem *wi = ui->list->item(i);
         if ( wi->data(SecondIconRole).isValid() )

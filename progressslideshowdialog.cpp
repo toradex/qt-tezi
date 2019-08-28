@@ -42,7 +42,7 @@ ProgressSlideshowDialog::ProgressSlideshowDialog(const QStringList &slidesDirect
 
             foreach (QString slide, s)
             {
-                _slides.append(slidesDirectory+"/"+slide);
+                _slides.append(slidesDirectory + "/" + slide);
             }
         }
     }

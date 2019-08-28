@@ -406,7 +406,7 @@ void MainWindow::addImages(const QListVariantMap images)
     QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
     dummyicon.fill();
 
-    for (int i=0; i< ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
         if (ui->list->item(i)->icon().isNull())
         {
@@ -445,7 +445,7 @@ void MainWindow::removeTemporaryFiles(const QVariantMap entry)
 
 void MainWindow::removeImagesByBlockdev(const QString blockdev)
 {
-    for (int i=0; i< ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
         QListWidgetItem *item = ui->list->item(i);
         QVariantMap entry = item->data(Qt::UserRole).toMap();
@@ -458,7 +458,7 @@ void MainWindow::removeImagesByBlockdev(const QString blockdev)
 
 void MainWindow::removeImagesBySource(enum ImageSource source)
 {
-    for (int i=0; i< ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
         QListWidgetItem *item = ui->list->item(i);
         QVariantMap entry = item->data(Qt::UserRole).toMap();
@@ -598,7 +598,7 @@ void MainWindow::installImage(QVariantMap entry)
         QString url = entry.value("baseurl").value<QString>();
 
         if (entry.contains("marketing"))
-            downloadMetaFile(url + entry.value("marketing").toString(), folder+"/marketing.tar");
+            downloadMetaFile(url + entry.value("marketing").toString(), folder + "/marketing.tar");
 
         if (entry.contains("prepare_script")) {
             QString script = entry.value("prepare_script").toString();
@@ -1081,7 +1081,7 @@ void MainWindow::onImageListDownloadError(const QString &msg)
 
 QListWidgetItem *MainWindow::findItem(const QVariant &name)
 {
-    for (int i=0; i<ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
         QListWidgetItem *item = ui->list->item(i);
         QVariantMap m = item->data(Qt::UserRole).toMap();
@@ -1097,7 +1097,7 @@ QList<QListWidgetItem *> MainWindow::selectedItems()
 {
     QList<QListWidgetItem *> selected;
 
-    for (int i=0; i < ui->list->count(); i++)
+    for (int i = 0; i < ui->list->count(); i++)
     {
         QListWidgetItem *item = ui->list->item(i);
         if (item->checkState())
@@ -1269,8 +1269,8 @@ void MainWindow::startImageWrite(QVariantMap &entry)
     }
 
     slidesFolders.clear();
-    if (QFile::exists(slidesFolder+"/slides_vga"))
-        slidesFolders.append(slidesFolder+"/slides_vga");
+    if (QFile::exists(slidesFolder + "/slides_vga"))
+        slidesFolders.append(slidesFolder + "/slides_vga");
 
     _imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), imageSource);

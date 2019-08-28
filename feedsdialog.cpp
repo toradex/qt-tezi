@@ -76,7 +76,7 @@ void FeedsDialog::on_addPushButton_clicked(void)
 void FeedsDialog::accept()
 {
     _networkFeedServerList.clear();
-    for (int i=0; i < ui->serverListWidget->count(); i++)
+    for (int i = 0; i < ui->serverListWidget->count(); i++)
     {
         QListWidgetItem *item = ui->serverListWidget->item(i);
         FeedServer server = item->data(Qt::UserRole).value<FeedServer>();

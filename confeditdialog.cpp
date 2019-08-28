@@ -76,7 +76,7 @@ ConfEditDialog::ConfEditDialog(const QString &partition, QWidget *parent) :
     ui->setupUi(this);
     ui->tabWidget->clear();
 
-    if (QProcess::execute("mount -t vfat "+partition+" /boot") != 0)
+    if (QProcess::execute("mount -t vfat " + partition + " /boot") != 0)
     {
         QMessageBox::critical(this,
                               tr("Error"),

@@ -483,7 +483,7 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
 {
     /* Write partition table using sfdisk */
     QByteArray partitionTable;
-    for (int i=1; i <= partitionMap.keys().last(); i++)
+    for (int i = 1; i <= partitionMap.keys().last(); i++)
     {
         if (partitionMap.contains(i))
         {
@@ -530,7 +530,7 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
         return false;
     }
 
-    for (int i=1; i <= partitionMap.keys().last(); i++) {
+    for (int i = 1; i <= partitionMap.keys().last(); i++) {
         if (partitionMap.contains(i))
         {
             BlockDevPartitionInfo *p = partitionMap.value(i);
@@ -773,11 +773,11 @@ bool MultiImageWriteThread::processContent(ContentInfo *content, QByteArray part
     }
     else if (!isLabelAvailable(label))
     {
-        for (int i=0; i<10; i++)
+        for (int i = 0; i < 10; i++)
         {
-            if (isLabelAvailable(label+QByteArray::number(i)))
+            if (isLabelAvailable(label + QByteArray::number(i)))
             {
-                label = label+QByteArray::number(i);
+                label = label + QByteArray::number(i);
                 break;
             }
         }
