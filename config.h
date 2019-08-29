@@ -3,7 +3,7 @@
 
 /* Version number */
 #ifndef VERSION_NUMBER
-#define VERSION_NUMBER "2.0b1"
+#define VERSION_NUMBER "2.0b3"
 #endif
 
 /* Supported config format */
