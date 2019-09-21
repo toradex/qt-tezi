@@ -34,9 +34,10 @@
 
 void tezi_reboot(int mode)
 {
-
     // Shut down networking
     QProcess::execute("ifdown -a");
+    // Save system clock into file
+    QProcess::execute("/etc/init.d/save-rtc.sh");
     // Unmount file systems
     QProcess::execute("umount -ar");
     ::sync();
