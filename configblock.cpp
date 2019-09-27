@@ -174,10 +174,12 @@ QString ConfigBlock::getBoardRev()
 QString ConfigBlock::getProductName()
 {
     quint16 productId = getProductId();
-    if (productId >= ARRAY_SIZE(toradex_modules))
+    if (productId >= ARRAY_SIZE(toradex_modules)) {
         if (isTdxPrototypeProdid(productId))
             return QString::fromLatin1(toradex_prototype_modules[productId]);
+    } else {
         return QString("UNKNOWN");
+    }
     return QString::fromLatin1(toradex_modules[productId]);
 }
 
