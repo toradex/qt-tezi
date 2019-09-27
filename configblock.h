@@ -5,6 +5,7 @@
 #include <QByteArray>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define PROTOTYPE_RANGE_MIN 2600
 
 #define TAG_VALID	0xcf01
 #define TAG_MAC		0x0000
@@ -14,6 +15,7 @@
 #define TAG_FLAG_VALID	0x1
 
 extern const char* const toradex_modules[];
+extern const char* const toradex_prototype_modules[];
 
 struct ConfigBlockTag {
     quint32 len:14;
@@ -57,6 +59,7 @@ public:
 private:
     QByteArray _cb;
     QByteArray _mac, _hw;
+    bool isTdxPrototypeProdid(quint16 prodid);
 signals:
 
 public slots:

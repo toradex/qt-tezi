@@ -63,6 +63,12 @@ const char* const toradex_modules[] = {
 	[50] = "Colibri iMX8 QuadXPlus 2GB IT",
 	[51] = "Colibri iMX8 DualX 1GB Wi-Fi / Bluetooth",
 	[52] = "Colibri iMX8 DualX 1GB",
+	[53] = "Apalis iMX8 QuadXPlus 2GB ECC IT",
+	[54] = "Apalis iMX8 DualXPlus 1GB",
+};
+
+const char * const toradex_prototype_modules[] = {
+	[0] = "Apalis iMX8QXP 2GB ECC Wi / BT IT PROTO",
 };
 
 ConfigBlock::ConfigBlock(const QByteArray &cb, QObject *parent) : QObject(parent),
@@ -148,6 +154,13 @@ QString ConfigBlock::getProductNumber()
     return QString::number(getProductId()).rightJustified(4, '0');
 }
 
+bool ConfigBlock::isTdxPrototypeProdid(quint16 prodid)
+{
+       int prototype_range_max = PROTOTYPE_RANGE_MIN + ARRAY_SIZE(toradex_prototype_modules);
+
+       return ((prodid >= PROTOTYPE_RANGE_MIN) && (prodid < prototype_range_max));
+}
+
 QString ConfigBlock::getBoardRev()
 {
     ConfigBlockHw *hw = (ConfigBlockHw *)_hw.data();
@@ -162,8 +175,10 @@ QString ConfigBlock::getProductName()
 {
     quint16 productId = getProductId();
     if (productId >= ARRAY_SIZE(toradex_modules))
+        if (isTdxPrototypeProdid(productId))
+            return QString::fromLatin1(toradex_prototype_modules[productId]);
         return QString("UNKNOWN");
-    return QString::fromLatin1(toradex_modules[getProductId()]);
+    return QString::fromLatin1(toradex_modules[productId]);
 }
 
 qint64 ConfigBlock::calculateAbsoluteOffset(int blockdevHandle, qint64 offset)
