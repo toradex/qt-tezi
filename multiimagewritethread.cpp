@@ -745,11 +745,27 @@ bool MultiImageWriteThread::processFileCopy(const QString &baseurl, const QStrin
         updateStatus(tr("Downloading and extracting file(s)"));
 
     if (!tarball.isEmpty())
-        resultfile = untar(baseurl, tarball, linuxfs, hasacl);
+        resultfile = untar(baseurl, tarball, "/", linuxfs, hasacl);
 
     if (!filelist.isEmpty()) {
-        foreach(QString file,filelist) {
-            if (!copy(baseurl, file)) {
+        foreach(QString entry, filelist) {
+            QStringList items = entry.split( ":" );
+            QString source = items.value(0);
+            QString destdir = "/";
+            bool unpack = false;
+            if (items.length() >= 2) {
+                if (!items.value(1).isEmpty())
+                    destdir = items.value(1);
+                if (items.length() >= 3)
+                    unpack = QVariant(items.value(2)).toBool();
+            }
+
+            if (unpack) {
+                if (!untar(baseurl, source, destdir, linuxfs, hasacl)) {
+                    resultfilelist = false;
+                    break;
+                }
+            } else if (!copy(baseurl, source, destdir)) {
                 resultfilelist = false;
                 break;
             }
@@ -1014,7 +1030,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
     return true;
 }
 
-bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, const QString &md5sum)
+bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, const QString &destdir, const QString &md5sum)
 {
     QString getfile;
     if (!baseurl.isEmpty())
@@ -1026,15 +1042,20 @@ bool MultiImageWriteThread::copy(const QString &baseurl, const QString &file, co
     if (md5sum != "")
         md5sumcmd = "tee " MD5SUM_NAMEDPIPE " | ";
 
+    QDir dest(TEMP_MOUNT_FOLDER "/" + destdir);
+    if (!dest.exists(destdir)){
+      dest.mkpath(".");
+    }
+
     /* Use pipe viewer for actual processing speed */
     QString cmd = QString("%1 | %2" PIPEVIEWER_COMMAND " | cat > %3")
-        .arg(getfile, md5sumcmd, TEMP_MOUNT_FOLDER "/" + file);
+        .arg(getfile, md5sumcmd, dest.absolutePath() + "/" + file);
 
     qDebug() << "Copying file" << file;
     return runwritecmd(cmd, md5sum != "");
 }
 
-bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball, bool linuxfs, bool hasacl)
+bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball, const QString &destdir, bool linuxfs, bool hasacl)
 {
     QString getfile;
     if (!baseurl.isEmpty())
@@ -1066,8 +1087,13 @@ bool MultiImageWriteThread::untar(const QString &baseurl, const QString &tarball
      */
     tarargs += " --warning=no-timestamp --warning=no-unknown-keyword";
 
+    QDir dest(TEMP_MOUNT_FOLDER "/" + destdir);
+    if (!dest.exists(destdir)){
+      dest.mkpath(".");
+    }
+
     QString cmd = QString("%1 | %2 | tar -x %3 -C %4")
-        .arg(getfile, uncompresscmd, tarargs, TEMP_MOUNT_FOLDER);
+        .arg(getfile, uncompresscmd, tarargs, dest.absolutePath());
 
     qDebug() << "Uncompress file" << tarball;
     return runwritecmd(cmd, false);

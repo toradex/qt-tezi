@@ -8,7 +8,7 @@
 
 /* Supported config format */
 #define IMAGE_LIST_CONFIG_FORMAT 1
-#define IMAGE_CONFIG_FORMAT 2
+#define IMAGE_CONFIG_FORMAT 3
 
 /* Color of the background */
 #define BACKGROUND_COLOR  Qt::black

@@ -56,8 +56,8 @@ protected:
     bool runwritecmd(const QString &cmd, bool checkmd5sum);
     bool pollpipeview();
     bool partclone_restore(const QString &baseurl, const QString &image, const QString &device);
-    bool untar(const QString &baseurl, const QString &tarball, bool linuxfs, bool hasacl);
-    bool copy(const QString &baseurl, const QString &file, const QString &md5sum = "");
+    bool untar(const QString &baseurl, const QString &tarball, const QString &destdir, bool linuxfs, bool hasacl);
+    bool copy(const QString &baseurl, const QString &file, const QString &destdir, const QString &md5sum = "");
     bool dd(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool nandflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile);
     bool ubiflash(const QString &baseurl, const QString &device, RawFileInfo *rawFile);

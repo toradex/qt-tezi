@@ -25,7 +25,7 @@
                     "type": "string"
                 },
                 "filelist": {
-                    "description": "Only if filesystem_type is a filesystem: List of filenames which get copied into the new file system",
+                    "description": "Only if filesystem_type is a filesystem: List of filenames which get copied into the new file system, new format: srcfile:destdir:unpack. If destdir is not set, the file will be copied to /, if unpack is set to 'true', and the srcfile is a zip/tar.gz/tar.xz/tar.bz2, it will be extracted into destdir. Configuration format 3 or newer is needed to use this format, or you shall use 'srcfile' only for older Configuration formats.",
                     "type": "array",
                     "items": {
                         "type": "string"
