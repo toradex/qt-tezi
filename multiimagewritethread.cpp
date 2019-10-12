@@ -1210,7 +1210,7 @@ QString MultiImageWriteThread::getUncompressCommand(const QString &file, bool md
     else if (file.endsWith(".zip"))
     {
         /* Note: the image must be the only file inside the .zip */
-        cmd += "unzip -p";
+        cmd += "funzip";
     }
     else
     {
