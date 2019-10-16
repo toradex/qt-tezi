@@ -170,12 +170,17 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         // i.MX8QM
         productIds << 37 << 47 << 48 << 49;
         storageClass = StorageClass::Block;
-        rebootWorks = false;
+        rebootWorks = true;
     } else if (socid == "i.MX8QXP") {
-        // i.MX8QM
-        productIds << 38 << 50 << 51 << 52;
+        // i.MX8QXP
+        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
+        if (compatible.contains("apalis")) {
+            productIds << 46 << 53 << 54 << 2600;
+        } else {
+            productIds << 38 << 50 << 51 << 52;
+        }
         storageClass = StorageClass::Block;
-        rebootWorks = false;
+        rebootWorks = true;
     } else {
         // Downstream the tegras use the machine file instead
         QFile machineFile("/sys/bus/soc/devices/soc0/machine");
