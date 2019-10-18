@@ -53,13 +53,13 @@ public:
     QString getProductNumber();
     QString getBoardRev();
     QString getProductName();
+    bool isTdxPrototypeProdid(quint16 prodid);
 
     bool needsWrite;
 
 private:
     QByteArray _cb;
     QByteArray _mac, _hw;
-    bool isTdxPrototypeProdid(quint16 prodid);
 signals:
 
 public slots:
