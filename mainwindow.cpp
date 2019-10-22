@@ -190,16 +190,19 @@ bool MainWindow::initialize() {
     FeedServer srv;
     srv.label = "Toradex Image Server";
     srv.url = DEFAULT_IMAGE_SERVER;
+    srv.source = SOURCE_NETWORK;
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
     srv.label = "Toradex 3rd Party Image Server";
     srv.url = DEFAULT_3RDPARTY_IMAGE_SERVER;
+    srv.source = SOURCE_NETWORK;
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
     srv.label = "Toradex Continuous Integration Server (testing)";
     srv.url = DEFAULT_CI_IMAGE_SERVER;
+    srv.source = SOURCE_NETWORK;
     srv.enabled = false;
     _networkFeedServerList.append(srv);
 
@@ -477,6 +480,10 @@ void MainWindow::addNewImageUrl(const QString url)
     FeedServer server;
     server.label = tr("Custom Server from Media");
     server.url = url;
+    if (url.contains(RNDIS_ADDRESS))
+        server.source = SOURCE_RNDIS;
+    else
+        server.source = SOURCE_NETWORK;
     server.enabled = true;
 
     int index = _networkFeedServerList.indexOf(server);
@@ -494,13 +501,12 @@ void MainWindow::addNewImageUrl(const QString url)
             _networkFeedServerList[index].enabled = true;
     }
 
-    if (url.contains(RNDIS_ADDRESS)) {
+    removeImagesBySource(server.source);
+
+    if (server.source == SOURCE_RNDIS)
         _downloadRndis = true;
-        removeImagesBySource(SOURCE_RNDIS);
-    } else {
+    else if (server.source == SOURCE_NETWORK)
         _downloadNetwork = true;
-        removeImagesBySource(SOURCE_NETWORK);
-    }
 }
 
 
@@ -1029,19 +1035,8 @@ bool MainWindow::downloadLists(const enum ImageSource source)
 
     foreach (FeedServer server, _networkFeedServerList)
     {
-        bool isRndis = server.url.contains(RNDIS_ADDRESS);
-
-        switch (source) {
-        case SOURCE_NETWORK:
-            if (isRndis)
-                continue;
-            break;
-        case SOURCE_RNDIS:
-            if (!isRndis)
-                continue;
-        default:
+        if (server.source != source)
             continue;
-        }
 
         if (!server.enabled)
             continue;
