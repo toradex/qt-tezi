@@ -1207,6 +1207,10 @@ QString MultiImageWriteThread::getUncompressCommand(const QString &file, bool md
     {
         cmd += "lz4 -dc";
     }
+    else if (file.endsWith(".zst"))
+    {
+        cmd += "zstd -dc";
+    }
     else if (file.endsWith(".zip"))
     {
         /* Note: the image must be the only file inside the .zip */
