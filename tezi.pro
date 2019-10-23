@@ -9,6 +9,7 @@ INSTALLS = target
 TEMPLATE = app
 CONFIG += link_pkgconfig
 PKGCONFIG += libusbgx
+LIBS += -lqtzeroconf-browser -lqtzeroconf-common
 
 system(sh updateqm.sh 2>/dev/null)
 

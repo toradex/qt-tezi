@@ -28,6 +28,7 @@
 #include <QSet>
 #include <QFileSystemWatcher>
 #include <QHostInfo>
+#include "qtzeroconf/zconfservicebrowser.h"
 
 enum RebootMode {
     LINUX_UNKNOWN,
@@ -84,6 +85,7 @@ protected:
     MultiImageWriteThread *_imageWriteThread;
     QList<FeedServer> _networkFeedServerList;
     int _internetHostLookupId;
+    ZConfServiceBrowser *_browser;
 
     void setWorkingInBackground(bool working, const QString &labelText = "");
     void updateModuleInformation();
@@ -131,6 +133,10 @@ protected slots:
     void onError(const QString &msg);
     void onCompleted();
     void onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer);
+
+    /* ZConfBrowser events */
+    void addService(QString service);
+    void removeService(QString service);
 
 private slots:
     /* UI events */

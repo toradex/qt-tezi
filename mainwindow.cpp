@@ -67,7 +67,7 @@ MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _imageListDownloadsActive(0), _netaccess(NULL), _internetHostLookupId(-1)
+    _imageListDownloadsActive(0), _netaccess(NULL), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -215,6 +215,10 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (newImagesToAdd(const QListVariantMap)), this, SLOT (addImages(const QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
     connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
+
+    connect(_browser, SIGNAL(serviceEntryAdded(QString)), this, SLOT(addService(QString)));
+    connect(_browser, SIGNAL(serviceEntryRemoved(QString)), this, SLOT(removeService(QString)));
+    _browser->browse("_tezi._tcp");
 
     _mediaPollThread->start();
 
@@ -908,6 +912,48 @@ void MainWindow::onError(const QString &msg)
 void MainWindow::onQuery(const QString &msg, const QString &title, QMessageBox::StandardButton* answer)
 {
     *answer = QMessageBox::question(this, title, msg, QMessageBox::Yes|QMessageBox::No);
+}
+
+void MainWindow::addService(QString service)
+{
+    ZConfServiceEntry serviceEntry = _browser->serviceEntry(service);
+    if (!serviceEntry.isValid())
+        return;
+
+    if (!serviceEntry.TXTRecords.contains("path"))
+        return;
+
+
+    FeedServer srv;
+    srv.label = service + " (zeroconf)";
+    srv.url = "http://" + serviceEntry.host + serviceEntry.TXTRecords.value("path");
+    srv.source = SOURCE_NETWORK;
+    srv.enabled = true;
+
+    /* Only add the service once */
+    int index = _networkFeedServerList.indexOf(srv);
+    if (index < 0) {
+        qDebug() << "Adding zeroconf feed" << service;
+        _networkFeedServerList.append(srv);
+        _downloadNetwork = true;
+    }
+}
+
+void MainWindow::removeService(QString service)
+{
+    int idx = -1;
+
+    for (int i = 0; i < _networkFeedServerList.count(); i++)
+    {
+        if (_networkFeedServerList[i].label == service + " (zeroconf)")
+            idx = i;
+    }
+    if (idx > 0)
+    {
+        qDebug() << "Removing zeroconf feed" << service;
+        _networkFeedServerList.removeAt(idx);
+        _downloadNetwork = true;
+    }
 }
 
 void MainWindow::changeEvent(QEvent* event)
