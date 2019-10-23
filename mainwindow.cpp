@@ -62,7 +62,7 @@
  *
  */
 
-MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent) :
+MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),

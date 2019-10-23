@@ -52,7 +52,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb, QWidget *parent = 0);
+    explicit MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
     void show();
     void showProgressDialog(const QString &labelText);

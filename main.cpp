@@ -68,10 +68,6 @@ int main(int argc, char *argv[])
         // Flag to indicate full screen
         if (strcmp(argv[i], "-fullscreen") == 0)
             fullscreen = true;
-
-        // Flag to indicate that framebuffers get added on hotplug
-        if (strcmp(argv[i], "-hotplugfb") == 0)
-            hotplugfb = true;
     }
 
     // Intercept right mouse clicks sent to the title bar
@@ -132,7 +128,7 @@ int main(int argc, char *argv[])
 #endif
 
     // Main window in the middle of screen
-    MainWindow mw(ld, autoinstall, hotplugfb);
+    MainWindow mw(ld, autoinstall);
     int mode = LINUX_POWEROFF;
 
     if (mw.initialize()) {
