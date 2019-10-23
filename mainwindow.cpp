@@ -66,7 +66,7 @@ MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
-    _ld(ld), _wasOnline(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
+    _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
     _imageListDownloadsActive(0), _netaccess(NULL)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -969,25 +969,26 @@ void MainWindow::pollNetworkStatus()
 {
     QNetworkAddressEntry ae;
     if (hasAddress("eth0", &ae)) {
-        if (!_wasOnline) {
+        if (!_wasOnNetwork) {
             qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
             ui->labelEthernetAddress->setText(
                         QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 
             setWorkingInBackground(true, tr("Downloading image list ..."));
 
-            _wasOnline = true;
+            _wasOnNetwork = true;
         }
 
         if (_downloadNetwork) {
             _downloadNetwork = false;
+            removeImagesBySource(SOURCE_NETWORK);
             downloadLists(SOURCE_NETWORK);
         }
     } else {
-        if (_wasOnline) {
+        if (_wasOnNetwork) {
             ui->labelEthernetAddress->setText(tr("No address assigned"));
             removeImagesBySource(SOURCE_NETWORK);
-            _wasOnline = false;
+            _wasOnNetwork = false;
             _downloadNetwork = true;
         }
     }
@@ -1004,6 +1005,7 @@ void MainWindow::pollNetworkStatus()
 
         if (_downloadRndis) {
             _downloadRndis = false;
+            removeImagesBySource(SOURCE_RNDIS);
             downloadLists(SOURCE_RNDIS);
         }
 
@@ -1019,7 +1021,6 @@ void MainWindow::pollNetworkStatus()
 
 bool MainWindow::downloadLists(const enum ImageSource source)
 {
-    bool downloading = false;
     int index = 0;
 
     if (!_netaccess)
@@ -1041,7 +1042,7 @@ bool MainWindow::downloadLists(const enum ImageSource source)
         if (!server.enabled)
             continue;
 
-        ImageListDownload *imageList = new ImageListDownload(server.url, index, _netaccess, this);
+        ImageListDownload *imageList = new ImageListDownload(server.url, server.source, index, _netaccess, this);
         connect(imageList, SIGNAL(newImagesToAdd(const QListVariantMap)), this, SLOT(addImages(const QListVariantMap)));
         connect(imageList, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
         connect(imageList, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));

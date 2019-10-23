@@ -2,6 +2,7 @@
 #define IMAGESOURCE_H
 
 enum ImageSource {
+    SOURCE_UNKOWN,
     SOURCE_USB,
     SOURCE_SDCARD,
     SOURCE_NETWORK,

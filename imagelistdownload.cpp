@@ -14,9 +14,10 @@
  *
  * Initial author: Stefan Agner
  */
-ImageListDownload::ImageListDownload(const QString &url, int index,
+ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource, int index,
     QNetworkAccessManager *netaccess, QObject *parent) : QObject(parent),
-    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _index(index)
+    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _index(index),
+    _imageSource(imageSource)
 {
     _numDownloads++;
     qDebug() << "Downloading image list from " << url;
@@ -94,10 +95,7 @@ void ImageListDownload::downloadImageJsonCompleted()
     imageinfo.close();
     imagemap["image_info"] = filename;
     imagemap["baseurl"] = baseurl;
-    if (baseurl.contains(RNDIS_ADDRESS))
-        imagemap["source"] = SOURCE_RNDIS;
-    else
-        imagemap["source"] = SOURCE_NETWORK;
+    imagemap["source"] = _imageSource;
     _netImages.append(imagemap);
 
     QString icon = imagemap.value("icon").toString();

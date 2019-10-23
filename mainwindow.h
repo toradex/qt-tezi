@@ -68,7 +68,7 @@ protected:
     int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll, _newInstallerAvailable;
     LanguageDialog *_ld;
-    bool _wasOnline, _wasRndis;
+    bool _wasOnNetwork, _wasRndis;
     bool _downloadNetwork, _downloadRndis;
     int _imageListDownloadsActive;
     QNetworkAccessManager *_netaccess;

@@ -24,9 +24,10 @@
 
 /* Location to download the list of available distributions from
  * Multiple lists can be specified by space separating the URLs */
-#define DEFAULT_IMAGE_SERVER  "http://tezi.toradex.com/image_list.json"
-#define DEFAULT_3RDPARTY_IMAGE_SERVER  "http://tezi.toradex.com/image_list_3rdparty.json"
-#define DEFAULT_CI_IMAGE_SERVER  "http://tezi.toradex.com/image_list_ci.json"
+#define DEFAULT_IMAGE_HOST "tezi.toradex.com"
+#define DEFAULT_IMAGE_SERVER  "http://" DEFAULT_IMAGE_HOST "/image_list.json"
+#define DEFAULT_3RDPARTY_IMAGE_SERVER  "http://" DEFAULT_IMAGE_HOST "/image_list_3rdparty.json"
+#define DEFAULT_CI_IMAGE_SERVER  "http://" DEFAULT_IMAGE_HOST "/image_list_ci.json"
 
 /* Keys in tezi_config.json */
 #define TEZI_CONFIG_JSON_DEFAULT_FEED "show_default_feed"
