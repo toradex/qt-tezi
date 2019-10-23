@@ -159,6 +159,7 @@ bool MainWindow::initialize() {
     /* Initialize icons */
     _sdIcon = QIcon(":/icons/sd_memory.png");
     _usbIcon = QIcon(":/icons/flashdisk_logo.png");
+    _networkIcon = QIcon(":/icons/download.png");
     _internetIcon = QIcon(":/icons/download_cloud.png");
 
     _mediaPollThread = new MediaPollThread(_moduleInformation, this);
@@ -400,8 +401,10 @@ void MainWindow::addImages(const QListVariantMap images)
             item->setData(SecondIconRole, _usbIcon);
         else if (source == SOURCE_SDCARD)
             item->setData(SecondIconRole, _sdIcon);
-        else if (ImageInfo::isNetwork(source))
+        else if (source == SOURCE_INTERNET)
             item->setData(SecondIconRole, _internetIcon);
+        else if (source == SOURCE_NETWORK || source == SOURCE_RNDIS)
+            item->setData(SecondIconRole, _networkIcon);
 
         ui->list->addItem(item);
     }

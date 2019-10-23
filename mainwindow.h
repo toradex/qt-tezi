@@ -78,7 +78,7 @@ protected:
     bool _installingFromMedia;
     QTimer _networkStatusPollTimer;
     QTime _time;
-    QIcon _sdIcon,_usbIcon, _internetIcon;
+    QIcon _sdIcon,_usbIcon, _networkIcon, _internetIcon;
     QVariantMap _imageEntry;
     UsbGadget *_usbGadget;
     MediaPollThread *_mediaPollThread;
