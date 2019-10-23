@@ -67,7 +67,7 @@ MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, bool hotplugFb
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _imageListDownloadsActive(0), _netaccess(NULL)
+    _imageListDownloadsActive(0), _netaccess(NULL), _internetHostLookupId(-1)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -190,19 +190,19 @@ bool MainWindow::initialize() {
     FeedServer srv;
     srv.label = "Toradex Image Server";
     srv.url = DEFAULT_IMAGE_SERVER;
-    srv.source = SOURCE_NETWORK;
+    srv.source = SOURCE_INTERNET;
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
     srv.label = "Toradex 3rd Party Image Server";
     srv.url = DEFAULT_3RDPARTY_IMAGE_SERVER;
-    srv.source = SOURCE_NETWORK;
+    srv.source = SOURCE_INTERNET;
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
     srv.label = "Toradex Continuous Integration Server (testing)";
     srv.url = DEFAULT_CI_IMAGE_SERVER;
-    srv.source = SOURCE_NETWORK;
+    srv.source = SOURCE_INTERNET;
     srv.enabled = false;
     _networkFeedServerList.append(srv);
 
@@ -289,12 +289,10 @@ void MainWindow::addImages(const QListVariantMap images)
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
         enum ImageSource source = (enum ImageSource)m.value("source").value<int>();
 
-        if (source == SOURCE_NETWORK) {
-            /* We don't show incompatible images from network (there will be a lot of them later!) */
-            if (!supportedImage) {
-                removeTemporaryFiles(m);
-                continue;
-            }
+        if (source == SOURCE_INTERNET && !supportedImage) {
+            /* We don't show incompatible images from the Internet (there will be a lot of them later!) */
+            removeTemporaryFiles(m);
+            continue;
         }
 
         if (supportedImage && supportedConfigFormat) {
@@ -467,7 +465,7 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
         QVariantMap entry = item->data(Qt::UserRole).toMap();
         QVariant entrysource = entry["source"];
         if (entrysource == source) {
-            if (entrysource == SOURCE_NETWORK || entrysource == SOURCE_RNDIS)
+            if (ImageInfo::isNetwork(source))
                 removeTemporaryFiles(entry);
             delete item;
             i--;
@@ -480,6 +478,9 @@ void MainWindow::addNewImageUrl(const QString url)
     FeedServer server;
     server.label = tr("Custom Server from Media");
     server.url = url;
+
+    // Classify as network by default. This could be a public or
+    // a local url, we can't tell...
     if (url.contains(RNDIS_ADDRESS))
         server.source = SOURCE_RNDIS;
     else
@@ -508,7 +509,6 @@ void MainWindow::addNewImageUrl(const QString url)
     else if (server.source == SOURCE_NETWORK)
         _downloadNetwork = true;
 }
-
 
 void MainWindow::on_list_currentItemChanged()
 {
@@ -791,6 +791,10 @@ void MainWindow::on_actionRefreshCloud_triggered()
 
     removeImagesBySource(SOURCE_RNDIS);
     downloadLists(SOURCE_RNDIS);
+
+    /* Try to lookup image host before trying to download images from the Internet */
+    _internetHostLookupId = QHostInfo::lookupHost(DEFAULT_IMAGE_HOST,
+                          this, SLOT(imageHostLookupResults(QHostInfo)));
 }
 
 void MainWindow::on_actionCancel_triggered()
@@ -935,11 +939,7 @@ void MainWindow::startNetworking()
 {
     _time.start();
 
-    /* We could ask Qt's Bearer management to notify us once we are online,
-       but it tends to poll every 10 seconds.
-       Users are not that patient, so lets poll ourselves every 0.1 second */
-    //QNetworkConfigurationManager *_netconfig = new QNetworkConfigurationManager(this);
-    //connect(_netconfig, SIGNAL(onlineStateChanged(bool)), this, SLOT(onOnlineStateChanged(bool)));
+    // Poll network interface changes every 100ms
     connect(&_networkStatusPollTimer, SIGNAL(timeout()), SLOT(pollNetworkStatus()));
     _networkStatusPollTimer.start(100);
 }
@@ -976,6 +976,10 @@ void MainWindow::pollNetworkStatus()
 
             setWorkingInBackground(true, tr("Downloading image list ..."));
 
+            /* Check for Internet connectivity */
+            _internetHostLookupId = QHostInfo::lookupHost(DEFAULT_IMAGE_HOST,
+                                  this, SLOT(imageHostLookupResults(QHostInfo)));
+
             _wasOnNetwork = true;
         }
 
@@ -988,6 +992,7 @@ void MainWindow::pollNetworkStatus()
         if (_wasOnNetwork) {
             ui->labelEthernetAddress->setText(tr("No address assigned"));
             removeImagesBySource(SOURCE_NETWORK);
+            removeImagesBySource(SOURCE_INTERNET);
             _wasOnNetwork = false;
             _downloadNetwork = true;
         }
@@ -1016,6 +1021,21 @@ void MainWindow::pollNetworkStatus()
             _wasRndis = false;
             _downloadRndis = true;
         }
+    }
+}
+
+void MainWindow::imageHostLookupResults(QHostInfo hostInfo){
+    /* Name server lookup result */
+    if (hostInfo.error() != QHostInfo::NoError) {
+        qDebug() << hostInfo.errorString();
+
+        _internetHostLookupId = QHostInfo::lookupHost(DEFAULT_IMAGE_HOST,
+                              this, SLOT(imageHostLookupResults(QHostInfo)));
+    } else {
+        qDebug() << "Tezi Server lookup successfully";
+        _internetHostLookupId = -1;
+        removeImagesBySource(SOURCE_INTERNET);
+        downloadLists(SOURCE_INTERNET);
     }
 }
 

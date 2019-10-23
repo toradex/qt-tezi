@@ -6,6 +6,7 @@ enum ImageSource {
     SOURCE_USB,
     SOURCE_SDCARD,
     SOURCE_NETWORK,
+    SOURCE_INTERNET,
     SOURCE_RNDIS,
 };
 

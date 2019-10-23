@@ -27,6 +27,7 @@
 #include <QUrl>
 #include <QSet>
 #include <QFileSystemWatcher>
+#include <QHostInfo>
 
 enum RebootMode {
     LINUX_UNKNOWN,
@@ -82,6 +83,7 @@ protected:
     MediaPollThread *_mediaPollThread;
     MultiImageWriteThread *_imageWriteThread;
     QList<FeedServer> _networkFeedServerList;
+    int _internetHostLookupId;
 
     void setWorkingInBackground(bool working, const QString &labelText = "");
     void updateModuleInformation();
@@ -119,6 +121,7 @@ protected slots:
     void addImages(const QListVariantMap images);
     void errorMounting(const QString blockdev);
     void disableFeed(const QString feedname);
+    void imageHostLookupResults(QHostInfo hostInfo);
 
     /* Events from ImageListDownload */
     void onImageListDownloadFinished();
