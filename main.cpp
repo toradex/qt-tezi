@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     if (QFile::exists(":/icons/toradex_icon.png"))
         a.setWindowIcon(QIcon(":/icons/toradex_icon.png"));
 
-        QApplication::processEvents();
+    QApplication::processEvents();
 
     // If -runinstaller is not specified, only continue if SHIFT is pressed, GPIO is triggered,
     // or no OS is installed (/settings/installed_os.json does not exist)
