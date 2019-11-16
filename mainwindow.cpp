@@ -67,7 +67,7 @@ MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *paren
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser),
+    _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -292,7 +292,7 @@ void MainWindow::addImages(const QListVariantMap images)
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
-        enum ImageSource source = static_cast<enum ImageSource>(m.value("source").value<int>());
+        enum ImageSource source = m.value("source").value<enum ImageSource>();
 
         if (source == SOURCE_INTERNET && !supportedImage) {
             /* We don't show incompatible images from the Internet (there will be a lot of them later!) */
@@ -470,7 +470,7 @@ void MainWindow::removeImagesBySource(enum ImageSource source)
     {
         QListWidgetItem *item = ui->list->item(i);
         QVariantMap entry = item->data(Qt::UserRole).toMap();
-        QVariant entrysource = entry["source"];
+        enum ImageSource entrysource = entry["source"].value<enum ImageSource>();
         if (entrysource == source) {
             if (ImageInfo::isNetwork(source))
                 removeTemporaryFiles(entry);
@@ -571,7 +571,7 @@ bool MainWindow::validateImageJson(QVariantMap &entry)
 
 void MainWindow::installImage(QVariantMap entry)
 {
-    enum ImageSource imageSource = static_cast<enum ImageSource>(entry.value("source").value<int>());
+    enum ImageSource imageSource = entry.value("source").value<enum ImageSource>();
 
     setEnabled(false);
     _numMetaFilesToDownload = 0;
@@ -1281,7 +1281,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     _imageWriteThread = new MultiImageWriteThread(_toradexConfigBlock, _moduleInformation);
-    enum ImageSource imageSource = static_cast<enum ImageSource>(entry.value("source").toInt());
+    enum ImageSource imageSource = entry.value("source").value<enum ImageSource>();
     QString folder = entry.value("folder").toString();
     QString slidesFolder = "/var/volatile/marketing/";
     QStringList slidesFolders;

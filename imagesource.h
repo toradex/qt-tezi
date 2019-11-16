@@ -1,6 +1,8 @@
 #ifndef IMAGESOURCE_H
 #define IMAGESOURCE_H
 
+#include <QObject>
+
 enum ImageSource {
     SOURCE_UNKOWN,
     SOURCE_USB,
@@ -9,5 +11,6 @@ enum ImageSource {
     SOURCE_INTERNET,
     SOURCE_RNDIS,
 };
+Q_DECLARE_METATYPE(ImageSource);
 
 #endif // IMAGESOURCE_H
