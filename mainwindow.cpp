@@ -65,7 +65,7 @@
 MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
-    _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
+    _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
     _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser)
 {
@@ -319,9 +319,6 @@ void MainWindow::addImages(const QListVariantMap images)
                     if (imageversion[i].toInt() > installerversion[i].toInt())
                         isNewer = true;
                 }
-
-                if (isNewer)
-                    _newInstallerAvailable = true;
 
                 /* Only autoInstall newer Toradex Easy Installer Versions */
                 if (!isNewer)

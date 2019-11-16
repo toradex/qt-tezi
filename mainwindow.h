@@ -68,7 +68,7 @@ protected:
     ConfigBlock *_toradexConfigBlock;
     QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
     int _toradexProductId;
-    bool _allowAutoinstall, _isAutoinstall, _showAll, _newInstallerAvailable;
+    bool _allowAutoinstall, _isAutoinstall, _showAll;
     LanguageDialog *_ld;
     bool _wasOnNetwork, _wasRndis;
     bool _downloadNetwork, _downloadRndis;
