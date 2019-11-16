@@ -19,6 +19,7 @@
 #include "multiimagewritethread.h"
 #include "moduleinformation.h"
 #include "feedserver.h"
+#include "imagelist.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QMessageBox>
@@ -86,12 +87,12 @@ protected:
     QList<FeedServer> _networkFeedServerList;
     int _internetHostLookupId;
     ZConfServiceBrowser *_browser;
+    ImageList *_imageList;
 
     void setWorkingInBackground(bool working, const QString &labelText = "");
     void updateModuleInformation();
     void updateVersion();
     virtual void changeEvent(QEvent * event);
-    void removeTemporaryFiles(const QVariantMap entry);
     void removeImagesBySource(enum ImageSource source);
     bool hasAddress(const QString &iface, QNetworkAddressEntry *currAddress = NULL);
     QStringList getFlavours(const QString &folder);
@@ -118,9 +119,9 @@ protected slots:
     void discardOrEraseFinished();
     void discardOrEraseError(const QString &errorString);
     void startNetworking();
-    void removeImagesByBlockdev(const QString blockdev);
     void addNewImageUrl(const QString url);
-    void addImages(const QListVariantMap images);
+    void imageListUpdated();
+    void foundAutoInstallImage(const QVariantMap &image);
     void errorMounting(const QString blockdev);
     void disableFeed(const QString feedname);
     void imageHostLookupResults(QHostInfo hostInfo);

@@ -17,7 +17,8 @@ GIT_VERSION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD rev-parse --sh
 DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    imagelist.cpp \
+    mainwindow.cpp \
     languagedialog.cpp \
     gpioinput.cpp \
     progressslideshowdialog.cpp \
@@ -53,6 +54,7 @@ SOURCES += main.cpp\
     qlistimagewidgetitem.cpp
 
 HEADERS  += mainwindow.h \
+    imagelist.h \
     languagedialog.h \
     config.h \
     gpioinput.h \

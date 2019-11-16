@@ -209,11 +209,16 @@ bool MainWindow::initialize() {
 
     qRegisterMetaType<QListVariantMap>("QListVariantMap");
 
+    // Image list contains and maintains all currently downloaded image descriptions (image.json)
+    _imageList = new ImageList(_toradexProductNumber);
+    connect(_imageList, SIGNAL (imageListUpdated()), this, SLOT (imageListUpdated()));
+    connect(_imageList, SIGNAL (foundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)));
+
     // Starting network after first media scan makes sure that a local media takes presedence over a server provided image.
     connect(_mediaPollThread, SIGNAL (firstScanFinished()), this, SLOT (startNetworking()));
-    connect(_mediaPollThread, SIGNAL (removedBlockdev(const QString)), this, SLOT (removeImagesByBlockdev(const QString)));
+    connect(_mediaPollThread, SIGNAL (removedBlockdev(const QString)), _imageList, SLOT (removeImagesByBlockdev(const QString)));
     connect(_mediaPollThread, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
-    connect(_mediaPollThread, SIGNAL (newImagesToAdd(const QListVariantMap)), this, SLOT (addImages(const QListVariantMap)));
+    connect(_mediaPollThread, SIGNAL (newImagesToAdd(QListVariantMap)), _imageList, SLOT (addImages(QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
     connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
 
@@ -266,17 +271,21 @@ void MainWindow::showProgressDialog(const QString &labelText)
     _qpd->show();
 }
 
-void MainWindow::addImages(const QListVariantMap images)
+void MainWindow::imageListUpdated()
 {
     QSize currentsize = ui->list->iconSize();
     QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
     dummyicon.fill();
-    bool isAutoinstall = false;
-    QVariantMap autoInstallImage;
 
-    foreach (const QVariantMap m, images)
+    for (int i = 0; i < ui->list->count(); i++)
     {
-        int config_format = m.value("config_format").toInt();
+        QListWidgetItem *item = ui->list->item(i);
+        delete item;
+        i--;
+    }
+
+    foreach (const QVariantMap &m, _imageList->imageList())
+    {
         int imageindex = m.value("index").toInt();
         QString name = m.value("name").toString();
         QString foldername = m.value("foldername").toString();
@@ -284,53 +293,11 @@ void MainWindow::addImages(const QListVariantMap images)
         QString version = m.value("version").toString();
         QString releasedate = m.value("release_date").toString();
         QByteArray icondata = m.value("iconimage").value<QByteArray>();
-        bool autoInstall = m.value("autoinstall").toBool();
-        bool isInstaller = m.value("isinstaller").toBool();
-        QVariantList supportedProductIds = m.value("supported_product_ids").toList();
-        bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
-        bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
+        bool supportedImage = m.value("supported_image").toBool();
+        bool supportedConfigFormat = m.value("supported_config_format").toBool();
         enum ImageSource source = m.value("source").value<enum ImageSource>();
         // Use -1 so that local media will be displayed first.
         int feedindex = m.value("feedindex", -1).toInt();
-
-        if (source == SOURCE_INTERNET && !supportedImage) {
-            /* We don't show incompatible images from the Internet (there will be a lot of them later!) */
-            removeTemporaryFiles(m);
-            continue;
-        }
-
-        if (supportedImage && supportedConfigFormat) {
-            /* Compare Toradex Easy Installer against current version */
-            if (isInstaller) {
-                bool isNewer = false;
-                QStringList installerversion = QString(VERSION_NUMBER).split('.');
-                QStringList imageversion = QString(version).remove(QRegExp("[^0-9|.]")).split('.');
-
-                /* Get minimal version length */
-                int versionl = installerversion.length();
-                if (versionl < imageversion.length())
-                    versionl = imageversion.length();
-
-                /* If we get a longer version, its newer... (0.3 vs. 0.3.1 */
-                if (versionl < imageversion.length())
-                    isNewer = true;
-
-                for (int i = 0; i < versionl; i++) {
-                    if (imageversion[i].toInt() > installerversion[i].toInt())
-                        isNewer = true;
-                }
-
-                /* Only autoInstall newer Toradex Easy Installer Versions */
-                if (!isNewer)
-                    autoInstall = false;
-            }
-
-            /* We found an auto install image, install it! */
-            if (_allowAutoinstall && autoInstall) {
-                isAutoinstall = true;
-                autoInstallImage = m;
-            }
-        }
 
         QString imageName = name;
         QString imageInfo, imageURI, imageVersion, space(" "), eol("\n");
@@ -415,54 +382,16 @@ void MainWindow::addImages(const QListVariantMap images)
         setWorkingInBackground(true, tr("Waiting for external media or network..."));
     }
 
-    if (isAutoinstall) {
-        _isAutoinstall = isAutoinstall;
-        installImage(autoInstallImage);
-        return;
-    }
-
     updateNeeded();
 }
 
-void MainWindow::removeTemporaryFiles(const QVariantMap entry)
+void MainWindow::foundAutoInstallImage(const QVariantMap &image)
 {
-    QString folder = entry["folder"].toString();
-    QDir dir(folder);
-    if (dir.exists()) {
-        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
-            QFile::remove(info.absoluteFilePath());
-        }
-        QDir().rmdir(folder);
-    }
-}
+    if (!_allowAutoinstall)
+        return;
 
-void MainWindow::removeImagesByBlockdev(const QString blockdev)
-{
-    for (int i = 0; i < ui->list->count(); i++)
-    {
-        QListWidgetItem *item = ui->list->item(i);
-        QVariantMap entry = item->data(Qt::UserRole).toMap();
-        if (entry.value("image_source_blockdev").toString() == blockdev) {
-            delete item;
-            i--;
-        }
-    }
-}
-
-void MainWindow::removeImagesBySource(enum ImageSource source)
-{
-    for (int i = 0; i < ui->list->count(); i++)
-    {
-        QListWidgetItem *item = ui->list->item(i);
-        QVariantMap entry = item->data(Qt::UserRole).toMap();
-        enum ImageSource entrysource = entry["source"].value<enum ImageSource>();
-        if (entrysource == source) {
-            if (ImageInfo::isNetwork(source))
-                removeTemporaryFiles(entry);
-            delete item;
-            i--;
-        }
-    }
+    _isAutoinstall = true;
+    installImage(image);
 }
 
 void MainWindow::addNewImageUrl(const QString url)
@@ -494,7 +423,7 @@ void MainWindow::addNewImageUrl(const QString url)
             _networkFeedServerList[index].enabled = true;
     }
 
-    removeImagesBySource(server.source);
+    _imageList->removeImagesBySource(server.source);
 
     if (server.source == SOURCE_RNDIS)
         _downloadRndis = true;
@@ -778,10 +707,11 @@ void MainWindow::on_actionInstall_triggered()
 
 void MainWindow::on_actionRefreshCloud_triggered()
 {
-    removeImagesBySource(SOURCE_NETWORK);
+    _imageList->removeImagesBySource(SOURCE_NETWORK);
+    _imageList->removeImagesBySource(SOURCE_INTERNET);
     downloadLists(SOURCE_NETWORK);
 
-    removeImagesBySource(SOURCE_RNDIS);
+    _imageList->removeImagesBySource(SOURCE_RNDIS);
     downloadLists(SOURCE_RNDIS);
 
     /* Try to lookup image host before trying to download images from the Internet */
@@ -1019,14 +949,14 @@ void MainWindow::pollNetworkStatus()
 
         if (_downloadNetwork) {
             _downloadNetwork = false;
-            removeImagesBySource(SOURCE_NETWORK);
+            _imageList->removeImagesBySource(SOURCE_NETWORK);
             downloadLists(SOURCE_NETWORK);
         }
     } else {
         if (_wasOnNetwork) {
             ui->labelEthernetAddress->setText(tr("No address assigned"));
-            removeImagesBySource(SOURCE_NETWORK);
-            removeImagesBySource(SOURCE_INTERNET);
+            _imageList->removeImagesBySource(SOURCE_NETWORK);
+            _imageList->removeImagesBySource(SOURCE_INTERNET);
             _wasOnNetwork = false;
             _downloadNetwork = true;
         }
@@ -1044,14 +974,14 @@ void MainWindow::pollNetworkStatus()
 
         if (_downloadRndis) {
             _downloadRndis = false;
-            removeImagesBySource(SOURCE_RNDIS);
+            _imageList->removeImagesBySource(SOURCE_RNDIS);
             downloadLists(SOURCE_RNDIS);
         }
 
     } else {
         if (_wasRndis) {
             ui->labelRNDISAddress->setText(tr("No address assigned"));
-            removeImagesBySource(SOURCE_RNDIS);
+            _imageList->removeImagesBySource(SOURCE_RNDIS);
             _wasRndis = false;
             _downloadRndis = true;
         }
@@ -1068,7 +998,7 @@ void MainWindow::imageHostLookupResults(QHostInfo hostInfo){
     } else {
         qDebug() << "Tezi Server lookup successfully";
         _internetHostLookupId = -1;
-        removeImagesBySource(SOURCE_INTERNET);
+        _imageList->removeImagesBySource(SOURCE_INTERNET);
         downloadLists(SOURCE_INTERNET);
     }
 }
@@ -1096,10 +1026,10 @@ bool MainWindow::downloadLists(const enum ImageSource source)
         if (!server.enabled)
             continue;
 
-        ImageListDownload *imageList = new ImageListDownload(server.url, server.source, index, _netaccess, this);
-        connect(imageList, SIGNAL(newImagesToAdd(const QListVariantMap)), this, SLOT(addImages(const QListVariantMap)));
-        connect(imageList, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
-        connect(imageList, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
+        ImageListDownload *imageListDownload = new ImageListDownload(server.url, server.source, index, _netaccess, this);
+        connect(imageListDownload, SIGNAL(newImagesToAdd(QListVariantMap)), _imageList, SLOT(addImages(QListVariantMap)));
+        connect(imageListDownload, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
+        connect(imageListDownload, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
         _imageListDownloadsActive++;
         index++;
     }
