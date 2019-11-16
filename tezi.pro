@@ -102,12 +102,6 @@ FORMS    += mainwindow.ui \
 QMAKE_CXXFLAGS += -Wno-unused-variable
 RESOURCES += \
     icons.qrc \
-    translations.qrc
-
-TRANSLATIONS += translation_de.ts \
-    translation_pt.ts \
-    translation_fr.ts \
-    translation_it.ts
 
 OTHER_FILES += \
     README.txt \
