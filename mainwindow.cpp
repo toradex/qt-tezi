@@ -268,14 +268,9 @@ void MainWindow::showProgressDialog(const QString &labelText)
 
 void MainWindow::addImages(const QListVariantMap images)
 {
-    ImageListDownload *ild = qobject_cast<ImageListDownload *>(sender());
     QSize currentsize = ui->list->iconSize();
     bool isAutoinstall = false;
-    int feedindex = -1; // Use -1 so that local media will be displayed first.
     QVariantMap autoInstallImage;
-
-    if (ild != nullptr)
-        feedindex = ild->index();
 
     foreach (const QVariantMap m, images)
     {
@@ -293,6 +288,8 @@ void MainWindow::addImages(const QListVariantMap images)
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
         enum ImageSource source = m.value("source").value<enum ImageSource>();
+        // Use -1 so that local media will be displayed first.
+        int feedindex = m.value("feedindex", -1).toInt();
 
         if (source == SOURCE_INTERNET && !supportedImage) {
             /* We don't show incompatible images from the Internet (there will be a lot of them later!) */

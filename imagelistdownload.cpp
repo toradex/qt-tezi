@@ -16,7 +16,7 @@
  */
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource, int index,
     QNetworkAccessManager *netaccess, QObject *parent) : QObject(parent),
-    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _index(index),
+    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(index),
     _imageSource(imageSource)
 {
     _numDownloads++;
@@ -96,6 +96,7 @@ void ImageListDownload::downloadImageJsonCompleted()
     imagemap["image_info"] = filename;
     imagemap["baseurl"] = baseurl;
     imagemap["source"] = _imageSource;
+    imagemap["feedindex"] = _feedindex;
     _netImages.append(imagemap);
 
     QString icon = imagemap.value("icon").toString();
