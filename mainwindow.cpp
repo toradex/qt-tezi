@@ -269,6 +269,8 @@ void MainWindow::showProgressDialog(const QString &labelText)
 void MainWindow::addImages(const QListVariantMap images)
 {
     QSize currentsize = ui->list->iconSize();
+    QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
+    dummyicon.fill();
     bool isAutoinstall = false;
     QVariantMap autoInstallImage;
 
@@ -361,9 +363,7 @@ void MainWindow::addImages(const QListVariantMap images)
         QPixmap pix;
         pix.loadFromData(icondata);
         QIcon icon(pix);
-        if (icon.isNull()) {
-            icon = QIcon();
-        } else {
+        if (!icon.isNull()) {
             QList<QSize> avs = icon.availableSizes();
             if (avs.isEmpty()) {
                 /* Icon file corrupt */
@@ -382,7 +382,10 @@ void MainWindow::addImages(const QListVariantMap images)
         QListImageWidgetItem *item = new QListImageWidgetItem(icon, imageName, feedindex, imageindex);
 
         item->setData(Qt::UserRole, m);
-        item->setData(Qt::DecorationRole, icon);
+        if (!icon.isNull())
+            item->setData(Qt::DecorationRole, icon);
+        else
+            item->setData(Qt::DecorationRole, dummyicon);
         item->setData(NameRole, name);
         item->setData(VersionRole, imageVersion);
         item->setData(InfoRole, imageInfo);
@@ -406,18 +409,6 @@ void MainWindow::addImages(const QListVariantMap images)
         ui->list->addItem(item);
     }
     ui->list->sortItems();
-
-    /* Giving items without icon a dummy icon to make them have equal height and text alignment */
-    QPixmap dummyicon = QPixmap(currentsize.width(), currentsize.height());
-    dummyicon.fill();
-
-    for (int i = 0; i < ui->list->count(); i++)
-    {
-        if (ui->list->item(i)->icon().isNull())
-        {
-            ui->list->item(i)->setIcon(dummyicon);
-        }
-    }
 
     /* Remove waiting spinner as soon as there is something the user might want to look at... */
     if (ui->list->count() > 0) {
