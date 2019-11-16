@@ -65,9 +65,9 @@
 MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
-    _qpd(NULL), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
+    _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _newInstallerAvailable(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _imageListDownloadsActive(0), _netaccess(NULL), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser)
+    _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser),
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -94,15 +94,15 @@ bool MainWindow::writeBootConfigurationBlock() {
 
 bool MainWindow::initialize() {
     _moduleInformation = ModuleInformation::detectModule(this);
-    if (_moduleInformation == NULL) {
-        QMessageBox::critical(NULL, QObject::tr("Module Detection failed"),
+    if (_moduleInformation == nullptr) {
+        QMessageBox::critical(nullptr, QObject::tr("Module Detection failed"),
                               QObject::tr("Failed to detect the basic module type. Cannot continue."),
                               QMessageBox::Close);
         return false;
     }
 
     if (!_moduleInformation->moduleSupported()) {
-        QMessageBox::critical(NULL, QObject::tr("Unsupported Module Type"),
+        QMessageBox::critical(nullptr, QObject::tr("Unsupported Module Type"),
                               QObject::tr("This module is an early sample which is not supported by the Toradex Easy Installer due to chip issues."),
                               QMessageBox::Close);
         return false;
@@ -113,16 +113,16 @@ bool MainWindow::initialize() {
     _moduleInformation->unlockFlash();
 
     // No config block found, ask the user to create a new one using Label information
-    if (_toradexConfigBlock == NULL) {
+    if (_toradexConfigBlock == nullptr) {
         if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Mtd) {
             // We have to assume that we need to rebuild the boot ROM specific boot configuration block (BCB/FCB)
             if (!writeBootConfigurationBlock())
-                QMessageBox::critical(NULL, QObject::tr("Restoring Boot Configuration Block failed"),
+                QMessageBox::critical(nullptr, QObject::tr("Restoring Boot Configuration Block failed"),
                                       QObject::tr("Restoring Boot Configuration Block failed. Please check the logfile in /var/volatile/tezi.log and contact the Toradex support."),
                                       QMessageBox::Ok);
         }
 
-        QMessageBox::critical(NULL, QObject::tr("Reading Config Block failed"),
+        QMessageBox::critical(nullptr, QObject::tr("Reading Config Block failed"),
                               QObject::tr("Reading the Toradex Config Block failed, the Toradex Config Block might be erased or corrupted. "
                                           "Please restore the Config Block using the information on the Modules Sticker before continuing."),
                               QMessageBox::Ok);
@@ -166,7 +166,7 @@ bool MainWindow::initialize() {
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    _availableMB = _moduleInformation->getStorageSize() / (1024 * 1024);
+    _availableMB = static_cast<int>(_moduleInformation->getStorageSize() / (1024 * 1024));
 
     _usbGadget = new UsbGadget(_serialNumber, _toradexProductName, _toradexProductId, _moduleInformation->mainPartition());
 
@@ -274,7 +274,7 @@ void MainWindow::addImages(const QListVariantMap images)
     int feedindex = -1; // Use -1 so that local media will be displayed first.
     QVariantMap autoInstallImage;
 
-    if (ild != NULL)
+    if (ild != nullptr)
         feedindex = ild->index();
 
     foreach (const QVariantMap m, images)
@@ -292,7 +292,7 @@ void MainWindow::addImages(const QListVariantMap images)
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
-        enum ImageSource source = (enum ImageSource)m.value("source").value<int>();
+        enum ImageSource source = static_cast<enum ImageSource>(m.value("source").value<int>());
 
         if (source == SOURCE_INTERNET && !supportedImage) {
             /* We don't show incompatible images from the Internet (there will be a lot of them later!) */
@@ -571,7 +571,7 @@ bool MainWindow::validateImageJson(QVariantMap &entry)
 
 void MainWindow::installImage(QVariantMap entry)
 {
-    enum ImageSource imageSource = (enum ImageSource)entry.value("source").value<int>();
+    enum ImageSource imageSource = static_cast<enum ImageSource>(entry.value("source").value<int>());
 
     setEnabled(false);
     _numMetaFilesToDownload = 0;
@@ -833,7 +833,7 @@ void MainWindow::onCompleted()
 {
     _psd->close();
     _psd->deleteLater();
-    _psd = NULL;
+    _psd = nullptr;
     _imageWriteThread->deleteLater();
 
 
@@ -873,7 +873,7 @@ void MainWindow::onCompleted()
         // Return to main menu...
         reenableImageChoice();
         QWidget::show();
-        if (_ld != NULL)
+        if (_ld != nullptr)
             _ld->show();
         break;
     }
@@ -903,12 +903,12 @@ void MainWindow::onError(const QString &msg)
 
     _psd->close();
     _psd->deleteLater();
-    _psd = NULL;
+    _psd = nullptr;
 
     _imageWriteThread->deleteLater();
     reenableImageChoice();
     QWidget::show();
-    if (_ld != NULL)
+    if (_ld != nullptr)
         _ld->show();
 }
 
@@ -1005,7 +1005,7 @@ bool MainWindow::hasAddress(const QString &iface, QNetworkAddressEntry *currAddr
         /* Check whether this is an address of global scope and a IPv4 address */
         if (a != QHostAddress::LocalHost && a != QHostAddress::LocalHostIPv6 &&
             a.scopeId() == "" && a.protocol() == QAbstractSocket::IPv4Protocol) {
-            if (currAddress != NULL)
+            if (currAddress != nullptr)
                 *currAddress = ae;
             return true;
         }
@@ -1155,7 +1155,7 @@ QListWidgetItem *MainWindow::findItem(const QVariant &name)
             return item;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 QList<QListWidgetItem *> MainWindow::selectedItems()
@@ -1242,7 +1242,7 @@ void MainWindow::downloadMetaCompleted()
         {
             _qpd->hide();
             _qpd->deleteLater();
-            _qpd = NULL;
+            _qpd = nullptr;
         }
         startImageWrite(_imageEntry);
     }
@@ -1256,7 +1256,7 @@ void MainWindow::downloadMetaFailed()
     {
         _qpd->hide();
         _qpd->deleteLater();
-        _qpd = NULL;
+        _qpd = nullptr;
     }
     QMessageBox::critical(this, tr("Download error"), tr("Error downloading meta file")+"\n"+fd->urlString(), QMessageBox::Close);
     reenableImageChoice();
@@ -1281,7 +1281,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
     _imageWriteThread = new MultiImageWriteThread(_toradexConfigBlock, _moduleInformation);
-    enum ImageSource imageSource = (enum ImageSource)entry.value("source").toInt();
+    enum ImageSource imageSource = static_cast<enum ImageSource>(entry.value("source").toInt());
     QString folder = entry.value("folder").toString();
     QString slidesFolder = "/var/volatile/marketing/";
     QStringList slidesFolders;
@@ -1347,7 +1347,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
     connect(_imageWriteThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(_imageWriteThread, SIGNAL(statusUpdate(QString)), _psd, SLOT(setLabelText(QString)));
     _imageWriteThread->start();
-    if (_ld != NULL)
+    if (_ld != nullptr)
         _ld->hide();
     hide();
     _psd->exec();
