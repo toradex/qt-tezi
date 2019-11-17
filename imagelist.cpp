@@ -11,6 +11,17 @@ ImageList::ImageList(const QString& toradexProductNumber, QObject *parent) : QOb
 {
 
 }
+// Compare two variants.
+bool ImageList::imageSortOrder(const QVariant &v1, const QVariant &v2)
+{
+    QVariantMap m1 = v1.toMap();
+    QVariantMap m2 = v2.toMap();
+
+    if (m1["feedindex"].toInt() == m2["feedindex"].toInt())
+        return m1["index"].toInt() < m2["index"].toInt();
+
+    return m1["feedindex"].toInt() < m2["feedindex"].toInt();
+}
 
 void ImageList::addImages(QListVariantMap images)
 {
@@ -77,6 +88,8 @@ void ImageList::addImages(QListVariantMap images)
 
         _imageList.append(m);
     }
+
+    std::sort(_imageList.begin(), _imageList.end(), ImageList::imageSortOrder);
 
     /* If we found an autoinstall image, install it! */
     if (autoInstallImage != nullptr)

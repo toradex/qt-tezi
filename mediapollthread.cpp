@@ -196,6 +196,8 @@ QList<QVariantMap> MediaPollThread::listMediaImages(const QString &path, const Q
         imagemap["foldername"] = imagename;
         imagemap["folder"] = image.path();
         imagemap["source"] = source;
+        // Use -2 so that local media will be displayed first.
+        imagemap["feedindex"] = -2;
 
         if (!imagemap.contains("nominal_size"))
             imagemap["nominal_size"] = calculateNominalSize(imagemap);

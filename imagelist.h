@@ -23,6 +23,7 @@ protected:
     const QString _toradexProductNumber;
 
     void removeTemporaryFiles(const QVariantMap entry);
+    static bool imageSortOrder(const QVariant &v1, const QVariant &v2);
 
 signals:
     void imageListUpdated();

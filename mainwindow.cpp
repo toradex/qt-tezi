@@ -286,7 +286,6 @@ void MainWindow::imageListUpdated()
 
     foreach (const QVariantMap &m, _imageList->imageList())
     {
-        int imageindex = m.value("index").toInt();
         QString name = m.value("name").toString();
         QString description = m.value("description").toString();
         QString version = m.value("version").toString();
@@ -295,8 +294,6 @@ void MainWindow::imageListUpdated()
         bool supportedImage = m.value("supported_image").toBool();
         bool supportedConfigFormat = m.value("supported_config_format").toBool();
         enum ImageSource source = m.value("source").value<enum ImageSource>();
-        // Use -1 so that local media will be displayed first.
-        int feedindex = m.value("feedindex", -1).toInt();
         QString imageURI = m.value("uri").toString();
 
         QString imageName = name;
@@ -334,7 +331,7 @@ void MainWindow::imageListUpdated()
             }
         }
 
-        QListImageWidgetItem *item = new QListImageWidgetItem(icon, imageName, feedindex, imageindex);
+        QListImageWidgetItem *item = new QListImageWidgetItem(icon, imageName);
 
         item->setData(Qt::UserRole, m);
         if (!icon.isNull())
@@ -363,7 +360,6 @@ void MainWindow::imageListUpdated()
 
         ui->list->addItem(item);
     }
-    ui->list->sortItems();
 
     /* Remove waiting spinner as soon as there is something the user might want to look at... */
     if (ui->list->count() > 0) {
