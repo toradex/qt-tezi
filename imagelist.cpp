@@ -19,6 +19,7 @@ void ImageList::addImages(QListVariantMap images)
     for (QVariantMap &m : images)
     {
         int config_format = m.value("config_format").toInt();
+        QString foldername = m.value("foldername").toString();
         bool autoInstall = m.value("autoinstall").toBool();
         bool isInstaller = m.value("isinstaller").toBool();
         QString version = m.value("version").toString();
@@ -64,6 +65,14 @@ void ImageList::addImages(QListVariantMap images)
             /* We found an auto install image, remember it */
             if (autoInstall)
                 autoInstallImage = &m;
+        }
+
+        if (source == SOURCE_USB)
+            m["url"] = "usb:/" + foldername;
+        else if (source == SOURCE_SDCARD)
+            m["uri"] = "sdcard:/" + foldername;
+        else {
+            m["uri"] = m.value("baseurl").value<QString>();
         }
 
         _imageList.append(m);

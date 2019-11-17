@@ -288,7 +288,6 @@ void MainWindow::imageListUpdated()
     {
         int imageindex = m.value("index").toInt();
         QString name = m.value("name").toString();
-        QString foldername = m.value("foldername").toString();
         QString description = m.value("description").toString();
         QString version = m.value("version").toString();
         QString releasedate = m.value("release_date").toString();
@@ -298,9 +297,10 @@ void MainWindow::imageListUpdated()
         enum ImageSource source = m.value("source").value<enum ImageSource>();
         // Use -1 so that local media will be displayed first.
         int feedindex = m.value("feedindex", -1).toInt();
+        QString imageURI = m.value("uri").toString();
 
         QString imageName = name;
-        QString imageInfo, imageURI, imageVersion, space(" "), eol("\n");
+        QString imageInfo, imageVersion, space(" "), eol("\n");
         imageInfo += description;
         if (!supportedImage)
             imageVersion += " [" + tr("image not compatible with this module") + "] ";
@@ -314,15 +314,6 @@ void MainWindow::imageListUpdated()
 
         if (!releasedate.isEmpty())
             imageVersion += "(" + releasedate + ")" + eol;
-
-        if (source == SOURCE_USB)
-            imageURI += "usb:/" + foldername;
-        else if (source == SOURCE_SDCARD)
-            imageURI += "sdcard:/" + foldername;
-        else {
-            QString url = m.value("baseurl").value<QString>();
-            imageURI +=  url;
-        }
 
         QPixmap pix;
         pix.loadFromData(icondata);
