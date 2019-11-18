@@ -11,7 +11,7 @@
 #include <usbg/function/net.h>
 
 /* Set Toradex product id at runtime... */
-struct usbg_gadget_attrs g_attrs_ms = {
+static struct usbg_gadget_attrs g_attrs_ms = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
@@ -22,7 +22,7 @@ struct usbg_gadget_attrs g_attrs_ms = {
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
-struct usbg_gadget_attrs g_attrs_rndis = {
+static struct usbg_gadget_attrs g_attrs_rndis = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
@@ -33,13 +33,13 @@ struct usbg_gadget_attrs g_attrs_rndis = {
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
-struct usbg_gadget_strs g_strs = {
+static struct usbg_gadget_strs g_strs = {
     .manufacturer = "Toradex", /* Manufacturer */
     .product = "Toradex Module", /* Product string */
     .serial = "00000000", /* Serial number */
 };
 
-struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
+static struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
     {
         .id = -1,
         .cdrom = 0,
@@ -66,41 +66,41 @@ struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
     }
 };
 
-struct usbg_f_ms_lun_attrs *f_ms_luns[] = {
+static struct usbg_f_ms_lun_attrs *f_ms_luns[] = {
     &f_ms_luns_array[0],
     &f_ms_luns_array[1],
     &f_ms_luns_array[2],
     NULL,
 };
 
-struct usbg_f_ms_attrs f_ms_attrs = {
+static struct usbg_f_ms_attrs f_ms_attrs = {
     .stall = 0,
     .nluns = 2,
     .luns = f_ms_luns,
 };
 
-struct usbg_config_strs c_strs_ms = {
+static struct usbg_config_strs c_strs_ms = {
         "Mass Storage"
 };
 
 /* RNDIS */
-struct usbg_f_net_attrs f_net_attrs = {
+static struct usbg_f_net_attrs f_net_attrs = {
     .dev_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xff } },
     .host_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xfe } },
     .qmult = 5,
 };
 
-const struct usbg_config_strs c_strs_rndis = {
+static const struct usbg_config_strs c_strs_rndis = {
     .configuration = "RNDIS"
 };
 
-const struct usbg_gadget_os_descs os_desc_rndis = {
+static const struct usbg_gadget_os_descs os_desc_rndis = {
     .use = 1,
     .b_vendor_code = 0xcd,
     .qw_sign = "MSFT100",
 };
 
-const struct usbg_function_os_desc os_desc_f_rndis = {
+static const struct usbg_function_os_desc os_desc_f_rndis = {
     .compatible_id = "RNDIS",
     .sub_compatible_id = "5162001",
 };
