@@ -210,7 +210,7 @@ bool usbgadget_ms_safe_to_remove()
 int usbgadget_ms_enable(const char *basemmcdev)
 {
     usbg_f_ms *mf;
-    char mmcdev[PATH_MAX];
+    char mmcdev[PATH_MAX + 1];
 
     usbg_ret = (usbg_error)usbg_create_function(g_ms, USBG_F_MASS_STORAGE, "emmc",
                     &f_ms_attrs, &f_ms);
