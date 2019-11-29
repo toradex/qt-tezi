@@ -65,6 +65,7 @@ const char* const toradex_modules[] = {
 	[52] = "Colibri iMX8 DualX 1GB",
 	[53] = "Apalis iMX8 QuadXPlus 2GB ECC IT",
 	[54] = "Apalis iMX8 DualXPlus 1GB",
+	[55] = "Verdin iMX8M Mini 2GB Wi-Fi / BT IT",
 };
 
 const char * const toradex_prototype_modules[] = {
