@@ -4,7 +4,9 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QVariantMap>
-#include <QVariantMap>
+#include <QVersionNumber>
+#include <QString>
+#include <QDebug>
 
 ImageList::ImageList(const QString& toradexProductNumber, QObject *parent) : QObject(parent),
     _toradexProductNumber(toradexProductNumber)
@@ -33,7 +35,7 @@ void ImageList::addImages(QListVariantMap images)
         QString foldername = m.value("foldername").toString();
         bool autoInstall = m.value("autoinstall").toBool();
         bool isInstaller = m.value("isinstaller").toBool();
-        QString version = m.value("version").toString();
+        QString versionString = m.value("version").toString();
         QVariantList supportedProductIds = m.value("supported_product_ids").toList();
         bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
@@ -51,21 +53,60 @@ void ImageList::addImages(QListVariantMap images)
             /* Compare Toradex Easy Installer against current version */
             if (isInstaller) {
                 bool isNewer = false;
-                QStringList installerversion = QString(VERSION_NUMBER).split('.');
-                QStringList imageversion = QString(version).remove(QRegExp("[^0-9|.]")).split('.');
+                int installerVersionIndex, imageVersionIndex;
+                QString installerVersionString(VERSION_NUMBER);
 
-                /* Get minimal version length */
-                int versionl = installerversion.length();
-                if (versionl < imageversion.length())
-                    versionl = imageversion.length();
+                QVersionNumber installerVersion = QVersionNumber::fromString(installerVersionString, &installerVersionIndex);
+                QVersionNumber imageVersion = QVersionNumber::fromString(versionString, &imageVersionIndex);
 
-                /* If we get a longer version, its newer... (0.3 vs. 0.3.1 */
-                if (versionl < imageversion.length())
+                int compVersion = QVersionNumber::compare(installerVersion, imageVersion);
+                if (compVersion < 0)
+                {
+                    // This image is newer...!
                     isNewer = true;
+                }
+                else if (compVersion > 0)
+                {
+                    // Current running Tezi is newer...
+                    isNewer = false;
+                }
+                else
+                {
+                    /*
+                     * Check whether there is a pre-release part in the image version. If
+                     * there is a match (return value of indexIn > -1), we can consider
+                     * the pre-release
+                     *
+                     * Note: This currently does not support multiple (dot separated) parts
+                     * in the pre-release part! We compare the complete string after the dash
+                     * using ASCII order.
+                     */
+                    QRegExp preRelease("\\-([0-9a-zA-Z-]+[\\.0-9a-zA-Z-]*)");
+                    int posInstaller = preRelease.indexIn(installerVersionString, installerVersionIndex);
+                    QString installerPreRelease;
+                    if (posInstaller > -1)
+                        installerPreRelease = preRelease.cap(1);
 
-                for (int i = 0; i < versionl; i++) {
-                    if (imageversion[i].toInt() > installerversion[i].toInt())
-                        isNewer = true;
+                    int posImage = preRelease.indexIn(versionString, imageVersionIndex);
+                    QString imagePreRelease;
+                    if (posImage > -1)
+                        imagePreRelease = preRelease.cap(1);
+
+                    int compPreRelease = installerPreRelease.compare(imagePreRelease);
+
+                    /* No pre-release has presedence */
+                    if (posInstaller < 0 && posImage < 0)
+                        isNewer = false; // Both have no pre-release, equal...
+                    else if (posImage < 0 && posInstaller >= 0)
+                        isNewer = true; // Image has no pre-release => Newer!
+                    else if (posInstaller < 0 && posImage >= 0)
+                        isNewer = false; // Installer has no pre-release
+                    else if (compPreRelease < 0)
+                        isNewer = true; // Image pre-release is higher
+                    else if (compPreRelease > 0)
+                        isNewer = false; // Installer pre-release is higher
+                    else
+                        isNewer = false; // The pre-releases are equal!
                 }
 
                 /* Only autoInstall newer Toradex Easy Installer Versions */
