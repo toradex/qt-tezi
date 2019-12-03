@@ -11,8 +11,6 @@ class ImageList : public QObject
 public:
     explicit ImageList(const QString& toradexProductNumber, QObject *parent = nullptr);
     void addImage(const QVariantMap &image);
-    void removeImagesByBlockdev(const QString blockdev);
-    void removeImagesBySource(enum ImageSource source);
 
     inline QListVariantMap& imageList() {
         return _imageList;
@@ -31,6 +29,8 @@ signals:
 
 public slots:
     void addImages(QListVariantMap images);
+    void removeImagesByBlockdev(const QString blockdev);
+    void removeImagesBySource(enum ImageSource source);
 };
 
 #endif // IMAGELIST_H
