@@ -92,6 +92,22 @@ bool MainWindow::writeBootConfigurationBlock() {
     return false;
 }
 
+bool MainWindow::setAvahiHostname(const QString hostname) {
+    QStringList avahiArgs;
+    QByteArray output;
+
+    avahiArgs << hostname;
+
+    if (MultiImageWriteThread::runCommand("/usr/bin/avahi-set-host-name", avahiArgs, output, 10000))
+    {
+        qDebug() << "avahi-set-host-name:";
+        qDebug() << output;
+        return true;
+    }
+
+    return false;
+}
+
 bool MainWindow::initialize() {
     _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == nullptr) {
@@ -145,6 +161,7 @@ bool MainWindow::initialize() {
     _serialNumber = _toradexConfigBlock->getSerialNumber();
     _toradexProductId = _toradexConfigBlock->getProductId();
     _toradexProductNumber = _toradexConfigBlock->getProductNumber();
+    setAvahiHostname(QString("%1-%2").arg(_moduleInformation->getHostname(), _serialNumber));
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this, ui->list));

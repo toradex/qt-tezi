@@ -17,6 +17,7 @@ protected:
                                bool moduleSupported, QObject *parent = 0);
 
 public:
+    static const QString getHostname();
     static ModuleInformation *detectModule(QObject *parent);
     ConfigBlock *readConfigBlock();
     void writeConfigBlockIfNeeded(ConfigBlock *configBlock);

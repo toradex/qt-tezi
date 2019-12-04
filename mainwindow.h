@@ -106,6 +106,7 @@ protected:
     bool validateImageJson(QVariantMap &entry);
     void reenableImageChoice();
     bool writeBootConfigurationBlock();
+    bool setAvahiHostname(const QString hostname);
 
 signals:
     void abortAllDownloads();

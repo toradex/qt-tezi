@@ -100,6 +100,18 @@ void ModuleInformation::writeConfigBlockIfNeeded(ConfigBlock *configBlock)
     configBlock->needsWrite = false;
 }
 
+const QString ModuleInformation::getHostname()
+{
+    QFile file("/etc/hostname");
+    if (!file.exists()) {
+        return "unknown";
+    }
+    file.open(QFile::ReadOnly);
+    QString hostname = file.readLine().trimmed();
+
+    return hostname;
+}
+
 ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 {
     // Try to detect which module we are running on...
