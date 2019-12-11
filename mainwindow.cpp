@@ -850,7 +850,7 @@ void MainWindow::addService(QString service)
     srv.label = service + " (zeroconf)";
     srv.url = "http://" + serviceEntry.host + serviceEntry.TXTRecords.value("path");
     srv.source = SOURCE_NETWORK;
-    srv.enabled = true;
+    srv.enabled = serviceEntry.TXTRecords.value("enabled", "1").toInt();
 
     /* Only add the service once */
     int index = _networkFeedServerList.indexOf(srv);
