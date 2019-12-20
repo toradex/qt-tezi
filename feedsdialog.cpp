@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QKeyEvent>
 #include <QEvent>
+#include "config.h"
 Q_DECLARE_METATYPE(FeedServer);
 
 FeedsDialog::FeedsDialog(QList<FeedServer> &_networkFeedServerList, QWidget *parent) :
@@ -68,6 +69,14 @@ void FeedsDialog::on_addPushButton_clicked(void)
     server.label = tr("Custom Server");
     server.url = ui->newServerLineEdit->text();
     server.enabled = true;
+
+    // Classify as network by default. This could be a public or
+    // a local url, we can't tell...
+    if (server.url.contains(RNDIS_ADDRESS))
+        server.source = SOURCE_RNDIS;
+    else
+        server.source = SOURCE_NETWORK;
+
     addFeedServer(server);
 
     ui->newServerLineEdit->clear();
