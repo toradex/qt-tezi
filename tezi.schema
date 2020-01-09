@@ -182,6 +182,14 @@
             "description": "Title to show in the license agreement dialog.",
             "type": "string"
         },
+        "releasenotes": {
+            "description": "Filename of a HTML file containing image release notes.",
+            "type": "string"
+        },
+        "releasenotes_title": {
+            "description": "Title to show in the release notes dialog.",
+            "type": "string"
+        },
         "supported_product_ids": {
             "description": "List of supported Product ID's. The product ID will be obtained from the Toradex Config Block. If a image is found which does not support the current module type it will be displayed in gray.",
             "type": "array",
