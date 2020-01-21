@@ -54,6 +54,13 @@ bool makeFifo(const QString &file)
     return mkfifo(file.toLocal8Bit().constData(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH) == 0;
 }
 
+void unlockFifo(const QString &filename, const QByteArray &data)
+{
+    int fifo_fd = open(filename.toUtf8().constData(), O_WRONLY | O_NONBLOCK);
+    write(fifo_fd, data.constData(), data.size());
+    close(fifo_fd);
+}
+
 QString getUrlPath(const QString& url)
 {
     int slash = url.lastIndexOf('/');

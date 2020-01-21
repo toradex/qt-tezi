@@ -990,28 +990,29 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
 
     p.waitForFinished(-1);
 
-    /*
-     * In case pv never got executed (e.g. due to missing source file) pollpipeview will hang
-     * in QFile::open(). This is a default behavior of Linux FIFOs: If the write side never
-     * got opened, the read side open will block. Unfortunately it is not easy to open non-blocking
-     * or detect if the write side got opened. Work around by opening the write side in case
-     * pipe viewer is still running now.
-     */
-    if (!pvfuture.isFinished()) {
-        qDebug() << "Pipeviewer poll did not finish on its own, make sure pipe got opened and received data.";
-        putFileContents(PIPEVIEWER_NAMEDPIPE, "\n");
+    if (p.exitCode() != 0)
+    {
+        emit error(tr("Error downloading or writing image")+"\n" + p.readAll());
+
+        /*
+         * In case pv never got executed (e.g. due to missing source file) pollpipeview will hang
+         * in QFile::open(). This is a default behavior of Linux FIFOs: If the write side never
+         * got opened, the read side open will block. Unfortunately it is not easy to open non-blocking
+         * or detect if the write side got opened. Work around by opening the write side in case
+         * pipe viewer is still running now.
+         */
+        if (!pvfuture.isFinished()) {
+            qDebug() << "Pipeviewer poll did not finish on its own, make sure pipe got opened and received data.";
+            unlockFifo(PIPEVIEWER_NAMEDPIPE, "\n");
+        }
+
+        return false;
     }
 
     pvfuture.waitForFinished();
 
     if (checkmd5sum)
         md5sum.waitForFinished(-1);
-
-    if (p.exitCode() != 0)
-    {
-        emit error(tr("Error downloading or writing image")+"\n" + p.readAll());
-        return false;
-    }
 
     /* Save stderr to log file even on success, printed warnings might be helpful */
     qDebug() << "Write pipe stderr output:" << p.readAll();
