@@ -848,7 +848,11 @@ void MainWindow::addService(QString service)
 
     FeedServer srv;
     srv.label = service + " (zeroconf)";
-    srv.url = "http://" + serviceEntry.host + serviceEntry.TXTRecords.value("path");
+    QString protocol = "http://";
+    if (serviceEntry.TXTRecords.value("https", "0").toInt() == 1)
+        protocol = "https://";
+
+    srv.url = protocol + serviceEntry.host + serviceEntry.TXTRecords.value("path");
     srv.source = SOURCE_NETWORK;
     srv.enabled = serviceEntry.TXTRecords.value("enabled", "1").toInt();
 
