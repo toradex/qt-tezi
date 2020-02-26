@@ -18,6 +18,7 @@
 #include "feedsdialog.h"
 #include "waitingspinnerwidget.h"
 #include "qlistimagewidgetitem.h"
+#include "httpapi.h"
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMap>
@@ -67,7 +68,8 @@ MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *paren
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser)
+    _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser),
+    _httpApi(new HttpApi), _TeziState(TEZI_IDLE)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -123,6 +125,7 @@ bool MainWindow::initialize() {
                               QMessageBox::Close);
         return false;
     }
+
     _toradexConfigBlock = _moduleInformation->readConfigBlock();
 
     // Unlock by default
@@ -230,7 +233,6 @@ bool MainWindow::initialize() {
     _imageList = new ImageList(_toradexProductNumber);
     connect(_imageList, SIGNAL (imageListUpdated()), this, SLOT (imageListUpdated()));
     connect(_imageList, SIGNAL (foundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)));
-
     // Starting network after first media scan makes sure that a local media takes presedence over a server provided image.
     connect(_mediaPollThread, SIGNAL (firstScanFinished()), this, SLOT (startNetworking()));
     connect(_mediaPollThread, SIGNAL (removedBlockdev(const QString)), _imageList, SLOT (removeImagesByBlockdev(const QString)));
@@ -238,11 +240,14 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (newImagesToAdd(QListVariantMap)), _imageList, SLOT (addImages(QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
     connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
-
+    connect(_httpApi, SIGNAL (httpApiFoundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)), Qt::QueuedConnection);
+    connect(_httpApi, SIGNAL (httpApiDownloadImage(QString, enum ImageSource)), this, SLOT (downloadImage(QString, enum ImageSource)));
     connect(_browser, SIGNAL(serviceEntryAdded(QString)), this, SLOT(addService(QString)));
     connect(_browser, SIGNAL(serviceEntryRemoved(QString)), this, SLOT(removeService(QString)));
-    _browser->browse("_tezi._tcp");
+    connect(_httpApi, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
 
+    _browser->browse("_tezi._tcp");
+    _httpApi->start("8080",this);
     _mediaPollThread->start();
 
     return true;
@@ -257,9 +262,12 @@ MainWindow::~MainWindow()
 void MainWindow::setWorkingInBackground(bool working, const QString &labelText)
 {
     if (working) {
+        _TeziState = TEZI_SCANNING;
         ui->waitingSpinner->start();
         ui->labelBackgroundTask->setText(labelText);
     } else {
+        if (_TeziState == TEZI_SCANNING)
+            _TeziState = TEZI_IDLE;
         ui->waitingSpinner->stop();
         ui->labelBackgroundTask->setText("");
     }
@@ -300,7 +308,6 @@ void MainWindow::imageListUpdated()
         delete item;
         i--;
     }
-
     foreach (const QVariantMap &m, _imageList->imageList())
     {
         QString name = m.value("name").toString();
@@ -385,7 +392,6 @@ void MainWindow::imageListUpdated()
     } else {
         setWorkingInBackground(true, tr("Waiting for external media or network..."));
     }
-
     updateNeeded();
 }
 
@@ -394,13 +400,13 @@ void MainWindow::foundAutoInstallImage(const QVariantMap &image)
     if (!_allowAutoinstall)
         return;
 
-    _isAutoinstall = true;
     installImage(image);
 }
 
 void MainWindow::addNewImageUrl(const QString url)
 {
     FeedServer server;
+    QMutexLocker locker(&feedMutex);
     server.label = tr("Custom Server from Media");
     server.url = url;
 
@@ -426,9 +432,7 @@ void MainWindow::addNewImageUrl(const QString url)
         else
             _networkFeedServerList[index].enabled = true;
     }
-
     _imageList->removeImagesBySource(server.source);
-
     if (server.source == SOURCE_RNDIS)
         _downloadRndis = true;
     else if (server.source == SOURCE_NETWORK)
@@ -457,6 +461,7 @@ void MainWindow::errorMounting(const QString blockdev)
 
 void MainWindow::disableFeed(const QString feedname)
 {
+        QMutexLocker locker(&feedMutex);
         if (feedname == TEZI_CONFIG_JSON_DEFAULT_FEED)
             _networkFeedServerList[0].enabled = false;
         else if (feedname == TEZI_CONFIG_JSON_3RDPARTY_FEED)
@@ -491,6 +496,7 @@ void MainWindow::installImage(QVariantMap entry)
 {
     enum ImageSource imageSource = entry.value("source").value<enum ImageSource>();
 
+    _TeziState = TEZI_INSTALLING;
     setEnabled(false);
     _numMetaFilesToDownload = 0;
 
@@ -753,6 +759,7 @@ void MainWindow::onCompleted()
     _psd->close();
     _psd->deleteLater();
     _psd = nullptr;
+    _TeziState = TEZI_INSTALLED;
     _imageWriteThread->deleteLater();
 
 
@@ -838,6 +845,7 @@ void MainWindow::onQuery(const QString &msg, const QString &title, QMessageBox::
 
 void MainWindow::addService(QString service)
 {
+    QMutexLocker locker(&feedMutex);
     ZConfServiceEntry serviceEntry = _browser->serviceEntry(service);
     if (!serviceEntry.isValid())
         return;
@@ -872,7 +880,7 @@ void MainWindow::addService(QString service)
 void MainWindow::removeService(QString service)
 {
     int idx = -1;
-
+    QMutexLocker locker(&feedMutex);
     for (int i = 0; i < _networkFeedServerList.count(); i++)
     {
         if (_networkFeedServerList[i].label == service + " (zeroconf)")
@@ -1015,6 +1023,26 @@ void MainWindow::imageHostLookupResults(QHostInfo hostInfo){
     }
 }
 
+void MainWindow::downloadImageSetupSignals(ImageListDownload *imageListDownload)
+{
+    connect(imageListDownload, SIGNAL(newImagesToAdd(QListVariantMap)), _imageList, SLOT(addImages(QListVariantMap)));
+    connect(imageListDownload, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
+    connect(imageListDownload, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
+    _imageListDownloadsActive++;
+}
+
+void MainWindow::downloadImageList(const QString &url, enum ImageSource source, int index)
+{
+    ImageListDownload *imageListDownload = new ImageListDownload(url, source, index, _netaccess, this);
+    downloadImageSetupSignals(imageListDownload);
+}
+
+void MainWindow::downloadImage(const QString &url, enum ImageSource source)
+{
+    ImageListDownload *imageListDownload = new ImageListDownload(url, source, _netaccess, this);
+    downloadImageSetupSignals(imageListDownload);
+}
+
 bool MainWindow::downloadLists(const enum ImageSource source)
 {
     int index = 0;
@@ -1030,6 +1058,7 @@ bool MainWindow::downloadLists(const enum ImageSource source)
         _netaccess->setConfiguration(manager.defaultConfiguration());
     }
 
+    QMutexLocker locker(&feedMutex);
     foreach (FeedServer server, _networkFeedServerList)
     {
         if (server.source != source)
@@ -1038,11 +1067,8 @@ bool MainWindow::downloadLists(const enum ImageSource source)
         if (!server.enabled)
             continue;
 
-        ImageListDownload *imageListDownload = new ImageListDownload(server.url, server.source, index, _netaccess, this);
-        connect(imageListDownload, SIGNAL(newImagesToAdd(QListVariantMap)), _imageList, SLOT(addImages(QListVariantMap)));
-        connect(imageListDownload, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
-        connect(imageListDownload, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
-        _imageListDownloadsActive++;
+        downloadImageList(server.url, server.source, index);
+
         index++;
     }
 
@@ -1202,6 +1228,7 @@ void MainWindow::reenableImageChoice()
     _networkStatusPollTimer.start();
     _mediaPollThread->scanMutex.unlock();
     setEnabled(true);
+    _TeziState = TEZI_IDLE;
 }
 
 void MainWindow::startImageWrite(QVariantMap &entry)

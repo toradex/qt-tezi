@@ -15,6 +15,7 @@ class ImageListDownload : public QObject
     Q_OBJECT
 public:
     explicit ImageListDownload(const QString &url, ImageSource imageSource, int index, QNetworkAccessManager *netaccess, QObject *parent);
+    explicit ImageListDownload(const QString &url, ImageSource imageSource, QNetworkAccessManager *netaccess, QObject *parent);
 
 signals:
     void newImagesToAdd(const QListVariantMap images);
@@ -41,6 +42,7 @@ protected:
     QList<QVariantMap> _netImages;
     int _numDownloads, _feedindex;
     enum ImageSource _imageSource;
+    bool _forceAutoinstall;
 };
 
 #endif // IMAGELISTDOWNLOAD_H

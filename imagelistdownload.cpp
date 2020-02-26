@@ -17,7 +17,7 @@
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource, int index,
     QNetworkAccessManager *netaccess, QObject *parent) : QObject(parent),
     _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(index),
-    _imageSource(imageSource)
+    _imageSource(imageSource), _forceAutoinstall(false)
 {
     _numDownloads++;
     qDebug() << "Downloading image list from " << url;
@@ -26,6 +26,22 @@ ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource
     connect(rd, SIGNAL(completed()), this, SLOT(downloadListJsonCompleted()));
     connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
     connect(parent, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
+}
+
+ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource,
+                                     QNetworkAccessManager *netaccess,
+                                     QObject *parent) : QObject(parent),
+    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0),
+    _imageSource(imageSource), _forceAutoinstall(true)
+{
+    qDebug() << "Downloading single image description from " << url;
+
+    _numDownloads++;
+    ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL, -1);
+    connect(rd, SIGNAL(failed()), this, SLOT(downloadImageJsonFailed()));
+    connect(rd, SIGNAL(completed()), this, SLOT(downloadImageJsonCompleted()));
+    connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(_parent, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
 }
 
 void ImageListDownload::downloadListJsonCompleted()
@@ -97,6 +113,8 @@ void ImageListDownload::downloadImageJsonCompleted()
     imagemap["baseurl"] = baseurl;
     imagemap["source"] = _imageSource;
     imagemap["feedindex"] = _feedindex;
+    if (_forceAutoinstall)
+        imagemap["autoinstall"] = true;
     _netImages.append(imagemap);
 
     QString icon = imagemap.value("icon").toString();

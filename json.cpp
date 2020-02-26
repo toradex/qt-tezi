@@ -179,8 +179,9 @@ bool Json::validate(const QByteArray &schemastr, const QByteArray &filestr, QStr
 
 QByteArray Json::serialize(const QVariant &json)
 {
+
     QJsonDocument doc(QJsonDocument::fromVariant(json));
-    return doc.toBinaryData();
+    return doc.toJson();
 #if 0
     QJson::Serializer serializer;
     bool ok;

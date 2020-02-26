@@ -1,6 +1,6 @@
 # Qt Project for Toradex Installer
 
-QT += core gui network dbus concurrent widgets
+QT += core gui network dbus concurrent widgets websockets
 
 TARGET = tezi
 target.files = tezi
@@ -8,7 +8,8 @@ target.path = /var/volatile
 INSTALLS = target
 TEMPLATE = app
 CONFIG += link_pkgconfig
-PKGCONFIG += libusbgx
+PKGCONFIG += libusbgx qhttp
+
 LIBS += -lqtzeroconf-browser -lqtzeroconf-common
 
 system(sh updateqm.sh 2>/dev/null)
@@ -17,6 +18,7 @@ GIT_VERSION = $$system(git --git-dir $$PWD/.git --work-tree $$PWD rev-parse --sh
 DEFINES += GIT_VERSION=\\\"$$GIT_VERSION\\\"
 
 SOURCES += main.cpp\
+    httpapi.cpp \
     imagelist.cpp \
     mainwindow.cpp \
     languagedialog.cpp \
@@ -54,6 +56,7 @@ SOURCES += main.cpp\
     qlistimagewidgetitem.cpp
 
 HEADERS  += mainwindow.h \
+    httpapi.h \
     imagelist.h \
     languagedialog.h \
     config.h \

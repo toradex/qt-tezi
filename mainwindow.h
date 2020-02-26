@@ -20,6 +20,7 @@
 #include "moduleinformation.h"
 #include "feedserver.h"
 #include "imagelist.h"
+#include "httpapi.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QMessageBox>
@@ -29,12 +30,21 @@
 #include <QSet>
 #include <QFileSystemWatcher>
 #include <QHostInfo>
-#include "qtzeroconf/zconfservicebrowser.h"
+#include <qtzeroconf/zconfservicebrowser.h>
+#include <atomic>
 
 enum RebootMode {
     LINUX_UNKNOWN,
     LINUX_REBOOT,
     LINUX_POWEROFF
+};
+
+enum TeziState {
+    TEZI_UNKNOWN,
+    TEZI_IDLE,
+    TEZI_SCANNING,
+    TEZI_INSTALLING,
+    TEZI_INSTALLED
 };
 
 namespace Ui {
@@ -52,12 +62,30 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+private:
+    QMutex  listMutex;
+    QMutex  feedMutex;
 public:
     explicit MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent = 0);
     ~MainWindow();
     void show();
     void showProgressDialog(const QString &labelText);
     bool initialize();
+    ImageList *_imageList;
+    QList<FeedServer> _networkFeedServerList;
+    void downloadImage(const QString &url, enum ImageSource source);
+
+    inline enum TeziState getTeziState() {
+        return _TeziState;
+    }
+
+    QList<FeedServer> getFeedServerList() {
+        return this->_networkFeedServerList;
+    }
+
+    QMutex* getFeedMutex() {
+        return &this->feedMutex;
+    }
 
 protected:
     Ui::MainWindow *ui;
@@ -84,10 +112,10 @@ protected:
     UsbGadget *_usbGadget;
     MediaPollThread *_mediaPollThread;
     MultiImageWriteThread *_imageWriteThread;
-    QList<FeedServer> _networkFeedServerList;
     int _internetHostLookupId;
     ZConfServiceBrowser *_browser;
-    ImageList *_imageList;
+    HttpApi *_httpApi;
+    std::atomic<TeziState> _TeziState;
 
     void setWorkingInBackground(bool working, const QString &labelText = "");
     void updateModuleInformation();
@@ -100,6 +128,8 @@ protected:
     QList<QListWidgetItem *> selectedItems();
     void updateNeeded();
     void downloadMetaFile(const QString &url, const QString &saveAs);
+    void downloadImageSetupSignals(ImageListDownload *imageListDownload);
+    void downloadImageList(const QString &url, enum ImageSource source, int index);
     bool downloadLists(const enum ImageSource source);
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap &entry);

@@ -27,8 +27,8 @@ bool ImageList::imageSortOrder(const QVariant &v1, const QVariant &v2)
 
 void ImageList::addImages(QListVariantMap images)
 {
+    QMutexLocker locker(&listMutex);
     QVariantMap* autoInstallImage = nullptr;
-
     for (QVariantMap &m : images)
     {
         int config_format = m.value("config_format").toInt();
@@ -141,11 +141,13 @@ void ImageList::addImages(QListVariantMap images)
 
 void ImageList::addImage(const QVariantMap &image)
 {
+    QMutexLocker locker(&listMutex);
     _imageList.append(image);
 }
 
 void ImageList::removeImagesByBlockdev(const QString blockdev)
 {
+    QMutexLocker locker(&listMutex);
     bool changes = false;
 
     QMutableListIterator<QVariantMap> i(_imageList);
@@ -162,6 +164,7 @@ void ImageList::removeImagesByBlockdev(const QString blockdev)
 
 void ImageList::removeImagesBySource(enum ImageSource source)
 {
+    QMutexLocker locker(&listMutex);
     bool changes = false;
 
     QMutableListIterator<QVariantMap> i(_imageList);

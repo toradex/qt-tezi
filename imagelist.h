@@ -4,16 +4,23 @@
 #include "imagelistdownload.h"
 
 #include <QObject>
+#include <QMutex>
 
 class ImageList : public QObject
 {
     Q_OBJECT
+private:
+    QMutex listMutex;
 public:
     explicit ImageList(const QString& toradexProductNumber, QObject *parent = nullptr);
     void addImage(const QVariantMap &image);
 
     inline QListVariantMap& imageList() {
         return _imageList;
+    }
+
+    QMutex* GetMutex(){
+        return &this->listMutex;
     }
 
 protected:
