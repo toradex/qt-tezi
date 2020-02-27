@@ -852,7 +852,11 @@ void MainWindow::addService(QString service)
     if (serviceEntry.TXTRecords.value("https", "0").toInt() == 1)
         protocol = "https://";
 
-    srv.url = protocol + serviceEntry.host + serviceEntry.TXTRecords.value("path");
+    QString port = "";
+    if (serviceEntry.port)
+        port = QString(":%1").arg(serviceEntry.port);
+
+    srv.url = protocol + serviceEntry.host + port + serviceEntry.TXTRecords.value("path");
     srv.source = SOURCE_NETWORK;
     srv.enabled = serviceEntry.TXTRecords.value("enabled", "1").toInt();
 
