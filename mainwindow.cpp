@@ -241,7 +241,7 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
     connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
     connect(_httpApi, SIGNAL (httpApiFoundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)), Qt::QueuedConnection);
-    connect(_httpApi, SIGNAL (httpApiDownloadImage(QString, enum ImageSource)), this, SLOT (downloadImage(QString, enum ImageSource)));
+    connect(_httpApi, SIGNAL (httpApiDownloadImage(const QString, enum ImageSource)), this, SLOT (downloadImage(const QString, enum ImageSource)));
     connect(_browser, SIGNAL(serviceEntryAdded(QString)), this, SLOT(addService(QString)));
     connect(_browser, SIGNAL(serviceEntryRemoved(QString)), this, SLOT(removeService(QString)));
     connect(_httpApi, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));

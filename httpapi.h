@@ -27,7 +27,7 @@ protected:
 
 signals:
     void httpApiFoundAutoInstallImage(const QVariantMap &image);
-    void httpApiDownloadImage(QString url, enum ImageSource source);
+    void httpApiDownloadImage(const QString url, enum ImageSource source);
     void newImageUrl(const QString url);
 };
 

@@ -73,7 +73,7 @@ public:
     bool initialize();
     ImageList *_imageList;
     QList<FeedServer> _networkFeedServerList;
-    void downloadImage(const QString &url, enum ImageSource source);
+
 
     inline enum TeziState getTeziState() {
         return _TeziState;
@@ -185,6 +185,7 @@ private slots:
     void on_list_itemDoubleClicked();
     void on_actionWifi_triggered();
     void on_list_itemSelectionChanged();
+    void downloadImage(const QString &url, enum ImageSource source);
 };
 
 #endif // MAINWINDOW_H
