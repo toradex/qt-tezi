@@ -47,6 +47,7 @@ void ResourceDownload::downloadRedirectCheck()
         emit finished();
     } else if (httpstatuscode > 300 && httpstatuscode < 400) {
         qDebug() << "Redirection - Re-trying download from" << redirectionurl;
+        reply->deleteLater();
         downloadFile(redirectionurl);
     } else {
         _httpStatusCode = httpstatuscode;
