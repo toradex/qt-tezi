@@ -182,7 +182,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         // i.MX8QM
         productIds << 37 << 47 << 48 << 49;
         storageClass = StorageClass::Block;
-        rebootWorks = true;
+        rebootWorks = false;
     } else if (socid == "i.MX8QXP") {
         // i.MX8QXP
         QByteArray compatible = getFileContents("/proc/device-tree/compatible");
@@ -192,7 +192,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             productIds << 38 << 50 << 51 << 52;
         }
         storageClass = StorageClass::Block;
-        rebootWorks = true;
+        rebootWorks = false;
     } else if (socid == "i.MX8MM") {
         // i.MX8MM
         productIds << 55;
