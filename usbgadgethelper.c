@@ -116,32 +116,38 @@ usbg_f_net *f_net_rndis;
 
 usbg_error usbg_ret;
 
-int usbgadget_init(const char *serial, const char *productName, uint16_t idProduct)
+int usbgadget_init()
 {
-    g_strs.serial = strdup(serial);
-    g_strs.product = strdup(productName);
-    g_attrs_ms.idProduct = idProduct;
-    g_attrs_rndis.idProduct = idProduct;
-
     usbg_ret = (usbg_error)usbg_init("/sys/kernel/config", &s);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
-
-    /* Delete old states if there... */
-    g_ms = usbg_get_gadget(s, "gms");
-    if (g_ms)
-        usbg_rm_gadget(g_ms, USBG_RM_RECURSE);
-    g_rndis = usbg_get_gadget(s, "grndis");
-    if (g_rndis)
-        usbg_rm_gadget(g_rndis, USBG_RM_RECURSE);
-
     return 0;
 }
 
 int usbgadget_ms_init()
 {
+    /* Do nothing if gadget device is already created... */
+    g_ms = usbg_get_gadget(s, "gms");
+    if (g_ms)
+        return 0;
+
     usbg_ret = (usbg_error)usbg_create_gadget(s, "gms", &g_attrs_ms, &g_strs, &g_ms);
     if (usbg_ret != USBG_SUCCESS)
+        return -1;
+
+    return 0;
+}
+
+int usbgadget_ms_set_attrs(const char *serial, const char *productName, const uint16_t idProduct)
+{
+    g_strs.serial = strdup(serial);
+    g_strs.product = strdup(productName);
+    g_attrs_ms.idProduct = 0x4000 + idProduct;
+
+    if (usbg_set_gadget_attrs(g_ms, &g_attrs_ms) != USBG_SUCCESS)
+        return -1;
+
+    if (usbg_set_gadget_strs(g_ms, LANG_US_ENG, &g_strs) != USBG_SUCCESS)
         return -1;
 
     return 0;
@@ -242,7 +248,7 @@ int usbgadget_ms_enable(const char *basemmcdev)
     usbg_f_ms_set_lun_file(mf, 1, mmcdev);
 
     usbg_ret = usbg_enable_gadget(g_ms, DEFAULT_UDC);
-    if (usbg_ret != USBG_SUCCESS)
+    if (usbg_ret != USBG_SUCCESS && usbg_ret != USBG_ERROR_BUSY)
         return -1;
     return 0;
 }
@@ -283,6 +289,11 @@ int usbgadget_rndis_init()
 {
     usbg_config *c;
 
+    /* Do nothing if gadget device is already created... */
+    g_rndis = usbg_get_gadget(s, "grndis");
+    if (g_rndis)
+        return 0;
+
     usbg_ret = (usbg_error)usbg_create_gadget(s, "grndis", &g_attrs_rndis, &g_strs, &g_rndis);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
@@ -317,10 +328,25 @@ int usbgadget_rndis_init()
     return 0;
 }
 
+int usbgadget_rndis_set_attrs(const char *serial, const char *productName, const uint16_t idProduct)
+{
+    g_strs.serial = strdup(serial);
+    g_strs.product = strdup(productName);
+    g_attrs_rndis.idProduct = 0x4000 + idProduct;
+
+    if (usbg_set_gadget_attrs(g_rndis, &g_attrs_rndis) != USBG_SUCCESS)
+        return -1;
+
+    if (usbg_set_gadget_strs(g_rndis, LANG_US_ENG, &g_strs) != USBG_SUCCESS)
+        return -1;
+
+    return 0;
+}
+
 int usbgadget_rndis_enable()
 {
     usbg_ret = usbg_enable_gadget(g_rndis, DEFAULT_UDC);
-    if (usbg_ret != USBG_SUCCESS)
+    if (usbg_ret != USBG_SUCCESS && usbg_ret != USBG_ERROR_BUSY)
         return -1;
     return 0;
 }
@@ -332,4 +358,3 @@ int usbgadget_rndis_disable()
         return -1;
     return 0;
 }
-

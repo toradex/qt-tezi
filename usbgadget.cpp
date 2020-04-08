@@ -7,16 +7,13 @@
 #include "usbgadgethelper.h"
 #include <usbg/usbg.h>
 
-UsbGadget::UsbGadget(QString &serial, QString &productName, int idProduct, const QString &eMMCDev, QObject *parent) : QObject(parent),
-    _gadgetInitialized(false), _gadgetIsMassStorage(false), _eMMCDev(eMMCDev)
+UsbGadget::UsbGadget(QObject *parent) : QObject(parent),
+    _gadgetInitialized(false), _gadgetIsMassStorage(false)
 {
-    uint16_t productId = 0x4000 + idProduct;
-
-    if (usbgadget_init(serial.toStdString().c_str(), productName.toStdString().c_str(), productId)) {
+    if (usbgadget_init()) {
         qDebug() << "USB Gadget: Error initalizing:" << usbgadget_strerror();
         return;
     }
-
     _gadgetInitialized = true;
 }
 
@@ -54,6 +51,16 @@ bool UsbGadget::isMassStorageSafeToRemove()
     return usbgadget_ms_safe_to_remove();
 }
 
+bool UsbGadget::setMassStorageAttrs(const QString &serial, const QString &productName, const uint16_t idProduct)
+{
+    if (usbgadget_ms_set_attrs(serial.toStdString().c_str(), productName.toStdString().c_str(), idProduct)) {
+        qDebug() << "USB Gadget: Error setting Mass Storage Attributes:" << usbgadget_strerror();
+        return false;
+    }
+
+    return true;
+}
+
 bool UsbGadget::initRndis()
 {
     if (!_gadgetInitialized)
@@ -79,4 +86,14 @@ void UsbGadget::enableRndis(bool enable)
         usbgadget_rndis_disable();
         qDebug() << "USB Gadget: RNDIS disabled";
     }
+}
+
+bool UsbGadget::setRndisAttrs(const QString &serial, const QString &productName, const uint16_t idProduct)
+{
+    if (usbgadget_rndis_set_attrs(serial.toStdString().c_str(), productName.toStdString().c_str(), idProduct)) {
+        qDebug() << "USB Gadget: Error setting RNDIS Attributes:" << usbgadget_strerror();
+        return false;
+    }
+
+    return true;
 }
