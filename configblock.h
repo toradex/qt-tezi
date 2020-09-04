@@ -54,6 +54,7 @@ public:
     QString getBoardRev();
     QString getProductName();
     bool isTdxPrototypeProdid(quint16 prodid);
+    QString getPID8();
 
     bool needsWrite;
 

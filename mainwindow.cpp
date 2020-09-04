@@ -169,6 +169,7 @@ bool MainWindow::initialize() {
     _toradexProductId = _toradexConfigBlock->getProductId();
     _toradexProductNumber = _toradexConfigBlock->getProductNumber();
     setAvahiHostname(QString("%1-%2").arg(_moduleInformation->getHostname(), _serialNumber));
+    _toradexPID8 = _toradexConfigBlock->getPID8();
     updateModuleInformation();
 
     ui->list->setItemDelegate(new TwoIconsDelegate(this, ui->list));
@@ -216,18 +217,21 @@ bool MainWindow::initialize() {
     FeedServer srv;
     srv.label = "Toradex Image Server";
     srv.url = DEFAULT_IMAGE_SERVER;
+    srv.url.append("?PID8=").append(_toradexPID8);
     srv.source = SOURCE_INTERNET;
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
     srv.label = "Toradex 3rd Party Image Server";
     srv.url = DEFAULT_3RDPARTY_IMAGE_SERVER;
+    srv.url.append("?PID8=").append(_toradexPID8);
     srv.source = SOURCE_INTERNET;
     srv.enabled = true;
     _networkFeedServerList.append(srv);
 
     srv.label = "Toradex Continuous Integration Server (testing)";
     srv.url = DEFAULT_CI_IMAGE_SERVER;
+    srv.url.append("?PID8=").append(_toradexPID8);
     srv.source = SOURCE_INTERNET;
     srv.enabled = false;
     _networkFeedServerList.append(srv);

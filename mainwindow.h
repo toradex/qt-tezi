@@ -95,7 +95,7 @@ protected:
     ProgressSlideshowDialog *_psd;
     ModuleInformation *_moduleInformation;
     ConfigBlock *_toradexConfigBlock;
-    QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber;
+    QString _toradexProductName, _toradexBoardRev, _serialNumber, _toradexProductNumber, _toradexPID8;
     int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     LanguageDialog *_ld;

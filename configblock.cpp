@@ -174,6 +174,16 @@ QString ConfigBlock::getBoardRev()
     return boardRev;
 }
 
+QString ConfigBlock::getPID8()
+{
+    ConfigBlockHw *hw = (ConfigBlockHw *)_hw.data();
+    QString prodNumber = QString::number(getProductId()).rightJustified(4, '0');
+    QString majVer = QString::number(hw->ver_major);
+    QString minVer = QString::number(hw->ver_minor);
+    QString assyVer = QString::number(hw->ver_assembly).rightJustified(2, '0');
+    return prodNumber + majVer + minVer + assyVer;
+}
+
 QString ConfigBlock::getProductName()
 {
     quint16 productId = getProductId();
