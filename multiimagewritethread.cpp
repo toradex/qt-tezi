@@ -496,8 +496,12 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
             partitionTable.append(",type=");
             partitionTable.append(p->partitionType());
 
-            if (p->active())
-                partitionTable.append(",bootable");
+            if (p->active()) {
+                if (blockdev->tableType() == "gpt")
+                    partitionTable.append(",attrs=LegacyBIOSBootable");
+                else
+                    partitionTable.append(",bootable");
+            }
             partitionTable.append("\n");
         }
         else
