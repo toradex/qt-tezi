@@ -66,8 +66,12 @@ const char* const toradex_modules[] = {
 	[53] = "Apalis iMX8 QuadXPlus 2GB ECC IT",
 	[54] = "Apalis iMX8 DualXPlus 1GB",
 	[55] = "Verdin iMX8M Mini Quad 2GB Wi-Fi / BT IT",
-	[56] = "Verdin iMX8M Nano SoloLite 1GB", /* not currently on sale */
+	[56] = "Verdin iMX8M Nano Quad 1GB Wi-Fi / BT", /* not currently on sale */
 	[57] = "Verdin iMX8M Mini DualLite 1GB",
+	[58] = "Verdin iMX8M Plus Quad 4GB Wi-Fi / BT IT",
+	[59] = "Verdin iMX8M Mini Quad 2GB IT",
+	[60] = "Verdin iMX8M Mini DualLite 1GB WB IT",
+	[61] = "Verdin iMX8M Plus Quad 2GB",
 };
 
 const char * const toradex_prototype_modules[] = {
