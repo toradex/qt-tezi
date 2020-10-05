@@ -164,27 +164,27 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
                 moduleSupported = false;
         }
     } else if (socid == "i.MX6Q") {
-        // i.MX6 Quad/Dual are only populated on Apalis currently
+        // i.MX 6Quad/Dual are only populated on Apalis currently
         productIds << 27 << 28 << 29 << 35;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX6DL") {
-        // i.MX6 DualLite/Solo are only populated on Colibri currently
+        // i.MX 6DualLite/Solo are only populated on Colibri currently
         productIds << 14 << 15 << 16 << 17;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX6ULL") {
-        // i.MX6 ULL
+        // i.MX 6ULL
         productIds << 36 << 40 << 44 << 45;
         storageClass = StorageClass::Mtd;
         rebootWorks = false;
     } else if (socid == "i.MX8QM") {
-        // i.MX8QM
+        // i.MX 8QuadMax/QuadPlus
         productIds << 37 << 47 << 48 << 49;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX8QXP") {
-        // i.MX8QXP
+        // i.MX 8QuadXPlus/DualXPlus/DualX
         QByteArray compatible = getFileContents("/proc/device-tree/compatible");
         if (compatible.contains("apalis")) {
             productIds << 46 << 53 << 54 << 2600;
@@ -194,7 +194,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX8MM") {
-        // i.MX8MM
+        // i.MX 8M Mini
         productIds << 55;
         storageClass = StorageClass::Block;
         rebootWorks = true;
