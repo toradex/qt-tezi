@@ -195,7 +195,17 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = false;
     } else if (socid == "i.MX8MM") {
         // i.MX 8M Mini
-        productIds << 55;
+        productIds << 55 << 57 << 59 << 60;
+        storageClass = StorageClass::Block;
+        rebootWorks = true;
+    } else if (socid == "i.MX8MN") {
+        // i.MX 8M Nano
+        productIds << 56;
+        storageClass = StorageClass::Block;
+        rebootWorks = true;
+    } else if (socid == "i.MX8MP") {
+        // i.MX 8M Plus
+        productIds << 58 << 61;
         storageClass = StorageClass::Block;
         rebootWorks = true;
     } else {
