@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QStringList>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 #define PROTOTYPE_RANGE_MIN 2600
@@ -57,6 +58,8 @@ public:
     QString getPID8();
 
     bool needsWrite;
+
+    static bool isProductSupported(const QString &toradexProductNumber, const QStringList &supportedProductIds);
 
 private:
     QByteArray _cb;

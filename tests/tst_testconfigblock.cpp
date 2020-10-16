@@ -17,7 +17,7 @@ private slots:
     void cleanupTestCase();
     void testConfigBlockParsing();
     void testConfigBlockPrototypeProdid();
-
+    void testIsProductSupported();
 };
 
 TestConfigBlock::TestConfigBlock()
@@ -63,6 +63,14 @@ void TestConfigBlock::testConfigBlockParsing()
     QVERIFY(cfg.getSerialNumber() == "03112489");
     QVERIFY(cfg.getBoardRev() == "V1.1A");
     QVERIFY(cfg.getPID8() == "00391100");
+}
+
+void TestConfigBlock::testIsProductSupported()
+{
+    QStringList supportedProducts = { "0039", "0040" };
+
+    QVERIFY(ConfigBlock::isProductSupported("0039", supportedProducts));
+    QVERIFY(!ConfigBlock::isProductSupported("0041", supportedProducts));
 }
 
 QTEST_MAIN(TestConfigBlock)

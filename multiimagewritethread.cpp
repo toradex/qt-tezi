@@ -692,7 +692,7 @@ QList<RawFileInfo *> MultiImageWriteThread::filterRawFileInfo(QList<RawFileInfo 
     foreach (RawFileInfo *rawFile, *rawFiles) {
         /* Only check against product id if specified */
         if (!rawFile->productIds().isEmpty()) {
-            if (!rawFile->productIds().contains(productNumber))
+            if (!ConfigBlock::isProductSupported(productNumber, rawFile->productIds()))
                 continue;
         }
         newList.append(rawFile);

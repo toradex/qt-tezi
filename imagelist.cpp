@@ -1,4 +1,5 @@
 #include "imagelist.h"
+#include "configblock.h"
 #include "config.h"
 
 #include <QDir>
@@ -37,8 +38,8 @@ void ImageList::addImages(QListVariantMap images)
         bool autoInstall = m.value("autoinstall").toBool();
         bool isInstaller = m.value("isinstaller").toBool();
         QString versionString = m.value("version").toString();
-        QVariantList supportedProductIds = m.value("supported_product_ids").toList();
-        bool supportedImage = supportedProductIds.contains(_toradexProductNumber);
+        const QStringList supportedProductIds = m.value("supported_product_ids").toStringList();
+        bool supportedImage = ConfigBlock::isProductSupported(_toradexProductNumber, supportedProductIds);
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         enum ImageSource source = m.value("source").value<enum ImageSource>();
         m["supported_image"] = supportedImage;

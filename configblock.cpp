@@ -296,3 +296,8 @@ ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QStr
 
     return new ConfigBlock(hw, eth);
 }
+
+bool ConfigBlock::isProductSupported(const QString &toradexProductNumber, const QStringList &supportedProductIds)
+{
+    return supportedProductIds.contains(toradexProductNumber);
+}
