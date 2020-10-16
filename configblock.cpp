@@ -181,7 +181,7 @@ QString ConfigBlock::getBoardRev()
 QString ConfigBlock::getPID8()
 {
     ConfigBlockHw *hw = (ConfigBlockHw *)_hw.data();
-    QString prodNumber = QString::number(getProductId()).rightJustified(4, '0');
+    QString prodNumber = getProductNumber();
     QString majVer = QString::number(hw->ver_major);
     QString minVer = QString::number(hw->ver_minor);
     QString assyVer = QString::number(hw->ver_assembly).rightJustified(2, '0');
