@@ -1,0 +1,17 @@
+# Image built locally using
+# docker build -t gitlab.int.toradex.com:4567/rd/tezi/qt-tezi/qt-tezi-sdk .
+image: gitlab.int.toradex.com:4567/rd/tezi/qt-tezi/qt-tezi-sdk:latest
+
+build-tezi:
+  script:
+    - source /usr/local/oecore-x86_64/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi
+    - qmake tezi.pro
+    - make
+
+test-tezi:
+  script:
+    # Compile on x86 using Debian Qt framework
+    - qmake tezi-tests.pro
+    - make
+    - ./tezi-tests
+
