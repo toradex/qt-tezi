@@ -687,12 +687,12 @@ bool MultiImageWriteThread::processUbi(QList<UbiVolumeInfo *> *volumes, QByteArr
 QList<RawFileInfo *> MultiImageWriteThread::filterRawFileInfo(QList<RawFileInfo *> *rawFiles)
 {
     QList<RawFileInfo *> newList;
-    QString productNumber = _configBlock->getProductNumber();
+    QString pid8 = _configBlock->getPID8();
 
     foreach (RawFileInfo *rawFile, *rawFiles) {
         /* Only check against product id if specified */
         if (!rawFile->productIds().isEmpty()) {
-            if (!ConfigBlock::isProductSupported(productNumber, rawFile->productIds()))
+            if (!ConfigBlock::isProductSupported(pid8, rawFile->productIds()))
                 continue;
         }
         newList.append(rawFile);

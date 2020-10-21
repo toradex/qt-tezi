@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QtEndian>
+#include <QRegularExpression>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -299,5 +300,41 @@ ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QStr
 
 bool ConfigBlock::isProductSupported(const QString &toradexProductNumber, const QStringList &supportedProductIds)
 {
-    return supportedProductIds.contains(toradexProductNumber);
+    // Only full PID supported now
+    assert(toradexProductNumber.length() == 8);
+
+    QStringList supportedProductIdsPid4 = supportedProductIds.filter(QRegularExpression("^[0-9]{4}$"));
+    QStringList supportedProductIdsPid8 = supportedProductIds.filter(QRegularExpression("^[0-9]{8}$"));
+    QRegularExpression pid8RangeRe("^([0-9]{8})-([0-9]{8}){0,1}$");
+    QStringList supportedProductIdsPid8Range = supportedProductIds.filter(pid8RangeRe);
+
+    if (supportedProductIdsPid8.isEmpty() && supportedProductIdsPid8Range.isEmpty())
+    {
+        // No Pid8 at all, fallback to Pid4 logic
+        return supportedProductIdsPid4.contains(toradexProductNumber.left(4));
+    }
+
+    bool pid8RangeMatch = false;
+    for (QString pid8Range : supportedProductIdsPid8Range)
+    {
+        QRegularExpressionMatch match = pid8RangeRe.match(pid8Range);
+
+        // Only process pid8 ranges here...
+        assert(match.hasMatch());
+
+        QString from = match.captured(1);
+        QString to = match.captured(2);
+
+        // This compares characters by their numeric value, hence this does the trick for us
+        // See: https://doc.qt.io/qt-5/qstring.html#comparing-strings
+        if (from <= toradexProductNumber && to >= toradexProductNumber)
+            pid8RangeMatch = true;
+
+        // If "to" is not given, it still must match this product number
+        if (from <= toradexProductNumber && to.isEmpty() && toradexProductNumber.left(4) == from.left(4))
+            pid8RangeMatch = true;
+    }
+
+    bool pid8Match = supportedProductIdsPid8.contains(toradexProductNumber);
+    return pid8Match || pid8RangeMatch;
 }

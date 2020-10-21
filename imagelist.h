@@ -25,7 +25,7 @@ public:
 
 protected:
     QListVariantMap _imageList;
-    const QString _toradexProductNumber;
+    const QString _toradexPid8;
 
     void removeTemporaryFiles(const QVariantMap entry);
     static bool imageSortOrder(const QVariant &v1, const QVariant &v2);

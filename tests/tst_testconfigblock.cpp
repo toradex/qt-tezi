@@ -17,7 +17,9 @@ private slots:
     void cleanupTestCase();
     void testConfigBlockParsing();
     void testConfigBlockPrototypeProdid();
-    void testIsProductSupported();
+    void testIsProductSupportedPid4();
+    void testIsProductSupportedPid8();
+    void testIsProductSupportedPid8Range();
 };
 
 TestConfigBlock::TestConfigBlock()
@@ -65,12 +67,34 @@ void TestConfigBlock::testConfigBlockParsing()
     QVERIFY(cfg.getPID8() == "00391100");
 }
 
-void TestConfigBlock::testIsProductSupported()
+void TestConfigBlock::testIsProductSupportedPid4()
 {
+    // Legacy image, should work as usual
     QStringList supportedProducts = { "0039", "0040" };
 
-    QVERIFY(ConfigBlock::isProductSupported("0039", supportedProducts));
-    QVERIFY(!ConfigBlock::isProductSupported("0041", supportedProducts));
+    QVERIFY(ConfigBlock::isProductSupported("00391100", supportedProducts));
+    QVERIFY(!ConfigBlock::isProductSupported("00411100", supportedProducts));
+}
+
+void TestConfigBlock::testIsProductSupportedPid8()
+{
+    // Backward compatible image: Newer Tezi should only parse Pid8
+    QStringList supportedProducts = { "00391100", "0039" };
+
+    QVERIFY(ConfigBlock::isProductSupported("00391100", supportedProducts));
+    QVERIFY(!ConfigBlock::isProductSupported("00391101", supportedProducts));
+    QVERIFY(!ConfigBlock::isProductSupported("00410000", supportedProducts));
+}
+
+void TestConfigBlock::testIsProductSupportedPid8Range()
+{
+    QStringList supportedProducts = { "00391100-00391102", "00391200-", "0039" };
+
+    QVERIFY(ConfigBlock::isProductSupported("00391102", supportedProducts));
+    QVERIFY(!ConfigBlock::isProductSupported("00391103", supportedProducts));
+    QVERIFY(ConfigBlock::isProductSupported("00391200", supportedProducts));
+    QVERIFY(ConfigBlock::isProductSupported("00391201", supportedProducts));
+    QVERIFY(!ConfigBlock::isProductSupported("00401000", supportedProducts));
 }
 
 QTEST_MAIN(TestConfigBlock)

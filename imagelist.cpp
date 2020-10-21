@@ -9,8 +9,8 @@
 #include <QString>
 #include <QDebug>
 
-ImageList::ImageList(const QString& toradexProductNumber, QObject *parent) : QObject(parent),
-    _toradexProductNumber(toradexProductNumber)
+ImageList::ImageList(const QString& toradexPid8, QObject *parent) : QObject(parent),
+    _toradexPid8(toradexPid8)
 {
 
 }
@@ -39,7 +39,7 @@ void ImageList::addImages(QListVariantMap images)
         bool isInstaller = m.value("isinstaller").toBool();
         QString versionString = m.value("version").toString();
         const QStringList supportedProductIds = m.value("supported_product_ids").toStringList();
-        bool supportedImage = ConfigBlock::isProductSupported(_toradexProductNumber, supportedProductIds);
+        bool supportedImage = ConfigBlock::isProductSupported(_toradexPid8, supportedProductIds);
         bool supportedConfigFormat = config_format <= IMAGE_CONFIG_FORMAT;
         enum ImageSource source = m.value("source").value<enum ImageSource>();
         m["supported_image"] = supportedImage;

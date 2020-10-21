@@ -239,7 +239,7 @@ bool MainWindow::initialize() {
     qRegisterMetaType<QListVariantMap>("QListVariantMap");
 
     // Image list contains and maintains all currently downloaded image descriptions (image.json)
-    _imageList = new ImageList(_toradexProductNumber);
+    _imageList = new ImageList(_toradexPID8);
     connect(_imageList, SIGNAL (imageListUpdated()), this, SLOT (imageListUpdated()));
     connect(_imageList, SIGNAL (foundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)));
     // Starting network after first media scan makes sure that a local media takes presedence over a server provided image.
