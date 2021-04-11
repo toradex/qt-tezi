@@ -27,8 +27,9 @@ bool ImageList::imageSortOrder(const QVariant &v1, const QVariant &v2)
 
 void ImageList::addImages(QListVariantMap images)
 {
-    QMutexLocker locker(&listMutex);
     QVariantMap* autoInstallImage = nullptr;
+
+    listMutex.lock();
     for (QVariantMap &m : images)
     {
         int config_format = m.value("config_format").toInt();
@@ -131,6 +132,7 @@ void ImageList::addImages(QListVariantMap images)
     }
 
     std::sort(_imageList.begin(), _imageList.end(), ImageList::imageSortOrder);
+    listMutex.unlock();
 
     /* If we found an autoinstall image, install it! */
     if (autoInstallImage != nullptr)

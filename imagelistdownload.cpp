@@ -19,13 +19,15 @@ ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource
     _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(index),
     _imageSource(imageSource), _forceAutoinstall(false)
 {
-    _numDownloads++;
     qDebug() << "Downloading image list from " << url;
+
+    _numDownloads++;
     ResourceDownload *rd = new ResourceDownload(_netaccess, url, NULL);
     connect(rd, SIGNAL(failed()), this, SLOT(downloadListJsonFailed()));
     connect(rd, SIGNAL(completed()), this, SLOT(downloadListJsonCompleted()));
     connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
-    connect(parent, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
+    connect(_parent, SIGNAL(abortAllDownloads()), this, SLOT(downloadAborted()));
+    connect(_parent, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
 }
 
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource,
@@ -41,6 +43,7 @@ ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource
     connect(rd, SIGNAL(failed()), this, SLOT(downloadImageJsonFailed()));
     connect(rd, SIGNAL(completed()), this, SLOT(downloadImageJsonCompleted()));
     connect(rd, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(_parent, SIGNAL(abortAllDownloads()), this, SLOT(downloadAborted()));
     connect(_parent, SIGNAL(abortAllDownloads()), rd, SLOT(abortDownload()));
 }
 
@@ -163,6 +166,12 @@ void ImageListDownload::downloadFinished()
     }
 
     rd->deleteLater();
+}
+
+void ImageListDownload::downloadAborted()
+{
+    emit finished();
+    this->deleteLater();
 }
 
 void ImageListDownload::downloadListJsonFailed()

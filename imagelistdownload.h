@@ -33,6 +33,7 @@ protected slots:
     void downloadIconCompleted();
     void downloadIconFailed();
     void downloadFinished();
+    void downloadAborted();
 
 protected:
     static bool orderByIndex(const QVariantMap &m1, const QVariantMap &m2);
