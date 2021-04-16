@@ -66,7 +66,7 @@
 MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
-    _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false),
+    _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _acceptAllLicenses(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
     _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser),
     _httpApi(new HttpApi), _TeziState(TEZI_IDLE)
@@ -721,6 +721,7 @@ void MainWindow::on_actionInstall_triggered()
                             tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
+        setAcceptAllLicenses(false);
         installImage(entry);
     }
 }
@@ -1251,7 +1252,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
     QString slidesFolder = "/var/volatile/marketing/";
     QStringList slidesFolders;
 
-    if (entry.contains("license") && !_isAutoinstall) {
+    if (entry.contains("license") && !(_isAutoinstall || _acceptAllLicenses)) {
         QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());
         ScrollTextDialog eula(entry.value("license_title").toString(), QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
         eula.setButtonText(QDialogButtonBox::Yes, tr("I Agree"));
@@ -1262,23 +1263,28 @@ void MainWindow::startImageWrite(QVariantMap &entry)
             if (_installingFromMedia)
                 _mediaPollThread->unmountMedia();
             reenableImageChoice();
+            setAcceptAllLicenses(false);
             return;
         }
     }
 
-    if (entry.contains("releasenotes") && !_isAutoinstall) {
+    if (entry.contains("releasenotes") && !(_isAutoinstall || _acceptAllLicenses)) {
         QByteArray text = getFileContents(folder + "/" + entry.value("releasenotes").toString());
-        ScrollTextDialog eula(entry.value("releasenotes_title").toString(), QString(text), QDialogButtonBox::Ok | QDialogButtonBox::Abort);
-        eula.setDefaultButton(QDialogButtonBox::Abort);
-        int ret = eula.exec();
+        ScrollTextDialog releasenotes(entry.value("releasenotes_title").toString(), QString(text), QDialogButtonBox::Ok | QDialogButtonBox::Abort);
+        releasenotes.setDefaultButton(QDialogButtonBox::Abort);
+        int ret = releasenotes.exec();
 
         if (ret != QDialogButtonBox::Ok) {
             if (_installingFromMedia)
                 _mediaPollThread->unmountMedia();
             reenableImageChoice();
+            setAcceptAllLicenses(false);
             return;
         }
     }
+
+    /* Reset _acceptAllLicenses after installation*/
+    setAcceptAllLicenses(false);
 
     /* Delete old slides if exist */
     if (QFile::exists(slidesFolder))

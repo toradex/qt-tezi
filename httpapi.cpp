@@ -100,6 +100,9 @@ int HttpApi::start(QString port, MainWindow *mainWindow)
                             status = qhttp::ESTATUS_BAD_REQUEST;
                         } else {
                             QJsonObject object = doc.object();
+                            bool acceptAllLicenses = false;
+                            if (object.contains("accept_all_licenses"))
+                                acceptAllLicenses = object["accept_all_licenses"].toBool();
                             if (object.contains("image_id")) {
                                 if (!object["image_id"].isDouble()) {
                                     status = qhttp::ESTATUS_BAD_REQUEST;
@@ -110,9 +113,11 @@ int HttpApi::start(QString port, MainWindow *mainWindow)
                                 if (mainWindow->_imageList->imageList().count() < imageId) {
                                     status = qhttp::ESTATUS_BAD_REQUEST;
                                 }
+                                mainWindow->setAcceptAllLicenses(acceptAllLicenses);
                                 emit this->httpApiFoundAutoInstallImage(mainWindow->_imageList->imageList()[imageId]);
                             }
                             if (object.contains("image_url")) {
+                                mainWindow->setAcceptAllLicenses(acceptAllLicenses);
                                 emit this->httpApiDownloadImage(object["image_url"].toString(), ImageSource::SOURCE_NETWORK);
                             }
                         }

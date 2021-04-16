@@ -79,6 +79,10 @@ public:
         return _TeziState;
     }
 
+    inline void setAcceptAllLicenses(bool value) {
+        _acceptAllLicenses = value;
+    }
+
     QList<FeedServer> getFeedServerList() {
         return this->_networkFeedServerList;
     }
@@ -116,6 +120,7 @@ protected:
     ZConfServiceBrowser *_browser;
     HttpApi *_httpApi;
     std::atomic<TeziState> _TeziState;
+    std::atomic<bool> _acceptAllLicenses;
 
     void setWorkingInBackground(bool working, const QString &labelText = "");
     void updateModuleInformation();
