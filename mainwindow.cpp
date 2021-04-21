@@ -409,6 +409,7 @@ void MainWindow::foundAutoInstallImage(const QVariantMap &image)
     if (!_allowAutoinstall)
         return;
 
+    _isAutoinstall = true;
     installImage(image);
 }
 
@@ -781,6 +782,7 @@ void MainWindow::onCompleted()
         /* A case for kexec... Anyone? :-) */
         QApplication::exit(LINUX_REBOOT);
     }
+    _isAutoinstall = false;
 
     QString text = tr("The Image has been installed successfully.") + " <b>" + tr("You can now safely power off or reset the system.") + "</b>";
 
