@@ -126,7 +126,7 @@ void MultiImageWriteThread::run()
         fwargs << "--script";
         fwargs << uBootEnv;
 
-        if (!runCommand("/sbin/fw_setenv", fwargs, output))
+        if (!runCommand("/usr/bin/fw_setenv", fwargs, output))
         {
             emit error(tr("Error setting U-Boot environment") + "\n" + output);
             return;
