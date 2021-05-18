@@ -12,10 +12,12 @@ ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
 {
     switch (_storageClass) {
     case StorageClass::Block:
-        _configBlockPartition = "mmcblk0boot0";
+        _configBlockPartition = BlockDevInfo::getDeviceNameFromSymlink("emmc-boot0");
         _configBlockOffset = Q_INT64_C(-512);
-        _erasePartitions << "mmcblk0" << "mmcblk0boot0" << "mmcblk0boot1";
-        _mainPartition = "mmcblk0";
+        _erasePartitions << BlockDevInfo::getDeviceNameFromSymlink("emmc")
+                         << BlockDevInfo::getDeviceNameFromSymlink("emmc-boot0")
+                         << BlockDevInfo::getDeviceNameFromSymlink("emmc-boot1");
+        _mainPartition = BlockDevInfo::getDeviceNameFromSymlink("emmc");
         _fwEnvConfig = "/etc/fw_env_mmcblk0boot0.config";
         break;
     case StorageClass::Mtd:
@@ -35,8 +37,8 @@ void ModuleInformation::unlockFlash()
     switch (_storageClass) {
     case StorageClass::Block:
         /* Disable RO on boot partitions, we are a flashing utility... */
-        disableBlockDevForceRo("mmcblk0boot0");
-        disableBlockDevForceRo("mmcblk0boot1");
+        disableBlockDevForceRo(BlockDevInfo::getDeviceNameFromSymlink("emmc-boot0"));
+        disableBlockDevForceRo(BlockDevInfo::getDeviceNameFromSymlink("emmc-boot1"));
         break;
     case StorageClass::Mtd:
         /* No unlock needed */
@@ -71,7 +73,7 @@ ConfigBlock *ModuleInformation::readConfigBlock()
 
         if (configBlock == NULL) {
             qDebug() << "Config Block not found at standard location, trying to read Config Block from alternative locations";
-            configBlock = ConfigBlock::readConfigBlockFromBlockdev(QString("mmcblk0"), Q_INT64_C(0x500 * 512));
+            configBlock = ConfigBlock::readConfigBlockFromBlockdev(_mainPartition, Q_INT64_C(0x500 * 512));
             if (configBlock) {
                 qDebug() << "Config Block found, migration will be executed upon flashing a new image...";
                 configBlock->needsWrite = true;

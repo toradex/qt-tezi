@@ -46,7 +46,7 @@ static struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
         .ro = 0,
         .nofua = 0,
         .removable = 1,
-        .file = "/dev/mmcblk0",
+        .file = "/dev/emmc",
     },
     {
         .id = -1,
@@ -54,7 +54,7 @@ static struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
         .ro = 0,
         .nofua = 0,
         .removable = 1,
-        .file = "/dev/mmcblk0boot0",
+        .file = "/dev/emmc-boot0",
     },
     {
         .id = -1,
@@ -62,7 +62,7 @@ static struct usbg_f_ms_lun_attrs f_ms_luns_array[] = {
         .ro = 0,
         .nofua = 0,
         .removable = 1,
-        .file = "/dev/mmcblk0boot1",
+        .file = "/dev/emmc-boot1",
     }
 };
 

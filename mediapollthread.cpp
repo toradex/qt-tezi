@@ -224,7 +224,7 @@ int MediaPollThread::calculateNominalSize(const QVariantMap &imagemap)
     QVariantList blockdevs = imagemap.value("blockdevs").toList();
     foreach (QVariant b, blockdevs) {
         QVariantMap blockdev = b.toMap();
-        if (blockdev.value("name") == "mmcblk0") {
+        if (blockdev.value("name") == "emmc") {
             QVariantList pvl = blockdev.value("partitions").toList();
             foreach (QVariant v, pvl)
             {
