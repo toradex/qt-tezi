@@ -200,6 +200,9 @@
      <property name="text">
       <string/>
      </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
@@ -213,6 +216,13 @@
    </item>
    <item>
     <widget class="QFrame" name="frame">
+     <property name="maximumSize">
+      <size>
+       <!-- Don't set a limit on the width -->
+       <width>16777215</width>
+       <height>128</height>
+      </size>
+     </property>
      <property name="frameShape">
       <enum>QFrame::Box</enum>
      </property>
