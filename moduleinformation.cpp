@@ -1,3 +1,4 @@
+#include "dto/blockdevinfo.h"
 #include "moduleinformation.h"
 #include "util.h"
 

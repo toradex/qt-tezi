@@ -49,6 +49,8 @@ public:
         return _erase;
     }
 
+     static QString getDeviceNameFromSymlink(const QString &device);
+
 protected:
 
     bool _erase;
