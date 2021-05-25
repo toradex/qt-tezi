@@ -18,7 +18,7 @@ ModuleInformation::ModuleInformation(QString socId, QList<quint16> productIds,
                          << BlockDevInfo::getDeviceNameFromSymlink("emmc-boot0")
                          << BlockDevInfo::getDeviceNameFromSymlink("emmc-boot1");
         _mainPartition = BlockDevInfo::getDeviceNameFromSymlink("emmc");
-        _fwEnvConfig = "/etc/fw_env_mmcblk0boot0.config";
+        _fwEnvConfig = "/etc/fw_env.config";
         break;
     case StorageClass::Mtd:
         _configBlockPartition = "mtd1";
