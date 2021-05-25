@@ -73,6 +73,11 @@ const char* const toradex_modules[] = {
 	[59] = "Verdin iMX8M Mini Quad 2GB IT",
 	[60] = "Verdin iMX8M Mini DualLite 1GB WB IT",
 	[61] = "Verdin iMX8M Plus Quad 2GB",
+	[62] = "Colibri iMX6ULL 1GB IT (eMMC)",
+	[63] = "Verdin iMX8M Plus Quad 4GB IT",
+	[64] = "Verdin iMX8M Plus Quad 2GB Wi-Fi / BT IT",
+	[65] = "Verdin iMX8M Plus QuadLite 1GB IT",
+	[66] = "Verdin iMX8M Plus Quad 8GB Wi-Fi / BT",
 };
 
 const char * const toradex_prototype_modules[] = {

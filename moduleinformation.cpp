@@ -145,6 +145,27 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         productIds << 34 << 42;
         storageClass = StorageClass::Block;
         rebootWorks = true;
+    } else if (socid == "i.MX6Q") {
+        // i.MX 6Quad/Dual are only populated on Apalis currently
+        productIds << 27 << 28 << 29 << 35;
+        storageClass = StorageClass::Block;
+        rebootWorks = false;
+    } else if (socid == "i.MX6DL") {
+        // i.MX 6DualLite/Solo are only populated on Colibri currently
+        productIds << 14 << 15 << 16 << 17;
+        storageClass = StorageClass::Block;
+        rebootWorks = false;
+    } else if (socid == "i.MX6ULL") {
+        // i.MX 6ULL
+        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
+        if (compatible.contains("colibri-imx6ull-emmc")) {
+            storageClass = StorageClass::Block;
+            productIds << 62;
+        } else {
+            productIds << 36 << 40 << 44 << 45;
+            storageClass = StorageClass::Mtd;
+        }
+        rebootWorks = false;
     } else if (socid == "i.MX7D") {
         QByteArray compatible = getFileContents("/proc/device-tree/compatible");
         if (compatible.contains("colibri_imx7d_emmc") || compatible.contains("colibri-imx7d-emmc")) {
@@ -166,21 +187,6 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             if (getFileContents("/sys/bus/soc/devices/soc0/revision").trimmed() == "1.0")
                 moduleSupported = false;
         }
-    } else if (socid == "i.MX6Q") {
-        // i.MX 6Quad/Dual are only populated on Apalis currently
-        productIds << 27 << 28 << 29 << 35;
-        storageClass = StorageClass::Block;
-        rebootWorks = false;
-    } else if (socid == "i.MX6DL") {
-        // i.MX 6DualLite/Solo are only populated on Colibri currently
-        productIds << 14 << 15 << 16 << 17;
-        storageClass = StorageClass::Block;
-        rebootWorks = false;
-    } else if (socid == "i.MX6ULL") {
-        // i.MX 6ULL
-        productIds << 36 << 40 << 44 << 45;
-        storageClass = StorageClass::Mtd;
-        rebootWorks = false;
     } else if (socid == "i.MX8QM") {
         // i.MX 8QuadMax/QuadPlus
         productIds << 37 << 47 << 48 << 49;
@@ -208,7 +214,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = true;
     } else if (socid == "i.MX8MP") {
         // i.MX 8M Plus
-        productIds << 58 << 61;
+        productIds << 58 << 61 << 63 << 64 << 65 << 66;
         storageClass = StorageClass::Block;
         rebootWorks = true;
     } else {
@@ -223,7 +229,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 
         if (machine == "apalis-tk1") {
             socid = "TK1";
-            productIds << 34;
+            productIds << 34 << 42;
             storageClass = StorageClass::Block;
             rebootWorks = true;
         } else {
