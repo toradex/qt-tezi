@@ -33,14 +33,18 @@ bool FeedsDialog::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyRelease) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-        if (keyEvent->key() >= Qt::Key_1 && keyEvent->key() <= Qt::Key_9) {
-            int index = keyEvent->key() - Qt::Key_1;
-            if (ui->serverListWidget->count() > index) {
-                QListWidgetItem *item = ui->serverListWidget->item(index);
-                if (item->checkState() == Qt::Unchecked)
-                    item->setCheckState(Qt::Checked);
-                else
-                    item->setCheckState(Qt::Unchecked);
+        if (!ui->newServerLineEdit->hasFocus()) {
+	    // Toggling feed checkboxes with pressing number keys should work
+	    // only if the Input Field "Server Line" is not active
+	    if (keyEvent->key() >= Qt::Key_1 && keyEvent->key() <= Qt::Key_9) {
+                int index = keyEvent->key() - Qt::Key_1;
+                if (ui->serverListWidget->count() > index) {
+                    QListWidgetItem *item = ui->serverListWidget->item(index);
+                    if (item->checkState() == Qt::Unchecked)
+                        item->setCheckState(Qt::Checked);
+                    else
+                        item->setCheckState(Qt::Unchecked);
+                }
             }
         }
     }
