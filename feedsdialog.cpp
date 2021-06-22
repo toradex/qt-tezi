@@ -93,6 +93,11 @@ void FeedsDialog::on_addPushButton_clicked(void)
 
 void FeedsDialog::accept()
 {
+    // if there is something entered to the input field "Server URL",
+    // threat it as a new feed server uri.
+    if (ui->newServerLineEdit->isModified())
+	   on_addPushButton_clicked();
+
     _networkFeedServerList.clear();
     for (int i = 0; i < ui->serverListWidget->count(); i++)
     {
