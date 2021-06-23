@@ -55,6 +55,11 @@ void FeedsDialog::addFeedServer(const FeedServer &server)
 {
     QString text = QString("(%1) %2\n%3").arg(QString::number(ui->serverListWidget->count() + 1), server.label, server.url);
     QListWidgetItem* item = new QListWidgetItem(text, ui->serverListWidget);
+
+    // Don't add empty server url
+    if (server.url.isEmpty())
+        return;
+
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
     if (server.enabled)
         item->setCheckState(Qt::Checked);
