@@ -1,4 +1,4 @@
-Copyright (c) 2016-2017, Toradex
+Copyright (c) 2016-2021, Toradex
 Copyright (c) 2013, Raspberry Pi
 All rights reserved.
 
