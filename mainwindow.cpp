@@ -1254,7 +1254,6 @@ void MainWindow::reenableImageChoice()
 void MainWindow::startImageWrite(QVariantMap &entry)
 {
     /* All meta files downloaded, extract slides tarball, and launch image writer thread */
-    _imageWriteThread = new MultiImageWriteThread(_toradexConfigBlock, _moduleInformation);
     enum ImageSource imageSource = entry.value("source").value<enum ImageSource>();
     QString folder = entry.value("folder").toString();
     QString slidesFolder = "/var/volatile/marketing/";
@@ -1316,6 +1315,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
     if (QFile::exists(slidesFolder + "/slides_vga"))
         slidesFolders.append(slidesFolder + "/slides_vga");
 
+    _imageWriteThread = new MultiImageWriteThread(_toradexConfigBlock, _moduleInformation);
     _imageWriteThread->setImage(folder, entry.value("image_info").toString(),
                                entry.value("baseurl").toString(), imageSource);
 
