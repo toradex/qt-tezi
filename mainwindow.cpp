@@ -510,6 +510,8 @@ void MainWindow::installImage(QVariantMap entry)
     setEnabled(false);
     _numMetaFilesToDownload = 0;
 
+    _moduleInformation->unlockFlash();
+
     /* Re-mount local media */
     _installingFromMedia = !ImageInfo::isNetwork(imageSource);
     _mediaPollThread->scanMutex.lock();
@@ -645,6 +647,8 @@ void MainWindow::discardBlockdev()
                                "After this operation you either need to install an image or use the module's recovery mode to boot back into Toradex Easy Installer. Continue?"),
                             QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
     {
+        _moduleInformation->unlockFlash();
+
         showProgressDialog(tr("Discarding all data on internal eMMC..."));
         /*
          * Note: In the eMMC case we discard all partitons. It is not easy to carve out
