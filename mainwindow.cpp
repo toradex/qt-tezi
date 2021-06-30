@@ -652,7 +652,7 @@ void MainWindow::discardBlockdev()
         showProgressDialog(tr("Discarding all data on internal eMMC..."));
         /*
          * Note: In the eMMC case we discard all partitons. It is not easy to carve out
-         * small portitions of blocks since discard seems to operate on erase bock size.
+         * small portitions of blocks since discard seems to operate on erase block size.
          * So even when specifiying "discard 0 - (end - 512 bytes), the eMMC actually
          * discards the last 512 bytes...
          *
