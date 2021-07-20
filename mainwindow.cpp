@@ -968,7 +968,7 @@ bool MainWindow::hasAddress(const QString &iface, QNetworkAddressEntry *currAddr
 void MainWindow::pollNetworkStatus()
 {
     QNetworkAddressEntry ae;
-    if (hasAddress("eth0", &ae)) {
+    if (hasAddress("eth0", &ae) || hasAddress("eth1", &ae)) {
         if (!_wasOnNetwork) {
             qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
             ui->labelEthernetAddress->setText(
