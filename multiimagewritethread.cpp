@@ -898,6 +898,7 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
         cmd = "/sbin/mkfs.ext4";
         args << "-L" << label;
 	args << "-O ^metadata_csum";
+	args << "-T default";
     }
     else if (fstype == "ntfs")
     {
