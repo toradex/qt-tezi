@@ -66,10 +66,10 @@
 MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
-    _qpd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false), _acceptAllLicenses(false),
+    _qpd(nullptr), _psd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false),
     _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
-    _imageListDownloadsActive(0), _netaccess(nullptr), _internetHostLookupId(-1), _browser(new ZConfServiceBrowser),
-    _httpApi(new HttpApi), _TeziState(TEZI_IDLE)
+    _imageListDownloadsActive(0), _netaccess(nullptr), _imageWriteThread(nullptr), _internetHostLookupId(-1),
+    _browser(new ZConfServiceBrowser), _httpApi(new HttpApi), _TeziState(TEZI_IDLE), _acceptAllLicenses(false)
 {
     setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     setWindowState(Qt::WindowMaximized);
@@ -510,37 +510,32 @@ void MainWindow::installImage(QVariantMap entry)
 {
     enum ImageSource imageSource = entry.value("source").value<enum ImageSource>();
 
-    _TeziState = TEZI_INSTALLING;
-    setEnabled(false);
     _numMetaFilesToDownload = 0;
-
     _moduleInformation->unlockFlash();
+    _installingFromMedia = !ImageInfo::isNetwork(imageSource);
+
+    disableImageChoice();
 
     /* Re-mount local media */
-    _installingFromMedia = !ImageInfo::isNetwork(imageSource);
-    _mediaPollThread->scanMutex.lock();
     if (_installingFromMedia) {
         QString blockdev = entry.value("image_source_blockdev").value<QString>();
         if (!_mediaPollThread->mountMedia(blockdev)) {
             errorMounting(blockdev);
-            _mediaPollThread->scanMutex.unlock();
-            setEnabled(true);
+            clearInstallSettings();
+            reenableImageChoice();
             return;
         }
     }
 
     if (entry.value("validate", true).value<bool>()) {
         if (!validateImageJson(entry)) {
-            if (_installingFromMedia)
-                _mediaPollThread->unmountMedia();
-
+            clearInstallSettings();
             reenableImageChoice();
             return;
         }
     }
 
-    /* Stop network polling, we are about to install a image (media polling is protected due to "mount singleton") */
-    _networkStatusPollTimer.stop();
+    _TeziState = TEZI_INSTALLING;
     emit abortAllDownloads();
 
     if (ImageInfo::isNetwork(imageSource))
@@ -729,7 +724,7 @@ void MainWindow::on_actionInstall_triggered()
                             tr("Warning: this will install the selected Image. All existing data on the internal flash will be overwritten."),
                             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        setAcceptAllLicenses(false);
+        _acceptAllLicenses = false;
         installImage(entry);
     }
 }
@@ -775,23 +770,15 @@ void MainWindow::on_actionCancel_triggered()
 
 void MainWindow::onCompleted()
 {
-    _psd->close();
-    _psd->deleteLater();
-    _psd = nullptr;
-    _TeziState = TEZI_INSTALLED;
-    _imageWriteThread->deleteLater();
-
-
-    if (_installingFromMedia)
-        _mediaPollThread->unmountMedia();
-
     /* Directly reboot into newer Toradex Easy Installer */
     if (_imageWriteThread->getImageInfo()->isInstaller() && _isAutoinstall) {
         close();
         /* A case for kexec... Anyone? :-) */
         QApplication::exit(LINUX_REBOOT);
     }
-    _isAutoinstall = false;
+
+    clearInstallSettings();
+    _TeziState = TEZI_INSTALLED;
 
     QString text = tr("The Image has been installed successfully.") + " <b>" + tr("You can now safely power off or reset the system.") + "</b>";
 
@@ -842,16 +829,11 @@ void MainWindow::onError(const QString &msg)
     } else
         qDebug() << "No error script found";
 
-    if (_installingFromMedia)
-        _mediaPollThread->unmountMedia();
-
     QMessageBox::critical(this, tr("Error"), msg  + "\n\n" + errMsg, QMessageBox::Ok);
 
-    _psd->close();
-    _psd->deleteLater();
-    _psd = nullptr;
+     _TeziState = TEZI_IDLE;
 
-    _imageWriteThread->deleteLater();
+    clearInstallSettings();
     reenableImageChoice();
     QWidget::show();
     if (_ld != nullptr)
@@ -1204,7 +1186,9 @@ void MainWindow::downloadMetaCompleted()
 
     if (fd->saveToFile() < 0) {
         QMessageBox::critical(this, tr("Download error"), tr("Error writing downloaded file to initramfs."), QMessageBox::Close);
-        setEnabled(true);
+        clearInstallSettings();
+        reenableImageChoice();
+        _TeziState = TEZI_IDLE;
     } else {
         _numMetaFilesToDownload--;
     }
@@ -1232,9 +1216,44 @@ void MainWindow::downloadMetaFailed()
         _qpd = nullptr;
     }
     QMessageBox::critical(this, tr("Download error"), tr("Error downloading meta file")+"\n"+fd->urlString(), QMessageBox::Close);
+    clearInstallSettings();
     reenableImageChoice();
 
+    _TeziState = TEZI_IDLE;
     fd->deleteLater();
+}
+
+void MainWindow::clearInstallSettings()
+{
+    if (_installingFromMedia)
+        _mediaPollThread->unmountMedia();
+
+    if (_psd != nullptr) {
+        _psd->close();
+        _psd->deleteLater();
+        _psd = nullptr;
+    }
+
+    if (_imageWriteThread != nullptr) {
+        _imageWriteThread->deleteLater();
+        _imageWriteThread = nullptr;
+    }
+
+    _isAutoinstall = false;
+    _acceptAllLicenses = false;
+}
+
+/*
+ * Disable timers and media poll thread
+ *
+ * Must be called after mounting the image media, otherwise
+ * there is a deadlock possibility scanMutex vs. mountMutex.
+ */
+void MainWindow::disableImageChoice()
+{
+    _networkStatusPollTimer.stop();
+    _mediaPollThread->scanMutex.lock();
+    setEnabled(false);
 }
 
 /*
@@ -1248,7 +1267,6 @@ void MainWindow::reenableImageChoice()
     _networkStatusPollTimer.start();
     _mediaPollThread->scanMutex.unlock();
     setEnabled(true);
-    _TeziState = TEZI_IDLE;
 }
 
 void MainWindow::startImageWrite(QVariantMap &entry)
@@ -1267,10 +1285,8 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         int ret = eula.exec();
 
         if (ret != QDialogButtonBox::Yes) {
-            if (_installingFromMedia)
-                _mediaPollThread->unmountMedia();
+            clearInstallSettings();
             reenableImageChoice();
-            setAcceptAllLicenses(false);
             return;
         }
     }
@@ -1282,16 +1298,11 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         int ret = releasenotes.exec();
 
         if (ret != QDialogButtonBox::Ok) {
-            if (_installingFromMedia)
-                _mediaPollThread->unmountMedia();
+            clearInstallSettings();
             reenableImageChoice();
-            setAcceptAllLicenses(false);
             return;
         }
     }
-
-    /* Reset _acceptAllLicenses after installation*/
-    setAcceptAllLicenses(false);
 
     /* Delete old slides if exist */
     if (QFile::exists(slidesFolder))

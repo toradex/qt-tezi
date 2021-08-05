@@ -79,10 +79,6 @@ public:
         return _TeziState;
     }
 
-    inline void setAcceptAllLicenses(bool value) {
-        _acceptAllLicenses = value;
-    }
-
     QList<FeedServer> getFeedServerList() {
         return this->_networkFeedServerList;
     }
@@ -139,6 +135,8 @@ protected:
     void installImage(QVariantMap entry);
     void startImageWrite(QVariantMap &entry);
     bool validateImageJson(QVariantMap &entry);
+    void clearInstallSettings();
+    void disableImageChoice();
     void reenableImageChoice();
     bool writeBootConfigurationBlock();
     bool setAvahiHostname(const QString hostname);
@@ -191,6 +189,8 @@ private slots:
     void on_actionWifi_triggered();
     void on_list_itemSelectionChanged();
     void downloadImage(const QString &url, enum ImageSource source);
+
+    friend class HttpApi;
 };
 
 #endif // MAINWINDOW_H
