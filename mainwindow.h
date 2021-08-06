@@ -188,6 +188,7 @@ private slots:
     void on_list_itemDoubleClicked();
     void on_actionWifi_triggered();
     void on_list_itemSelectionChanged();
+    void downloadImage(const QVariantMap image);
     void downloadImage(const QString &url, enum ImageSource source);
 
     friend class HttpApi;

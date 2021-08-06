@@ -26,8 +26,8 @@ protected:
     qhttp::server::QHttpServer *_httpServer;
 
 signals:
-    void httpApiFoundAutoInstallImage(const QVariantMap &image);
-    void httpApiDownloadImage(const QString url, enum ImageSource source);
+    void httpApiInstallImageById(const QVariantMap &image);
+    void httpApiInstallImageByUrl(const QString url, enum ImageSource source);
     void newImageUrl(const QString url);
 };
 

@@ -253,10 +253,10 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (newImagesToAdd(QListVariantMap)), _imageList, SLOT (addImages(QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
     connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
-    connect(_httpApi, SIGNAL (httpApiFoundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)), Qt::QueuedConnection);
-    connect(_httpApi, SIGNAL (httpApiDownloadImage(const QString, enum ImageSource)), this, SLOT (downloadImage(const QString, enum ImageSource)));
-    connect(_browser, SIGNAL(serviceEntryAdded(QString)), this, SLOT(addService(QString)));
-    connect(_browser, SIGNAL(serviceEntryRemoved(QString)), this, SLOT(removeService(QString)));
+    connect(_httpApi, SIGNAL (httpApiInstallImageById(const QVariantMap)), this, SLOT (downloadImage(const QVariantMap)));
+    connect(_httpApi, SIGNAL (httpApiInstallImageByUrl(const QString, enum ImageSource)), this, SLOT (downloadImage(const QString, enum ImageSource)));
+    connect(_browser, SIGNAL (serviceEntryAdded(QString)), this, SLOT (addService(QString)));
+    connect(_browser, SIGNAL (serviceEntryRemoved(QString)), this, SLOT (removeService(QString)));
     connect(_httpApi, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
 
     _browser->browse("_tezi._tcp");
@@ -1037,6 +1037,11 @@ void MainWindow::downloadImageList(const QString &url, enum ImageSource source, 
 {
     ImageListDownload *imageListDownload = new ImageListDownload(url, source, index, _netaccess, this);
     downloadImageSetupSignals(imageListDownload);
+}
+
+void MainWindow::downloadImage(const QVariantMap image)
+{
+    installImage(image);
 }
 
 void MainWindow::downloadImage(const QString &url, enum ImageSource source)
