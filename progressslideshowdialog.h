@@ -12,7 +12,7 @@
 
 #include <QProgressDialog>
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 
 namespace Ui {
 class ProgressSlideshowDialog;
@@ -40,7 +40,7 @@ protected:
     int _pos, _changeInterval, _maxSectors;
     qint64 _lastBytes;
     QTimer _timer;
-    QTime _t1;
+    QElapsedTimer _t1;
 
 
 private:

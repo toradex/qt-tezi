@@ -16,6 +16,7 @@
 #include <QProgressDialog>
 #include <QNetworkInterface>
 #include <QProcess>
+#include <QElapsedTimer>
 
 WifiSettingsDialog::WifiSettingsDialog(const QString &preferredInterface, QWidget *parent) :
     QDialog(parent),
@@ -368,7 +369,7 @@ bool WifiSettingsDialog::connectToWifi(const QString &ssid, const QString &usern
 /* Sleep for a number of miliseconds while processing events */
 void WifiSettingsDialog::msleep(int msec)
 {
-    QTime t1;
+    QElapsedTimer t1;
     t1.start();
     int timeleft = msec;
 

@@ -14,7 +14,7 @@
  */
 
 #include <QObject>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QPoint>
 
 class LongPressHandler : public QObject
@@ -25,7 +25,7 @@ public:
     virtual bool eventFilter(QObject *obj, QEvent *event);
 
 protected:
-    QTime _holdTime;
+    QElapsedTimer _holdTime;
     QPoint _holdPoint;
     int _holdInterval;
     int _maxPosDifference;

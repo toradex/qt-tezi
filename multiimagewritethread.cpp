@@ -16,7 +16,7 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QSettings>
-#include <QTime>
+#include <QElapsedTimer>
 #include <unistd.h>
 #include <linux/fs.h>
 #include <sys/ioctl.h>
@@ -966,7 +966,7 @@ bool MultiImageWriteThread::pollpipeview()
 
 bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
 {
-    QTime t1;
+    QElapsedTimer t1;
     QProcess md5sum;
     t1.start();
 

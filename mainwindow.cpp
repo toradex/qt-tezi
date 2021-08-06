@@ -941,7 +941,7 @@ void MainWindow::on_actionEdit_config_triggered()
 
 void MainWindow::startNetworking()
 {
-    _time.start();
+    _elapsedTimer.start();
 
     // Poll network interface changes every 100ms
     connect(&_networkStatusPollTimer, SIGNAL(timeout()), SLOT(pollNetworkStatus()));
@@ -974,7 +974,7 @@ void MainWindow::pollNetworkStatus()
     QNetworkAddressEntry ae;
     if (hasAddress("eth0", &ae) || hasAddress("eth1", &ae)) {
         if (!_wasOnNetwork) {
-            qDebug() << "Network up in" << _time.elapsed()/1000.0 << "seconds";
+            qDebug() << "Network up in" << _elapsedTimer.elapsed()/1000.0 << "seconds";
             ui->labelEthernetAddress->setText(
                         QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 
@@ -1005,7 +1005,7 @@ void MainWindow::pollNetworkStatus()
     if (hasAddress("usb0", &ae)) {
 
         if (!_wasRndis) {
-            qDebug() << "RNDIS up in" << _time.elapsed()/1000.0 << "seconds";
+            qDebug() << "RNDIS up in" << _elapsedTimer.elapsed()/1000.0 << "seconds";
             ui->labelRNDISAddress->setText(
                         QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 

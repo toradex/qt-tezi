@@ -25,7 +25,7 @@
 #include <QModelIndex>
 #include <QMessageBox>
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QUrl>
 #include <QSet>
 #include <QFileSystemWatcher>
@@ -110,7 +110,7 @@ protected:
     int _neededMB, _availableMB, _numMetaFilesToDownload;
     bool _installingFromMedia;
     QTimer _networkStatusPollTimer;
-    QTime _time;
+    QElapsedTimer _elapsedTimer;
     QIcon _sdIcon,_usbIcon, _networkIcon, _internetIcon;
     QVariantMap _imageEntry;
     UsbGadget *_usbGadget;

@@ -19,7 +19,7 @@
 #include <QProcess>
 #include <QDir>
 #include <QDebug>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QMessageBox>
 #include <QFont>
 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
     if (bailout && keyboard_trigger)
     {
-        QTime t;
+        QElapsedTimer t;
         t.start();
 
         while (t.elapsed() < 2000)

@@ -158,7 +158,7 @@ void ImageListDownload::downloadFinished()
     if (!_numDownloads)
     {
         // Add all images at once, in the right order...
-        qSort(_netImages.begin(), _netImages.end(), orderByIndex);
+        std::sort(_netImages.begin(), _netImages.end(), orderByIndex);
         emit newImagesToAdd(_netImages);
         emit finished();
 
