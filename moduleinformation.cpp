@@ -117,8 +117,19 @@ const QString ModuleInformation::getHostname()
 
 ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 {
+#if __x86_64__
+    QList<quint16> productIds;
+
+    QString socid = "i.MX6Q";
+    enum StorageClass storageClass = StorageClass::Block;
+    bool rebootWorks = false;
+    bool moduleSupported = true;
+    productIds << 27 << 28 << 29 << 35;
+    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
+#else
     // Try to detect which module we are running on...
     QFile file("/sys/bus/soc/devices/soc0/soc_id");
+
     if (!file.exists()) {
         return NULL;
     }
@@ -238,4 +249,5 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     }
 
     return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
+#endif //__x86_64__
 }

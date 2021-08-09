@@ -130,7 +130,11 @@ bool MainWindow::initialize() {
         return false;
     }
 
+#ifdef __x86_64__
+    _toradexConfigBlock = ConfigBlock::configBlockFromUserInput(27, "V1.1A", "01234567");
+#else
     _toradexConfigBlock = _moduleInformation->readConfigBlock();
+#endif //__x86_64__
 
     // Unlock by default
     _moduleInformation->unlockFlash();
