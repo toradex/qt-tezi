@@ -523,6 +523,7 @@ void MainWindow::installImage(QVariantMap entry)
             errorMounting(blockdev);
             clearInstallSettings();
             reenableImageChoice();
+            _TeziState = TEZI_FAILED;
             return;
         }
     }
@@ -531,6 +532,7 @@ void MainWindow::installImage(QVariantMap entry)
         if (!validateImageJson(entry)) {
             clearInstallSettings();
             reenableImageChoice();
+            _TeziState = TEZI_FAILED;
             return;
         }
     }
@@ -831,7 +833,7 @@ void MainWindow::onError(const QString &msg)
 
     QMessageBox::critical(this, tr("Error"), msg  + "\n\n" + errMsg, QMessageBox::Ok);
 
-     _TeziState = TEZI_IDLE;
+     _TeziState = TEZI_FAILED;
 
     clearInstallSettings();
     reenableImageChoice();
@@ -1193,7 +1195,7 @@ void MainWindow::downloadMetaCompleted()
         QMessageBox::critical(this, tr("Download error"), tr("Error writing downloaded file to initramfs."), QMessageBox::Close);
         clearInstallSettings();
         reenableImageChoice();
-        _TeziState = TEZI_IDLE;
+        _TeziState = TEZI_FAILED;
     } else {
         _numMetaFilesToDownload--;
     }
@@ -1224,7 +1226,7 @@ void MainWindow::downloadMetaFailed()
     clearInstallSettings();
     reenableImageChoice();
 
-    _TeziState = TEZI_IDLE;
+    _TeziState = TEZI_FAILED;
     fd->deleteLater();
 }
 
@@ -1292,6 +1294,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         if (ret != QDialogButtonBox::Yes) {
             clearInstallSettings();
             reenableImageChoice();
+            _TeziState = TEZI_ABORTED;
             return;
         }
     }
@@ -1305,6 +1308,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         if (ret != QDialogButtonBox::Ok) {
             clearInstallSettings();
             reenableImageChoice();
+            _TeziState = TEZI_ABORTED;
             return;
         }
     }

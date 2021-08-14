@@ -72,6 +72,12 @@ int HttpApi::start(QString port, MainWindow *mainWindow)
                             case TEZI_INSTALLED:
                                 tezi_status["status"] = "installed";
                                 break;
+                            case TEZI_ABORTED:
+                                tezi_status["status"] = "aborted";
+                                break;
+                            case TEZI_FAILED:
+                                tezi_status["status"] = "failed";
+                                break;
                             default:
                                 tezi_status["status"] = "unkown";
                                 break;

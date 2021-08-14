@@ -44,7 +44,9 @@ enum TeziState {
     TEZI_IDLE,
     TEZI_SCANNING,
     TEZI_INSTALLING,
-    TEZI_INSTALLED
+    TEZI_INSTALLED,
+    TEZI_ABORTED,
+    TEZI_FAILED
 };
 
 namespace Ui {
