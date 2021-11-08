@@ -32,7 +32,7 @@ protected:
 
 signals:
     void imageListUpdated();
-    void foundAutoInstallImage(const QVariantMap &image);
+    void installImage(const QVariantMap &image, const bool isAutoInstall);
 
 public slots:
     void addImages(QListVariantMap images);

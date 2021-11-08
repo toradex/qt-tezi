@@ -245,7 +245,7 @@ bool MainWindow::initialize() {
     // Image list contains and maintains all currently downloaded image descriptions (image.json)
     _imageList = new ImageList(_toradexPID8);
     connect(_imageList, SIGNAL (imageListUpdated()), this, SLOT (imageListUpdated()));
-    connect(_imageList, SIGNAL (foundAutoInstallImage(const QVariantMap)), this, SLOT (foundAutoInstallImage(const QVariantMap)));
+    connect(_imageList, SIGNAL (installImage(const QVariantMap, const bool)), this, SLOT (installImage(const QVariantMap, const bool)));
     // Starting network after first media scan makes sure that a local media takes presedence over a server provided image.
     connect(_mediaPollThread, SIGNAL (firstScanFinished()), this, SLOT (startNetworking()));
     connect(_mediaPollThread, SIGNAL (removedBlockdev(const QString)), _imageList, SLOT (removeImagesByBlockdev(const QString)));
@@ -408,15 +408,6 @@ void MainWindow::imageListUpdated()
     updateNeeded();
 }
 
-void MainWindow::foundAutoInstallImage(const QVariantMap &image)
-{
-    if (!_allowAutoinstall)
-        return;
-
-    _isAutoinstall = true;
-    installImage(image);
-}
-
 void MainWindow::addNewImageUrl(const QString url)
 {
     FeedServer server;
@@ -504,6 +495,15 @@ bool MainWindow::validateImageJson(QVariantMap &entry)
         return false;
     }
     return true;
+}
+
+void MainWindow::installImage(const QVariantMap &image, const bool isAutoInstall)
+{
+    if (!_allowAutoinstall && isAutoInstall)
+        return;
+
+    _isAutoinstall = isAutoInstall;
+    installImage(image);
 }
 
 void MainWindow::installImage(QVariantMap entry)

@@ -157,7 +157,7 @@ protected slots:
     void startNetworking();
     void addNewImageUrl(const QString url);
     void imageListUpdated();
-    void foundAutoInstallImage(const QVariantMap &image);
+    void installImage(const QVariantMap &image, const bool isAutoInstall);
     void errorMounting(const QString blockdev);
     void disableFeed(const QString feedname);
     void imageHostLookupResults(QHostInfo hostInfo);

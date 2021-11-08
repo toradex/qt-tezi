@@ -137,7 +137,7 @@ void ImageList::addImages(QListVariantMap images)
 
     /* If we found an autoinstall image, install it! */
     if (autoInstallImage != nullptr)
-        emit foundAutoInstallImage(*autoInstallImage);
+        emit installImage(*autoInstallImage, true);
 
     emit imageListUpdated();
 }
