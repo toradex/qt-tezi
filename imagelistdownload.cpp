@@ -17,7 +17,7 @@
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource, int index,
     QNetworkAccessManager *netaccess, QObject *parent) : QObject(parent),
     _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(index),
-    _imageSource(imageSource), _forceAutoinstall(false)
+    _imageSource(imageSource), _calledFromTezictl(false)
 {
     qDebug() << "Downloading image list from " << url;
 
@@ -34,7 +34,7 @@ ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource
                                      QNetworkAccessManager *netaccess,
                                      QObject *parent) : QObject(parent),
     _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0),
-    _imageSource(imageSource), _forceAutoinstall(true)
+    _imageSource(imageSource), _calledFromTezictl(true)
 {
     qDebug() << "Downloading single image description from " << url;
 
@@ -116,8 +116,13 @@ void ImageListDownload::downloadImageJsonCompleted()
     imagemap["baseurl"] = baseurl;
     imagemap["source"] = _imageSource;
     imagemap["feedindex"] = _feedindex;
-    if (_forceAutoinstall)
-        imagemap["autoinstall"] = true;
+
+    if (_calledFromTezictl && !imagemap["autoinstall"].toBool()) {
+        qDebug() << "Starting installation of image.json provided by tezictl";
+        emit installImage(imagemap, false);
+        return;
+    }
+
     _netImages.append(imagemap);
 
     QString icon = imagemap.value("icon").toString();

@@ -21,6 +21,7 @@ signals:
     void newImagesToAdd(const QListVariantMap images);
     void finished();
     void error(const QString &msg);
+    void installImage(const QVariantMap &image, const bool isAutoInstall);
 
 public slots:
 
@@ -43,7 +44,7 @@ protected:
     QList<QVariantMap> _netImages;
     int _numDownloads, _feedindex;
     enum ImageSource _imageSource;
-    bool _forceAutoinstall;
+    bool _calledFromTezictl;
 };
 
 #endif // IMAGELISTDOWNLOAD_H
