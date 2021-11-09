@@ -120,7 +120,7 @@ int HttpApi::start(QString port, MainWindow *mainWindow)
                                     status = qhttp::ESTATUS_BAD_REQUEST;
                                 }
                                 mainWindow->_acceptAllLicenses = acceptAllLicenses;
-                                emit this->httpApiInstallImageById(mainWindow->_imageList->imageList()[imageId]);
+                                emit this->httpApiInstallImageById(mainWindow->_imageList->imageList()[imageId], false);
                             }
                             if (object.contains("image_url")) {
                                 mainWindow->_acceptAllLicenses = acceptAllLicenses;

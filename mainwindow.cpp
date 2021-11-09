@@ -253,7 +253,7 @@ bool MainWindow::initialize() {
     connect(_mediaPollThread, SIGNAL (newImagesToAdd(QListVariantMap)), _imageList, SLOT (addImages(QListVariantMap)));
     connect(_mediaPollThread, SIGNAL (errorMounting(const QString)), this, SLOT (errorMounting(const QString)));
     connect(_mediaPollThread, SIGNAL (disableFeed(const QString)), this, SLOT (disableFeed(const QString)));
-    connect(_httpApi, SIGNAL (httpApiInstallImageById(const QVariantMap)), this, SLOT (downloadImage(const QVariantMap)));
+    connect(_httpApi, SIGNAL (httpApiInstallImageById(const QVariantMap, const bool)), this, SLOT (installImage(const QVariantMap, const bool)));
     connect(_httpApi, SIGNAL (httpApiInstallImageByUrl(const QString, enum ImageSource)), this, SLOT (downloadImage(const QString, enum ImageSource)));
     connect(_browser, SIGNAL (serviceEntryAdded(QString)), this, SLOT (addService(QString)));
     connect(_browser, SIGNAL (serviceEntryRemoved(QString)), this, SLOT (removeService(QString)));
@@ -1040,11 +1040,6 @@ void MainWindow::downloadImageList(const QString &url, enum ImageSource source, 
 {
     ImageListDownload *imageListDownload = new ImageListDownload(url, source, index, _netaccess, this);
     downloadImageSetupSignals(imageListDownload);
-}
-
-void MainWindow::downloadImage(const QVariantMap image)
-{
-    installImage(image);
 }
 
 void MainWindow::downloadImage(const QString &url, enum ImageSource source)
