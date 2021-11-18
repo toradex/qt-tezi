@@ -75,40 +75,23 @@ void ImageList::addImages(QListVariantMap images)
                 else
                 {
                     /*
-                     * Check whether there is a pre-release part in the image version. If
-                     * there is a match (return value of indexIn > -1), we can consider
-                     * the pre-release
+                     * QVersionNumber only compares the first three numbers (e.g. 5.2.0),
+                     * If these version numbers are equal we land in here.
                      *
-                     * Note: This currently does not support multiple (dot separated) parts
-                     * in the pre-release part! We compare the complete string after the dash
-                     * using ASCII order.
+                     * We can only distinguish between a prerelease (nightly, monthly etc.)
+                     * and a release. Check if the Tezi to be installed is a release and the
+                     * one that is running is a prerelease, which is the only case it should
+                     * autoinstall another Tezi if it has the same version number.
                      */
-                    QRegExp preRelease("\\-([0-9a-zA-Z-]+[\\.0-9a-zA-Z-]*)");
-                    int posInstaller = preRelease.indexIn(installerVersionString, installerVersionIndex);
-                    QString installerPreRelease;
-                    if (posInstaller > -1)
-                        installerPreRelease = preRelease.cap(1);
+                    bool installerIsPrerelease, imageIsPrerelease;
 
-                    int posImage = preRelease.indexIn(versionString, imageVersionIndex);
-                    QString imagePreRelease;
-                    if (posImage > -1)
-                        imagePreRelease = preRelease.cap(1);
+                    installerIsPrerelease = installerVersionString.contains("devel");
+                    imageIsPrerelease = versionString.contains("devel");
 
-                    int compPreRelease = installerPreRelease.compare(imagePreRelease);
-
-                    /* No pre-release has presedence */
-                    if (posInstaller < 0 && posImage < 0)
-                        isNewer = false; // Both have no pre-release, equal...
-                    else if (posImage < 0 && posInstaller >= 0)
-                        isNewer = true; // Image has no pre-release => Newer!
-                    else if (posInstaller < 0 && posImage >= 0)
-                        isNewer = false; // Installer has no pre-release
-                    else if (compPreRelease < 0)
-                        isNewer = true; // Image pre-release is higher
-                    else if (compPreRelease > 0)
-                        isNewer = false; // Installer pre-release is higher
-                    else
-                        isNewer = false; // The pre-releases are equal!
+                    if (installerIsPrerelease && !imageIsPrerelease) {
+                        // Only a released image vs. a prereleased installer is considered newer
+                        isNewer = true;
+                    }
                 }
 
                 /* Only autoInstall newer Toradex Easy Installer Versions */
