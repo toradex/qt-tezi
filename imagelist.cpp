@@ -53,7 +53,7 @@ void ImageList::addImages(QListVariantMap images)
 
         if (supportedImage && supportedConfigFormat) {
             /* Compare Toradex Easy Installer against current version */
-            if (isInstaller) {
+            if (isInstaller && autoInstall) {
                 bool isNewer = false;
                 int installerVersionIndex, imageVersionIndex;
                 QString installerVersionString(VERSION_NUMBER);
