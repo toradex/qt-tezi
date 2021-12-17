@@ -1116,8 +1116,31 @@ bool MultiImageWriteThread::dd(const QString &baseurl, const QString &device, Ra
 
     QString uncompresscmd = getUncompressCommand(file, false);
 
-    QString cmd = QString("%1 | %2 | dd of=%3 %4")
-            .arg(getfile, uncompresscmd, device, rawFile->ddOptions());
+    QString cmd;
+    if (rawFile->offset() != 0) {
+        qDebug() << "write raw to offset " << rawFile->offset();
+
+        if (rawFile->ddOptions().contains("bs", Qt::CaseSensitive) ||
+            rawFile->ddOptions().contains("seek", Qt::CaseSensitive)) {
+            // The bs and seek dd options are already used when we're dealing
+            // with the offset json option. Because of this, it is an error to
+            // provide both "offset" and also "dd_options" containing bs or seek
+            emit error(tr("Error writing image")+" Invalid option combination (offset + dd_options)\n");
+            qDebug() << "error writing " << rawFile->filename();
+            qDebug() << "cannot handle \"dd_options\" containing \"bs\" or \"seek\" when dealing with \"offset\"";
+            return false;
+        }
+
+        QFile blockDev(device);
+        blockDev.open(QFile::ReadOnly);
+        int myoffset = ConfigBlock::calculateAbsoluteOffset(blockDev.handle(), rawFile->offset());
+        blockDev.close();
+        cmd = QString("%1 | %2 | dd of=%3 bs=1 seek=%4 %5")
+                .arg(getfile, uncompresscmd, device).arg(myoffset).arg(rawFile->ddOptions());
+    } else {
+        cmd = QString("%1 | %2 | dd of=%3 %4")
+                .arg(getfile, uncompresscmd, device, rawFile->ddOptions());
+    }
 
     qDebug() << "Raw dd file" << file;
     return runwritecmd(cmd, false);

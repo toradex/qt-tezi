@@ -55,6 +55,10 @@
                     "description": "Extra options passed to the dd command (raw on block devices only)",
                     "type": "string"
                 },
+                "offset": {
+                    "description": "Offset to use when writing the image. It can be negative to start from the end of the partition.",
+                    "type": "number"
+                },
                 "nandwrite_options": {
                     "description": "Extra options passed to the nandwrite command (raw on NAND devices only)",
                     "type": "string"

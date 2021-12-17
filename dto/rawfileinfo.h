@@ -16,7 +16,7 @@ public:
         return _filename;
     }
 
-    inline QByteArray ddOptions()
+    inline QString ddOptions()
     {
         return _ddOptions;
     }
@@ -36,16 +36,22 @@ public:
         return _size;
     }
 
+    inline int offset()
+    {
+        return _offset;
+    }
+
 signals:
 
 public slots:
 
 protected:
     QString _filename;
-    QByteArray _ddOptions;
+    QString _ddOptions;
     QByteArray _nandwriteOptions;
     QStringList _productIds;
     int _size;
+    qint64 _offset;
 };
 
 #endif // RAWFILEINFO_H
