@@ -339,7 +339,7 @@ void MainWindow::imageListUpdated()
         if (!supportedImage)
             imageVersion += " [" + tr("image not compatible with this module") + "] ";
         else if (!supportedConfigFormat)
-            imageVersion += " [" + tr("image requires a newer version of the installer") + "] ";
+            imageVersion += " [" + tr("Update Easy Installer to a newer version before installing this image") + "] ";
 
         if (!version.isEmpty())
             imageVersion += version + space;
