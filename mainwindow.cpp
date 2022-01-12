@@ -792,9 +792,12 @@ void MainWindow::onCompleted()
 
     QMessageBox msgbox(QMessageBox::Information, tr("Image Installed"), text,
                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, this);
-    msgbox.button(QMessageBox::Yes)->setText(tr("Power off"));
-    msgbox.button(QMessageBox::No)->setText(tr("Reboot"));
-    msgbox.button(QMessageBox::Cancel)->setText(tr("Return to menu"));
+    msgbox.button(QMessageBox::Yes)->setText(tr("&Power off"));
+    msgbox.button(QMessageBox::Yes)->setShortcut(QKeySequence("p"));
+    msgbox.button(QMessageBox::No)->setText(tr("&Reboot"));
+    msgbox.button(QMessageBox::No)->setShortcut(QKeySequence("r"));
+    msgbox.button(QMessageBox::Cancel)->setText(tr("Return to &menu"));
+    msgbox.button(QMessageBox::Cancel)->setShortcut(QKeySequence("m"));
 
     int value = msgbox.exec();
 
