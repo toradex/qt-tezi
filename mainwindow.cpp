@@ -1283,7 +1283,10 @@ void MainWindow::startImageWrite(QVariantMap &entry)
     if (entry.contains("license") && !(_isAutoinstall || _acceptAllLicenses)) {
         QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());
         ScrollTextDialog eula(entry.value("license_title").toString(), QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
-        eula.setButtonText(QDialogButtonBox::Yes, tr("I Agree"));
+        eula.setButtonText(QDialogButtonBox::Yes, tr("I A&gree"));
+        eula.setButtonShortcut(QDialogButtonBox::Yes, QKeySequence("g"));
+        eula.setButtonText(QDialogButtonBox::Abort, tr("A&bort"));
+        eula.setButtonShortcut(QDialogButtonBox::Abort, QKeySequence("b"));
         eula.setDefaultButton(QDialogButtonBox::Abort);
         int ret = eula.exec();
 

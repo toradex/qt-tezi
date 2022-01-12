@@ -18,6 +18,7 @@ public:
                      QWidget* parent = 0);
     void setDefaultButton(QDialogButtonBox::StandardButton button);
     void setButtonText(QDialogButtonBox::StandardButton button, QString text);
+    void setButtonShortcut(QDialogButtonBox::StandardButton button, QKeySequence shortcut);
 
 private:
     void setDefaultButton(QPushButton *button);

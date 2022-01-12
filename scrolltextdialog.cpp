@@ -74,3 +74,8 @@ void ScrollTextDialog::setButtonText(QDialogButtonBox::StandardButton button, QS
 {
     buttonBox->button(button)->setText(text);
 }
+
+void ScrollTextDialog::setButtonShortcut(QDialogButtonBox::StandardButton button, QKeySequence shortcut)
+{
+    buttonBox->button(button)->setShortcut(shortcut);
+}
