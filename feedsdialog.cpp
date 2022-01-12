@@ -18,6 +18,11 @@ FeedsDialog::FeedsDialog(QList<FeedServer> &_networkFeedServerList, QWidget *par
     /* Force focus to widget so that we can use keyboard for selection */
     ui->serverListWidget->setFocus();
 
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText("&Ok");
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setShortcut(QKeySequence("o"));
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText("&Cancel");
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setShortcut(QKeySequence("c"));
+
     foreach (const FeedServer server, _networkFeedServerList)
         addFeedServer(server);
 
