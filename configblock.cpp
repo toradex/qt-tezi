@@ -78,6 +78,7 @@ const char* const toradex_modules[] = {
 	[64] = "Verdin iMX8M Plus Quad 2GB Wi-Fi / BT IT",
 	[65] = "Verdin iMX8M Plus QuadLite 1GB IT",
 	[66] = "Verdin iMX8M Plus Quad 8GB Wi-Fi / BT",
+	[67] = "Apalis iMX8 QuadMax 8GB Wi-Fi / BT IT",
 };
 
 const char * const toradex_prototype_modules[] = {
