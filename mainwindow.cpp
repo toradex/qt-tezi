@@ -1290,7 +1290,7 @@ void MainWindow::startImageWrite(QVariantMap &entry)
         QByteArray text = getFileContents(folder + "/" + entry.value("license").toString());
         ScrollTextDialog eula(entry.value("license_title").toString(), QString(text), QDialogButtonBox::Yes | QDialogButtonBox::Abort);
         eula.setButtonText(QDialogButtonBox::Yes, tr("I A&ccept"));
-        eula.setButtonShortcut(QDialogButtonBox::Yes, QKeySequence("g"));
+        eula.setButtonShortcut(QDialogButtonBox::Yes, QKeySequence("c"));
         eula.setButtonText(QDialogButtonBox::Abort, tr("A&bort"));
         eula.setButtonShortcut(QDialogButtonBox::Abort, QKeySequence("b"));
         eula.setDefaultButton(QDialogButtonBox::Abort);
