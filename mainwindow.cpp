@@ -1035,7 +1035,6 @@ void MainWindow::imageHostLookupResults(QHostInfo hostInfo){
 
 void MainWindow::downloadImageSetupSignals(ImageListDownload *imageListDownload)
 {
-    connect(imageListDownload, SIGNAL(newImagesToAdd(QListVariantMap)), _imageList, SLOT(addImages(QListVariantMap)));
     connect(imageListDownload, SIGNAL(finished()), this, SLOT(onImageListDownloadFinished()));
     connect(imageListDownload, SIGNAL(error(QString)), this, SLOT(onImageListDownloadError(QString)));
     connect(imageListDownload, SIGNAL(installImage(const QVariantMap, const bool)), this, SLOT(installImage(const QVariantMap, const bool)));
@@ -1045,6 +1044,7 @@ void MainWindow::downloadImageSetupSignals(ImageListDownload *imageListDownload)
 void MainWindow::downloadImageList(const QString &url, enum ImageSource source, int index)
 {
     ImageListDownload *imageListDownload = new ImageListDownload(url, source, index, _netaccess, this);
+    connect(imageListDownload, SIGNAL(newImagesToAdd(QListVariantMap)), _imageList, SLOT(addImages(QListVariantMap)));
     downloadImageSetupSignals(imageListDownload);
 }
 
