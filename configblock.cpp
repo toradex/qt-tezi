@@ -178,10 +178,17 @@ bool ConfigBlock::isTdxPrototypeProdid(quint16 prodid)
 QString ConfigBlock::getBoardRev()
 {
     ConfigBlockHw *hw = (ConfigBlockHw *)_hw.data();
+    QString assembly_str;
+
+    if (hw->ver_assembly < 26)
+        assembly_str = QString(hw->ver_assembly + 'A');
+    else
+        assembly_str = QString("#%1").arg(hw->ver_assembly);
+
     QString boardRev = QString("V%1.%2%3")
             .arg(hw->ver_major)
             .arg(hw->ver_minor)
-            .arg(QChar(hw->ver_assembly + 'A'));
+            .arg(assembly_str);
     return boardRev;
 }
 
@@ -296,7 +303,13 @@ ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QStr
     hw.prodid = productid;
     hw.ver_major = asciiver[1] - '0';
     hw.ver_minor = asciiver[3] - '0';
-    hw.ver_assembly = asciiver[4] - 'A';
+
+    if (asciiver[4] >= 'A' && asciiver[4] <= 'Z')
+        hw.ver_assembly = asciiver[4] - 'A';
+    else if (asciiver[4] == '#')
+        hw.ver_assembly = asciiver.mid(5,2).toUInt();
+    else
+        hw.ver_assembly = 99;
 
     eth.oui = qToBigEndian(0x00142dU << 8);
     eth.nic = qToBigEndian(serial.toInt() << 8);
