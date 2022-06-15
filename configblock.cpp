@@ -85,6 +85,11 @@ const char * const toradex_prototype_modules[] = {
 	[0] = "Apalis iMX8QXP 2GB ECC Wi / BT IT PROTO",
 };
 
+QList<quint32> toradex_ouis = {
+    0x00142dU,
+    0x8c06cbU,
+};
+
 ConfigBlock::ConfigBlock(const QByteArray &cb, QObject *parent) : QObject(parent),
   needsWrite(false), _cb(cb)
 {
@@ -153,7 +158,19 @@ ConfigBlock::ConfigBlock(const ConfigBlockHw &hwsrc, const ConfigBlockEthAddr &e
 QString ConfigBlock::getSerialNumber()
 {
     ConfigBlockEthAddr *addr = (ConfigBlockEthAddr *)_mac.data();
-    qint32 serial = qFromBigEndian(addr->nic) >> 8;
+    quint32 oui = qFromBigEndian(addr->oui) >> 8;
+    quint32 nic = qFromBigEndian(addr->nic) >> 8;
+    qint32 oui_index = toradex_ouis.indexOf(oui);
+
+    /*
+     * If indexOf() returns -1, default to the size of toradex_ouis so the behavior is the same
+     * as in U-Boot cfgblock implementation. This will in practice return an invalid serial#
+     * in the next OUI range not yet assigned.
+     */
+    if (oui_index < 0)
+        oui_index = toradex_ouis.size();
+
+    quint32 serial = (oui_index << 24) + nic;
     return QString::number(serial).rightJustified(8, '0');
 }
 
@@ -297,6 +314,14 @@ ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QStr
     QByteArray asciiver = version.toLatin1();
     ConfigBlockHw hw;
     ConfigBlockEthAddr eth;
+    quint32 serial_uint = serial.toUInt();
+    quint32 nic = serial_uint & 0xffffff;
+    quint32 oui;
+
+    if (isSerialValid(serial_uint))
+        oui = toradex_ouis[serial_uint >> 24];
+    else
+        oui = toradex_ouis[0];
 
     qDebug() << "User created Config Block, Product ID:" << productid << "Version:" << version << "Serial:" << serial;
 
@@ -311,8 +336,8 @@ ConfigBlock *ConfigBlock::configBlockFromUserInput(quint16 productid, const QStr
     else
         hw.ver_assembly = 99;
 
-    eth.oui = qToBigEndian(0x00142dU << 8);
-    eth.nic = qToBigEndian(serial.toInt() << 8);
+    eth.oui = qToBigEndian(oui << 8);
+    eth.nic = qToBigEndian(nic << 8);
 
     return new ConfigBlock(hw, eth);
 }
@@ -356,4 +381,12 @@ bool ConfigBlock::isProductSupported(const QString &toradexProductNumber, const 
 
     bool pid8Match = supportedProductIdsPid8.contains(toradexProductNumber);
     return pid8Match || pid8RangeMatch;
+}
+
+bool ConfigBlock::isSerialValid(quint32 serial)
+{
+    quint8 oui_count = toradex_ouis.size();
+    quint32 total_serials = oui_count << 24;
+
+    return (serial < total_serials);
 }

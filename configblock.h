@@ -60,6 +60,7 @@ public:
     bool needsWrite;
 
     static bool isProductSupported(const QString &toradexProductNumber, const QStringList &supportedProductIds);
+    static bool isSerialValid(quint32 serial);
 
 private:
     QByteArray _cb;
