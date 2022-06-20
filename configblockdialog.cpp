@@ -3,7 +3,6 @@
 #include "ui_configblockdialog.h"
 
 #include <QDebug>
-#include <QMessageBox>
 #include <QKeyEvent>
 
 ConfigBlockDialog::ConfigBlockDialog(QList<quint16> supportedModules, QWidget *parent) :
@@ -31,12 +30,35 @@ ConfigBlockDialog::~ConfigBlockDialog()
     delete ui;
 }
 
+bool ConfigBlockDialog::checkUserInput(quint16 productId, QLineEdit *moduleSerial, QLineEdit *moduleVersion)
+{
+    quint32 serial = moduleSerial->text().toUInt();
+    QString version = moduleVersion->text();
+    QByteArray asciiver = version.toLatin1();
+
+    if (!productId)
+        return false;
+
+    if (!ui->moduleVersion->hasAcceptableInput())
+        return false;
+
+    if (!((asciiver[4] >= 'A' && asciiver[4] <= 'Z') || asciiver[4] == '#'))
+        return false;
+
+    if (!moduleSerial->hasAcceptableInput())
+        return false;
+
+    if (!ConfigBlock::isSerialValid(serial))
+        return false;
+
+    return true;
+}
+
 void ConfigBlockDialog::accept()
 {
     quint16 productId = ui->moduleType->itemData(ui->moduleType->currentIndex()).toUInt();
 
-    if (!productId || !ui->moduleVersion->hasAcceptableInput() ||
-        !ui->moduleSerial->hasAcceptableInput()) {
+    if (!checkUserInput(productId, ui->moduleSerial, ui->moduleVersion)) {
         QMessageBox::critical(NULL, QObject::tr("Config Block information not valid"),
                               QObject::tr("Please enter valid and complete Config Block data."),
                               QMessageBox::Close);

@@ -2,6 +2,8 @@
 #define CONFIGBLOCKDIALOG_H
 
 #include <QDialog>
+#include <QMessageBox>
+#include <QLineEdit>
 #include "configblock.h"
 
 namespace Ui {
@@ -25,6 +27,7 @@ public slots:
 private:
     Ui::ConfigBlockDialog *ui;
     QString cfgBlock;
+    bool checkUserInput(quint16 productId, QLineEdit *moduleSerial, QLineEdit *moduleVersion);
 };
 
 #endif // CONFIGBLOCKDIALOG_H
