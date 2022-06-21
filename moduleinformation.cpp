@@ -204,13 +204,8 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX8QXP") {
-        // i.MX 8QuadXPlus/DualXPlus/DualX
-        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
-        if (compatible.contains("apalis")) {
-            productIds << 46 << 53 << 54 << 2600;
-        } else {
-            productIds << 38 << 50 << 51 << 52;
-        }
+        // i.MX 8QuadXPlus/DualX
+        productIds << 38 << 50 << 51 << 52;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX8MM") {
