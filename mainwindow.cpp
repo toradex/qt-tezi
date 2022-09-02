@@ -289,6 +289,7 @@ void MainWindow::setWorkingInBackground(bool working, const QString &labelText)
 void MainWindow::updateModuleInformation()
 {
     ui->moduleType->setText(_toradexProductName);
+    ui->moduleType->setWordWrap(true);
     ui->moduleVersion->setText(_toradexBoardRev);
     ui->moduleSerial->setText(_serialNumber);
 }
