@@ -66,6 +66,7 @@ protected:
     QString getUncompressCommand(const QString &file, bool md5sum);
     bool writePartitionTable(const QByteArray &blockdevpath, const QString &tableType, const QMap<int, BlockDevPartitionInfo *> &partitionMap);
     bool isURL(const QString &s);
+    bool setBootPartition0(BlockDevInfo *blockdev);
 
     ImageInfo *_image;
     ConfigBlock *_configBlock;

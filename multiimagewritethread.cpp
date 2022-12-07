@@ -305,6 +305,15 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
             return false;
     }
 
+    /*
+     * The active eMMC boot partition (see eMMC standard) might change by a U-Boot update mechansim.
+     * When we flash a new TEZI image and boot partition 1 is still active, we will continue to boot the old U-Boot.
+     * Here we make sure that we set the active boot partition back to boot0 if it changed.
+     */
+    if (blockdev->name().startsWith("mmcblk") && blockdev->name().endsWith("boot0")) {
+        return setBootPartition0(blockdev);
+    }
+
     return true;
 }
 
@@ -548,6 +557,33 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
                 emit error(tr("Timeout waiting for partition device %1.").arg(QString(p->partitionDevice())));
                 return false;
             }
+        }
+    }
+
+    return true;
+}
+
+bool MultiImageWriteThread::setBootPartition0(BlockDevInfo *blockdev)
+{
+    QString mmc_cmd("/usr/bin/mmc");
+    /* We need the parent device /dev/mmcblk0 without boot0 */
+    QString mmc_parent = "/dev/" + blockdev->name().remove("boot0");
+    QStringList args_read = {"extcsd", "read", mmc_parent};
+    QByteArray extcsd;
+
+    if (!runCommand(mmc_cmd, args_read, extcsd)) {
+        emit error(tr("Error reading extcsd"));
+        return false;
+    }
+
+    if (!extcsd.contains("Boot Partition 1 enabled")) {
+        QStringList args_write = {"bootpart", "enable", "1", "1", mmc_parent};
+        QByteArray output;
+
+        qDebug() << "Change boot partition from 1 to 0 (factory default)";
+        if (!runCommand(mmc_cmd, args_write, output)) {
+            emit error(tr("Failed to change boot partition to 0") + "\n" + output);
+            return false;
         }
     }
 
