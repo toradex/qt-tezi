@@ -577,9 +577,30 @@ bool MultiImageWriteThread::setBootPartition0(BlockDevInfo *blockdev)
     }
 
     if (!extcsd.contains("Boot Partition 1 enabled")) {
-        QStringList args_write = {"bootpart", "enable", "1", "1", mmc_parent};
-        QByteArray output;
+        /*
+         * We check for send_ack here:
+         * 0x10 -> partition 2 enabled, no send_ack
+         * 0x50 -> partition 2 enabled, send_ack
+         * 0x31 -> user partition enabled, no send_ack
+         * 0x71 -> user partition enabled, send_ack
+         * We test if bit6 (0x40) in the PARTITION_CONFIG register is set
+         */
+        QRegExp re(".*PARTITION_CONFIG: (0x[0-9a-fA-F]+).*");
+        if (re.indexIn(extcsd) == -1) {
+            emit error(tr("Could not get partition configuration (PARTITION_CONFIG)"));
+            return false;
+        }
 
+        bool ok;
+        int partition_config = re.cap(1).toInt(&ok, 0);
+        if (!ok) {
+            emit error(tr("Could not parse partition configuration (PARTITION_CONFIG)"));
+            return false;
+        }
+
+        QString send_ack = partition_config & 0x40 ? "1" : "0";
+        QStringList args_write = {"bootpart", "enable", "1", send_ack, mmc_parent};
+        QByteArray output;
         qDebug() << "Change boot partition from 1 to 0 (factory default)";
         if (!runCommand(mmc_cmd, args_write, output)) {
             emit error(tr("Failed to change boot partition to 0") + "\n" + output);
