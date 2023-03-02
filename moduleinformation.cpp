@@ -117,99 +117,97 @@ const QString ModuleInformation::getHostname()
 
 ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 {
-#if __x86_64__
-    QList<quint16> productIds;
-
-    QString socid = "i.MX6Q";
-    enum StorageClass storageClass = StorageClass::Block;
-    bool rebootWorks = false;
-    bool moduleSupported = true;
-    productIds << 27 << 28 << 29 << 35;
-    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
-#else
-    // Try to detect which module we are running on...
-    QFile file("/sys/bus/soc/devices/soc0/soc_id");
-
-    if (!file.exists()) {
-        return NULL;
-    }
-    file.open(QFile::ReadOnly);
-    QString socid = file.readLine().trimmed();
-    file.close();
+    QString socid;
     QList<quint16> productIds;
     enum StorageClass storageClass;
-    bool rebootWorks, moduleSupported = true;
-    if (socid == "i.MX6Q") {
-        // i.MX 6Quad/Dual are only populated on Apalis currently
-        productIds << 27 << 28 << 29 << 35;
-        storageClass = StorageClass::Block;
-        rebootWorks = false;
-    } else if (socid == "i.MX6DL") {
-        // i.MX 6DualLite/Solo are only populated on Colibri currently
-        productIds << 14 << 15 << 16 << 17;
-        storageClass = StorageClass::Block;
-        rebootWorks = false;
-    } else if (socid == "i.MX6ULL") {
-        // i.MX 6ULL
-        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
-        if (compatible.contains("colibri-imx6ull-emmc")) {
-            storageClass = StorageClass::Block;
-            productIds << 62;
-        } else {
-            productIds << 36 << 40 << 44 << 45;
-            storageClass = StorageClass::Mtd;
-        }
-        rebootWorks = false;
-    } else if (socid == "i.MX7D") {
-        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
-        if (compatible.contains("colibri_imx7d_emmc") || compatible.contains("colibri-imx7d-emmc")) {
-            storageClass = StorageClass::Block;
-            productIds << 39;
-        } else {
-            storageClass = StorageClass::Mtd;
-            // Dual and Solo are using the same soc_id currently
-            productIds << 32 << 33 << 41;
-        }
-        rebootWorks = true;
+    bool rebootWorks;
+    bool moduleSupported = true;
 
-        // Chip Tape-Out version
-        // 1.0 chips had a bug in the Boot ROM which required U-Boot
-        // to be written in a special format (3/4 of each page only)
-        // Tezi does not support those modules.
-        QFile file("/sys/bus/soc/devices/soc0/revision");
-        if (file.exists()) {
-            if (getFileContents("/sys/bus/soc/devices/soc0/revision").trimmed() == "1.0")
-                moduleSupported = false;
+#if __x86_64__
+    socid = "i.MX6Q";
+    productIds << 27 << 28 << 29 << 35;
+    storageClass = StorageClass::Block;
+    rebootWorks = false;
+    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
+#else
+
+    // Try to detect which module we are running on...
+    QFile file("/sys/bus/soc/devices/soc0/soc_id");
+    if (file.exists()) {
+        file.open(QFile::ReadOnly);
+        socid = file.readLine().trimmed();
+        file.close();
+        if (socid == "i.MX6Q") {
+            // i.MX 6Quad/Dual are only populated on Apalis currently
+            productIds << 27 << 28 << 29 << 35;
+            storageClass = StorageClass::Block;
+            rebootWorks = false;
+        } else if (socid == "i.MX6DL") {
+            // i.MX 6DualLite/Solo are only populated on Colibri currently
+            productIds << 14 << 15 << 16 << 17;
+            storageClass = StorageClass::Block;
+            rebootWorks = false;
+        } else if (socid == "i.MX6ULL") {
+            // i.MX 6ULL
+            QByteArray compatible = getFileContents("/proc/device-tree/compatible");
+            if (compatible.contains("colibri-imx6ull-emmc")) {
+                storageClass = StorageClass::Block;
+                productIds << 62;
+            } else {
+                productIds << 36 << 40 << 44 << 45;
+                storageClass = StorageClass::Mtd;
+            }
+            rebootWorks = false;
+        } else if (socid == "i.MX7D") {
+            QByteArray compatible = getFileContents("/proc/device-tree/compatible");
+            if (compatible.contains("colibri_imx7d_emmc") || compatible.contains("colibri-imx7d-emmc")) {
+                storageClass = StorageClass::Block;
+                productIds << 39;
+            } else {
+                storageClass = StorageClass::Mtd;
+                // Dual and Solo are using the same soc_id currently
+                productIds << 32 << 33 << 41;
+            }
+            rebootWorks = true;
+
+            // Chip Tape-Out version
+            // 1.0 chips had a bug in the Boot ROM which required U-Boot
+            // to be written in a special format (3/4 of each page only)
+            // Tezi does not support those modules.
+            QFile file("/sys/bus/soc/devices/soc0/revision");
+            if (file.exists()) {
+                if (getFileContents("/sys/bus/soc/devices/soc0/revision").trimmed() == "1.0")
+                    moduleSupported = false;
+            }
+        } else if (socid == "i.MX8QM") {
+            // i.MX 8QuadMax/QuadPlus
+            productIds << 37 << 47 << 48 << 49 << 67;
+            storageClass = StorageClass::Block;
+            rebootWorks = false;
+        } else if (socid == "i.MX8QXP") {
+            // i.MX 8QuadXPlus/DualX
+            productIds << 38 << 50 << 51 << 52;
+            storageClass = StorageClass::Block;
+            rebootWorks = false;
+        } else if (socid == "i.MX8MM") {
+            // i.MX 8M Mini
+            productIds << 55 << 57 << 59 << 60 << 68;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
+        } else if (socid == "i.MX8MN") {
+            // i.MX 8M Nano
+            productIds << 56;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
+        } else if (socid == "i.MX8MP") {
+            // i.MX 8M Plus
+            productIds << 58 << 61 << 63 << 64 << 65 << 66;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
         }
-    } else if (socid == "i.MX8QM") {
-        // i.MX 8QuadMax/QuadPlus
-        productIds << 37 << 47 << 48 << 49 << 67;
-        storageClass = StorageClass::Block;
-        rebootWorks = false;
-    } else if (socid == "i.MX8QXP") {
-        // i.MX 8QuadXPlus/DualX
-        productIds << 38 << 50 << 51 << 52;
-        storageClass = StorageClass::Block;
-        rebootWorks = false;
-    } else if (socid == "i.MX8MM") {
-        // i.MX 8M Mini
-        productIds << 55 << 57 << 59 << 60 << 68;
-        storageClass = StorageClass::Block;
-        rebootWorks = true;
-    } else if (socid == "i.MX8MN") {
-        // i.MX 8M Nano
-        productIds << 56;
-        storageClass = StorageClass::Block;
-        rebootWorks = true;
-    } else if (socid == "i.MX8MP") {
-        // i.MX 8M Plus
-        productIds << 58 << 61 << 63 << 64 << 65 << 66;
-        storageClass = StorageClass::Block;
-        rebootWorks = true;
-    } else {
-        return NULL;
     }
 
-    return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
+    return productIds.isEmpty() ? NULL :
+           new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
 #endif //__x86_64__
 }
