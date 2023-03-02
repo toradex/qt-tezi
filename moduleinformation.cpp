@@ -139,24 +139,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     QList<quint16> productIds;
     enum StorageClass storageClass;
     bool rebootWorks, moduleSupported = true;
-    if (socid == "48") {
-        // Tegra 3
-        QByteArray compatible = getFileContents("/proc/device-tree/compatible");
-        if (compatible.contains("apalis")) {
-            productIds << 25 << 26 << 31;
-        } else {
-            productIds << 23 << 30;
-        }
-        socid = "T30";
-        storageClass = StorageClass::Block;
-        rebootWorks = true;
-    } else if (socid == "64") {
-        // Tegra K1
-        socid = "TK1";
-        productIds << 34 << 42;
-        storageClass = StorageClass::Block;
-        rebootWorks = true;
-    } else if (socid == "i.MX6Q") {
+    if (socid == "i.MX6Q") {
         // i.MX 6Quad/Dual are only populated on Apalis currently
         productIds << 27 << 28 << 29 << 35;
         storageClass = StorageClass::Block;
@@ -224,23 +207,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         storageClass = StorageClass::Block;
         rebootWorks = true;
     } else {
-        // Downstream the tegras use the machine file instead
-        QFile machineFile("/sys/bus/soc/devices/soc0/machine");
-        if (!machineFile.exists()) {
-            return NULL;
-        }
-        machineFile.open(QFile::ReadOnly);
-        QString machine = machineFile.readLine().trimmed();
-        machineFile.close();
-
-        if (machine == "apalis-tk1") {
-            socid = "TK1";
-            productIds << 34 << 42;
-            storageClass = StorageClass::Block;
-            rebootWorks = true;
-        } else {
-            return NULL;
-        }
+        return NULL;
     }
 
     return new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
