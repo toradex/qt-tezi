@@ -207,6 +207,23 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         }
     }
 
+    if (productIds.isEmpty()) {
+        // TI AM62 uses the family file instead
+        QFile familyFile("/sys/bus/soc/devices/soc0/family");
+        if (familyFile.exists()) {
+            familyFile.open(QFile::ReadOnly);
+            QString family = familyFile.readLine().trimmed();
+            familyFile.close();
+
+            if (family.contains("AM62X")) {
+                socid = "AM62";
+                productIds << 69;
+                storageClass = StorageClass::Block;
+                rebootWorks = false;
+            }
+        }
+    }
+
     return productIds.isEmpty() ? NULL :
            new ModuleInformation(socid, productIds, storageClass, rebootWorks, moduleSupported, parent);
 #endif //__x86_64__
