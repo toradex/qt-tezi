@@ -118,6 +118,7 @@ int HttpApi::start(QString port, MainWindow *mainWindow)
                                 QMutexLocker locker(mainWindow->_imageList->GetMutex());
                                 if (mainWindow->_imageList->imageList().count() < imageId) {
                                     status = qhttp::ESTATUS_BAD_REQUEST;
+                                    break;
                                 }
                                 mainWindow->_acceptAllLicenses = acceptAllLicenses;
                                 emit this->httpApiInstallImageById(mainWindow->_imageList->imageList()[imageId], false);
