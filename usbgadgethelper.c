@@ -83,15 +83,8 @@ static struct usbg_config_strs c_strs_ms = {
         "Mass Storage"
 };
 
-/* NCM */
-static struct usbg_f_net_attrs f_net_attrs = {
-    .dev_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xff } },
-    .host_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xfe } },
-    .qmult = 5,
-};
-
 static const struct usbg_config_strs c_strs_ncm = {
-    .configuration = "NCM"
+    .configuration = "WINNCM"
 };
 
 static const struct usbg_gadget_os_descs os_desc_ncm = {
@@ -101,8 +94,8 @@ static const struct usbg_gadget_os_descs os_desc_ncm = {
 };
 
 static const struct usbg_function_os_desc os_desc_f_ncm = {
-    .compatible_id = "NCM",
-    .sub_compatible_id = "5162001",
+    .compatible_id = "WINNCM",
+    .sub_compatible_id = "",
 };
 
 usbg_state *s;
@@ -302,8 +295,14 @@ int usbgadget_ncm_init()
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
+    /* Don't touch the attributes, for ncm setting the attributes is
+     * currently broken, i.e. class/subclass/protocol attrs do not exist
+     * and make the call fail. (kernel 5.10, libusbgx @ 0.2.0, git 36e71e1)
+     * Since we drop setting a fixed MAC addr we would set all
+     * attributes to their default anyway.
+     */
     usbg_ret = (usbg_error)usbg_create_function(g_ncm, USBG_F_NCM, "usb0",
-                    &f_net_attrs, &f_ncm);
+                NULL, &f_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
@@ -322,8 +321,8 @@ int usbgadget_ncm_init()
 
     /* Bind NCM to be the OS Descriptor configuration */
     usbg_ret = usbg_set_os_desc_config(g_ncm, c);
-            if (usbg_ret != USBG_SUCCESS)
-                return -1;
+    if (usbg_ret != USBG_SUCCESS)
+        return -1;
 
     return 0;
 }
