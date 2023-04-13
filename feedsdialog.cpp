@@ -86,8 +86,8 @@ void FeedsDialog::on_addPushButton_clicked(void)
 
     // Classify as network by default. This could be a public or
     // a local url, we can't tell...
-    if (server.url.contains(RNDIS_ADDRESS))
-        server.source = SOURCE_RNDIS;
+    if (server.url.contains(NCM_ADDRESS))
+        server.source = SOURCE_NCM;
     else
         server.source = SOURCE_NETWORK;
 

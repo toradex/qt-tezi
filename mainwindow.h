@@ -101,8 +101,8 @@ protected:
     int _toradexProductId;
     bool _allowAutoinstall, _isAutoinstall, _showAll;
     LanguageDialog *_ld;
-    bool _wasOnNetwork, _wasRndis;
-    bool _downloadNetwork, _downloadRndis;
+    bool _wasOnNetwork, _wasNcm;
+    bool _downloadNetwork, _downloadNcm;
     int _imageListDownloadsActive;
     QNetworkAccessManager *_netaccess;
     int _neededMB, _availableMB, _numMetaFilesToDownload;
@@ -181,7 +181,7 @@ private slots:
     void on_actionRefreshCloud_triggered();
     void on_actionCancel_triggered();
     void on_actionUsbMassStorage_triggered(bool checked);
-    void on_actionUsbRndis_triggered(bool checked);
+    void on_actionUsbNcm_triggered(bool checked);
     void on_actionEraseModule_triggered();
     void on_actionShowLicense_triggered();
     void on_actionEditFeeds_triggered();

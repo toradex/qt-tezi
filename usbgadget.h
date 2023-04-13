@@ -13,9 +13,9 @@ public:
     bool isMassStorageSafeToRemove();
     bool setMassStorageAttrs(const QString &serial, const QString &productName, const uint16_t idProduct);
 
-    bool initRndis();
-    void enableRndis(bool enable);
-    bool setRndisAttrs(const QString &serial, const QString &productName, const uint16_t idProduct);
+    bool initNcm();
+    void enableNcm(bool enable);
+    bool setNcmAttrs(const QString &serial, const QString &productName, const uint16_t idProduct);
 
     bool isMassStorage() {
         return _gadgetIsMassStorage;

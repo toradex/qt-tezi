@@ -61,37 +61,37 @@ bool UsbGadget::setMassStorageAttrs(const QString &serial, const QString &produc
     return true;
 }
 
-bool UsbGadget::initRndis()
+bool UsbGadget::initNcm()
 {
     if (!_gadgetInitialized)
         return false;
 
-    if (usbgadget_rndis_init()) {
-        qDebug() << "USB Gadget: Error initalizing RDNIS:" << usbgadget_strerror();
+    if (usbgadget_ncm_init()) {
+        qDebug() << "USB Gadget: Error initalizing NCM:" << usbgadget_strerror();
         return false;
     }
 
     return true;
 }
 
-void UsbGadget::enableRndis(bool enable)
+void UsbGadget::enableNcm(bool enable)
 {
     if (enable) {
-        if (usbgadget_rndis_enable()) {
-            qDebug() << "USB Gadget: Error enabling RNDIS" << usbgadget_strerror();
+        if (usbgadget_ncm_enable()) {
+            qDebug() << "USB Gadget: Error enabling NCM" << usbgadget_strerror();
             return;
         }
-        qDebug() << "USB Gadget: RNDIS enabled";
+        qDebug() << "USB Gadget: NCM enabled";
     } else {
-        usbgadget_rndis_disable();
-        qDebug() << "USB Gadget: RNDIS disabled";
+        usbgadget_ncm_disable();
+        qDebug() << "USB Gadget: NCM disabled";
     }
 }
 
-bool UsbGadget::setRndisAttrs(const QString &serial, const QString &productName, const uint16_t idProduct)
+bool UsbGadget::setNcmAttrs(const QString &serial, const QString &productName, const uint16_t idProduct)
 {
-    if (usbgadget_rndis_set_attrs(serial.toStdString().c_str(), productName.toStdString().c_str(), idProduct)) {
-        qDebug() << "USB Gadget: Error setting RNDIS Attributes:" << usbgadget_strerror();
+    if (usbgadget_ncm_set_attrs(serial.toStdString().c_str(), productName.toStdString().c_str(), idProduct)) {
+        qDebug() << "USB Gadget: Error setting NCM Attributes:" << usbgadget_strerror();
         return false;
     }
 

@@ -62,7 +62,7 @@
 #define PIPEVIEWER_NAMEDPIPE "/var/volatile/pvpipe"
 #define PIPEVIEWER_COMMAND "pv -b -n 2>" PIPEVIEWER_NAMEDPIPE
 
-/* RNDIS network */
-#define RNDIS_ADDRESS "192.168.11"
+/* NCM network */
+#define NCM_ADDRESS "192.168.11"
 
 #endif // CONFIG_H

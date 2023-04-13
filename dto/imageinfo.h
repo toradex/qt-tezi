@@ -23,7 +23,7 @@ public:
 
     static bool isNetwork(enum ImageSource source)
     {
-        return source == SOURCE_INTERNET || source == SOURCE_NETWORK || source == SOURCE_RNDIS;
+        return source == SOURCE_INTERNET || source == SOURCE_NETWORK || source == SOURCE_NCM;
     }
 
     inline QString folder()

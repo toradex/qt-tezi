@@ -67,7 +67,7 @@ MainWindow::MainWindow(LanguageDialog* ld, bool allowAutoinstall, QWidget *paren
     QMainWindow(parent),
     ui(new Ui::MainWindow), _fileSystemWatcher(new QFileSystemWatcher), _fileSystemWatcherFb(new QFileSystemWatcher),
     _qpd(nullptr), _psd(nullptr), _allowAutoinstall(allowAutoinstall), _isAutoinstall(false), _showAll(false),
-    _ld(ld), _wasOnNetwork(false), _wasRndis(false), _downloadNetwork(true), _downloadRndis(true),
+    _ld(ld), _wasOnNetwork(false), _wasNcm(false), _downloadNetwork(true), _downloadNcm(true),
     _imageListDownloadsActive(0), _netaccess(nullptr), _imageWriteThread(nullptr), _internetHostLookupId(-1),
     _browser(new ZConfServiceBrowser), _httpApi(new HttpApi), _TeziState(TEZI_IDLE), _acceptAllLicenses(false)
 {
@@ -112,8 +112,8 @@ bool MainWindow::setAvahiHostname(const QString hostname) {
 
 bool MainWindow::initialize() {
     _usbGadget = new UsbGadget();
-    _usbGadget->initRndis();
-    _usbGadget->enableRndis(true);
+    _usbGadget->initNcm();
+    _usbGadget->enableNcm(true);
 
     _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == nullptr) {
@@ -208,13 +208,13 @@ bool MainWindow::initialize() {
         ui->mainToolBar->removeAction(ui->actionUsbMassStorage);
     }
 
-    if (_usbGadget->initRndis() &&
-        _usbGadget->setRndisAttrs(_serialNumber, _toradexProductName, _toradexProductId)) {
-        ui->actionUsbRndis->setEnabled(true);
-        ui->actionUsbRndis->trigger();
+    if (_usbGadget->initNcm() &&
+        _usbGadget->setNcmAttrs(_serialNumber, _toradexProductName, _toradexProductId)) {
+        ui->actionUsbNcm->setEnabled(true);
+        ui->actionUsbNcm->trigger();
 
     } else {
-        ui->actionUsbRndis->setEnabled(false);
+        ui->actionUsbNcm->setEnabled(false);
     }
 
     // Add static server list
@@ -393,7 +393,7 @@ void MainWindow::imageListUpdated()
             item->setData(SecondIconRole, _sdIcon);
         else if (source == SOURCE_INTERNET)
             item->setData(SecondIconRole, _internetIcon);
-        else if (source == SOURCE_NETWORK || source == SOURCE_RNDIS)
+        else if (source == SOURCE_NETWORK || source == SOURCE_NCM)
             item->setData(SecondIconRole, _networkIcon);
 
         ui->list->addItem(item);
@@ -418,8 +418,8 @@ void MainWindow::addNewImageUrl(const QString url)
 
     // Classify as network by default. This could be a public or
     // a local url, we can't tell...
-    if (url.contains(RNDIS_ADDRESS))
-        server.source = SOURCE_RNDIS;
+    if (url.contains(NCM_ADDRESS))
+        server.source = SOURCE_NCM;
     else
         server.source = SOURCE_NETWORK;
     server.enabled = true;
@@ -439,8 +439,8 @@ void MainWindow::addNewImageUrl(const QString url)
             _networkFeedServerList[index].enabled = true;
     }
     _imageList->removeImagesBySource(server.source);
-    if (server.source == SOURCE_RNDIS)
-        _downloadRndis = true;
+    if (server.source == SOURCE_NCM)
+        _downloadNcm = true;
     else if (server.source == SOURCE_NETWORK)
         _downloadNetwork = true;
 }
@@ -601,12 +601,12 @@ void MainWindow::on_actionUsbMassStorage_triggered(bool checked)
     /* Disable installation button if USB mass storage is exported */
     ui->actionInstall->setEnabled(!checked);
     ui->actionEraseModule->setEnabled(!checked);
-    ui->actionUsbRndis->setEnabled(!checked);
+    ui->actionUsbNcm->setEnabled(!checked);
 }
 
-void MainWindow::on_actionUsbRndis_triggered(bool checked)
+void MainWindow::on_actionUsbNcm_triggered(bool checked)
 {
-    _usbGadget->enableRndis(checked);
+    _usbGadget->enableNcm(checked);
     if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block)
         ui->actionUsbMassStorage->setEnabled(!checked);
 }
@@ -738,8 +738,8 @@ void MainWindow::on_actionRefreshCloud_triggered()
     _imageList->removeImagesBySource(SOURCE_INTERNET);
     downloadLists(SOURCE_NETWORK);
 
-    _imageList->removeImagesBySource(SOURCE_RNDIS);
-    downloadLists(SOURCE_RNDIS);
+    _imageList->removeImagesBySource(SOURCE_NCM);
+    downloadLists(SOURCE_NCM);
 
     /* Try to lookup image host before trying to download images from the Internet */
     _internetHostLookupId = QHostInfo::lookupHost(DEFAULT_IMAGE_HOST,
@@ -995,26 +995,26 @@ void MainWindow::pollNetworkStatus()
 
     if (hasAddress("usb0", &ae)) {
 
-        if (!_wasRndis) {
-            qDebug() << "RNDIS up in" << _elapsedTimer.elapsed()/1000.0 << "seconds";
-            ui->labelRNDISAddress->setText(
+        if (!_wasNcm) {
+            qDebug() << "NCM up in" << _elapsedTimer.elapsed()/1000.0 << "seconds";
+            ui->labelNCMAddress->setText(
                         QString("%2/%3").arg(ae.ip().toString(), QString::number(ae.prefixLength())));
 
-            _wasRndis = true;
+            _wasNcm = true;
         }
 
-        if (_downloadRndis) {
-            _downloadRndis = false;
-            _imageList->removeImagesBySource(SOURCE_RNDIS);
-            downloadLists(SOURCE_RNDIS);
+        if (_downloadNcm) {
+            _downloadNcm = false;
+            _imageList->removeImagesBySource(SOURCE_NCM);
+            downloadLists(SOURCE_NCM);
         }
 
     } else {
-        if (_wasRndis) {
-            ui->labelRNDISAddress->setText(tr("No address assigned"));
-            _imageList->removeImagesBySource(SOURCE_RNDIS);
-            _wasRndis = false;
-            _downloadRndis = true;
+        if (_wasNcm) {
+            ui->labelNCMAddress->setText(tr("No address assigned"));
+            _imageList->removeImagesBySource(SOURCE_NCM);
+            _wasNcm = false;
+            _downloadNcm = true;
         }
     }
 }

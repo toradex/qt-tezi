@@ -9,7 +9,7 @@ enum ImageSource {
     SOURCE_SDCARD,
     SOURCE_NETWORK,
     SOURCE_INTERNET,
-    SOURCE_RNDIS,
+    SOURCE_NCM,
 };
 Q_DECLARE_METATYPE(ImageSource);
 

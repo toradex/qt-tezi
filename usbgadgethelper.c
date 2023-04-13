@@ -22,7 +22,7 @@ static struct usbg_gadget_attrs g_attrs_ms = {
     .bcdDevice = 0x0001, /* Verson of device */
 };
 
-static struct usbg_gadget_attrs g_attrs_rndis = {
+static struct usbg_gadget_attrs g_attrs_ncm = {
     .bcdUSB = 0x0200,
     .bDeviceClass =	USB_CLASS_PER_INTERFACE,
     .bDeviceSubClass = 0x00,
@@ -83,25 +83,25 @@ static struct usbg_config_strs c_strs_ms = {
         "Mass Storage"
 };
 
-/* RNDIS */
+/* NCM */
 static struct usbg_f_net_attrs f_net_attrs = {
     .dev_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xff } },
     .host_addr = { .ether_addr_octet = { 0x00, 0x14, 0x2d, 0xff, 0xff, 0xfe } },
     .qmult = 5,
 };
 
-static const struct usbg_config_strs c_strs_rndis = {
-    .configuration = "RNDIS"
+static const struct usbg_config_strs c_strs_ncm = {
+    .configuration = "NCM"
 };
 
-static const struct usbg_gadget_os_descs os_desc_rndis = {
+static const struct usbg_gadget_os_descs os_desc_ncm = {
     .use = 1,
     .b_vendor_code = 0xcd,
     .qw_sign = "MSFT100",
 };
 
-static const struct usbg_function_os_desc os_desc_f_rndis = {
-    .compatible_id = "RNDIS",
+static const struct usbg_function_os_desc os_desc_f_ncm = {
+    .compatible_id = "NCM",
     .sub_compatible_id = "5162001",
 };
 
@@ -110,9 +110,9 @@ usbg_gadget *g_ms;
 usbg_config *c_ms;
 usbg_function *f_ms;
 
-usbg_gadget *g_rndis;
-usbg_function *f_rndis;
-usbg_f_net *f_net_rndis;
+usbg_gadget *g_ncm;
+usbg_function *f_ncm;
+usbg_f_net *f_net_ncm;
 
 usbg_error usbg_ret;
 
@@ -285,75 +285,75 @@ const char *usbgadget_strerror()
     return usbg_strerror(usbg_ret);
 }
 
-int usbgadget_rndis_init()
+int usbgadget_ncm_init()
 {
     usbg_config *c;
 
     /* Do nothing if gadget device is already created... */
-    g_rndis = usbg_get_gadget(s, "grndis");
-    if (g_rndis)
+    g_ncm = usbg_get_gadget(s, "gncm");
+    if (g_ncm)
         return 0;
 
-    usbg_ret = (usbg_error)usbg_create_gadget(s, "grndis", &g_attrs_rndis, &g_strs, &g_rndis);
+    usbg_ret = (usbg_error)usbg_create_gadget(s, "gncm", &g_attrs_ncm, &g_strs, &g_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_set_gadget_os_descs(g_rndis, &os_desc_rndis);
+    usbg_ret = (usbg_error)usbg_set_gadget_os_descs(g_ncm, &os_desc_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_create_function(g_rndis, USBG_F_RNDIS, "usb0",
-                    &f_net_attrs, &f_rndis);
+    usbg_ret = (usbg_error)usbg_create_function(g_ncm, USBG_F_NCM, "usb0",
+                    &f_net_attrs, &f_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = (usbg_error)usbg_set_interf_os_desc(f_rndis, "rndis", &os_desc_f_rndis);
+    usbg_ret = (usbg_error)usbg_set_interf_os_desc(f_ncm, "ncm", &os_desc_f_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
     /* NULL can be passed to use kernel defaults */
-    usbg_ret = usbg_create_config(g_rndis, 1, "RNDIS", NULL, &c_strs_rndis, &c);
+    usbg_ret = usbg_create_config(g_ncm, 1, "NCM", NULL, &c_strs_ncm, &c);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    usbg_ret = usbg_add_config_function(c, "RNDIS Function", f_rndis);
+    usbg_ret = usbg_add_config_function(c, "NCM Function", f_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
 
-    /* Bind RNDIS to be the OS Descriptor configuration */
-    usbg_ret = usbg_set_os_desc_config(g_rndis, c);
+    /* Bind NCM to be the OS Descriptor configuration */
+    usbg_ret = usbg_set_os_desc_config(g_ncm, c);
             if (usbg_ret != USBG_SUCCESS)
                 return -1;
 
     return 0;
 }
 
-int usbgadget_rndis_set_attrs(const char *serial, const char *productName, const uint16_t idProduct)
+int usbgadget_ncm_set_attrs(const char *serial, const char *productName, const uint16_t idProduct)
 {
     g_strs.serial = strdup(serial);
     g_strs.product = strdup(productName);
-    g_attrs_rndis.idProduct = 0x4000 + idProduct;
+    g_attrs_ncm.idProduct = 0x4000 + idProduct;
 
-    if (usbg_set_gadget_attrs(g_rndis, &g_attrs_rndis) != USBG_SUCCESS)
+    if (usbg_set_gadget_attrs(g_ncm, &g_attrs_ncm) != USBG_SUCCESS)
         return -1;
 
-    if (usbg_set_gadget_strs(g_rndis, LANG_US_ENG, &g_strs) != USBG_SUCCESS)
+    if (usbg_set_gadget_strs(g_ncm, LANG_US_ENG, &g_strs) != USBG_SUCCESS)
         return -1;
 
     return 0;
 }
 
-int usbgadget_rndis_enable()
+int usbgadget_ncm_enable()
 {
-    usbg_ret = usbg_enable_gadget(g_rndis, DEFAULT_UDC);
+    usbg_ret = usbg_enable_gadget(g_ncm, DEFAULT_UDC);
     if (usbg_ret != USBG_SUCCESS && usbg_ret != USBG_ERROR_BUSY)
         return -1;
     return 0;
 }
 
-int usbgadget_rndis_disable()
+int usbgadget_ncm_disable()
 {
-    usbg_ret = usbg_disable_gadget(g_rndis);
+    usbg_ret = usbg_disable_gadget(g_ncm);
     if (usbg_ret != USBG_SUCCESS)
         return -1;
     return 0;
