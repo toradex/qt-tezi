@@ -220,7 +220,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = true;
     } else if (socid == "i.MX8MP") {
         // i.MX 8M Plus
-        productIds << 58 << 61 << 63 << 64 << 65 << 66;
+        productIds << 58 << 61 << 63 << 64 << 65 << 66 << 70;
         storageClass = StorageClass::Block;
         rebootWorks = true;
     } else {
