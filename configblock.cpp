@@ -82,6 +82,12 @@ const char* const toradex_modules[] = {
 	[68] = "0068 Verdin iMX8M Mini Quad 2GB WB IT",
 	[69] = "0069 Verdin AM62 Quad 1GB WB IT",
 	[70] = "0070 Verdin iMX8M Plus 8GB WB IT",
+	[71] = "0071 Verdin AM62 Solo 512MB",
+	[72] = "0072 Verdin AM62 Solo 512MB WB IT",
+	[73] = "0073 Verdin AM62 Dual 1GB ET",
+	[74] = "0074 Verdin AM62 Dual 1GB IT",
+	[75] = "0075 Verdin AM62 Dual 1GB WB IT",
+	[76] = "0076 Verdin AM62 Quad 2GB WB IT",
 };
 
 const char * const toradex_prototype_modules[] = {
