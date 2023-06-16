@@ -217,7 +217,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 
             if (family.contains("AM62X")) {
                 socid = "AM62";
-                productIds << 69;
+                productIds << 69 << 71 << 72 << 73 << 74 << 75 << 76;
                 storageClass = StorageClass::Block;
                 rebootWorks = false;
             }
