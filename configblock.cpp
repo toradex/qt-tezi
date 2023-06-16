@@ -82,6 +82,12 @@ const char* const toradex_modules[] = {
 	[68] = "0068 Verdin iMX8M Mini Quad 2GB Wi-Fi / BT IT (No CAN)",
 	[69] = "0069 UNKNOWN MODULE",  /* Verdin AM62 Q 1GB WB IT" not supported by TEZI 5 */
 	[70] = "0070 Verdin iMX8M Plus Quad 8GB Wi-Fi / BT IT",
+	[71] = "0071 Verdin AM62 Solo 512MB",
+	[72] = "0072 Verdin AM62 Solo 512MB WB IT",
+	[73] = "0073 Verdin AM62 Dual 1GB ET",
+	[74] = "0074 Verdin AM62 Dual 1GB IT",
+	[75] = "0075 Verdin AM62 Dual 1GB WB IT",
+	[76] = "0076 Verdin AM62 Quad 2GB WB IT",
 };
 
 const char * const toradex_prototype_modules[] = {
