@@ -202,7 +202,7 @@
             }
         },
         "u_boot_env": {
-            "description": "U-Boot environment to write. If there is already a valid U-Boot environment variables will be added or existing ones overwritten",
+            "description": "U-Boot environment to write.",
             "type": "string"
         },
         "isinstaller": {
