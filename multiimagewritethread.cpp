@@ -123,7 +123,7 @@ void MultiImageWriteThread::run()
         QStringList fwargs;
         fwargs << "--config";
         fwargs << _moduleInformation->fwEnvConfig();
-        fwargs << "--script";
+        fwargs << "--defenv";
         fwargs << uBootEnv;
 
         if (!runCommand("/usr/bin/fw_setenv", fwargs, output))
