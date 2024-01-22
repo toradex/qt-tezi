@@ -124,6 +124,8 @@ void MultiImageWriteThread::run()
         fwargs << "--config";
         fwargs << _moduleInformation->fwEnvConfig();
         fwargs << "--defenv";
+        fwargs << "/dev/null";
+        fwargs << "--script";
         fwargs << uBootEnv;
 
         if (!runCommand("/usr/bin/fw_setenv", fwargs, output))
