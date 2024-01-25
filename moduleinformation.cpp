@@ -163,7 +163,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = false;
     } else if (socid == "i.MX6DL") {
         // i.MX 6DualLite/Solo are only populated on Colibri currently
-        productIds << 14 << 15 << 16 << 17;
+        productIds << 14 << 15 << 16 << 17 << 77 << 78 << 79 << 80;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX6ULL") {
