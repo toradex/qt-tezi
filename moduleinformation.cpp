@@ -158,7 +158,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         rebootWorks = true;
     } else if (socid == "i.MX6Q") {
         // i.MX 6Quad/Dual are only populated on Apalis currently
-        productIds << 27 << 28 << 29 << 35;
+        productIds << 27 << 28 << 29 << 35 << 82 << 83 << 84 << 85;
         storageClass = StorageClass::Block;
         rebootWorks = false;
     } else if (socid == "i.MX6DL") {
