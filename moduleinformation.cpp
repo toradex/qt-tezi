@@ -185,7 +185,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
         } else {
             storageClass = StorageClass::Mtd;
             // Dual and Solo are using the same soc_id currently
-            productIds << 32 << 33 << 41;
+            productIds << 32 << 33 << 41 << 81;
         }
         rebootWorks = true;
 
