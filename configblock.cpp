@@ -88,6 +88,10 @@ const char* const toradex_modules[] = {
 	[74] = "0074 Verdin AM62 Dual 1GB IT",
 	[75] = "0075 Verdin AM62 Dual 1GB WB IT",
 	[76] = "0076 Verdin AM62 Quad 2GB WB IT",
+	[77] = "0077 Colibri iMX6S 256MB",
+	[78] = "0078 Colibri iMX6S 256MB IT",
+	[79] = "0079 Colibri iMX6DL 512MB",
+	[80] = "0080 Colibri iMX6DL 512MB IT",
 };
 
 const char * const toradex_prototype_modules[] = {
