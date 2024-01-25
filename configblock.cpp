@@ -92,6 +92,7 @@ const char* const toradex_modules[] = {
 	[78] = "0078 Colibri iMX6S 256MB IT",
 	[79] = "0079 Colibri iMX6DL 512MB",
 	[80] = "0080 Colibri iMX6DL 512MB IT",
+	[81] = "0081 Colibri iMX7D 512MB",
 };
 
 const char * const toradex_prototype_modules[] = {
