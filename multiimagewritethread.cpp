@@ -195,7 +195,7 @@ bool MultiImageWriteThread::runScript(QString script, QByteArray &output)
     return p.exitCode() == 0;
 }
 
-bool MultiImageWriteThread::runCommand(const QString &cmd, const QStringList &args, QByteArray &output, int msecs, const QString &workdir)
+bool MultiImageWriteThread::runCommand(const QString &cmd, const QStringList &args, QByteArray &output, const QByteArray &input, int msecs, const QString &workdir)
 {
     QProcess p;
 
@@ -203,6 +203,11 @@ bool MultiImageWriteThread::runCommand(const QString &cmd, const QStringList &ar
     p.setProcessChannelMode(QProcess::MergedChannels);
     p.setWorkingDirectory(workdir);
     p.start(cmd, args);
+
+    if (!input.isEmpty()) {
+        p.write(input);
+        p.closeWriteChannel();
+    }
 
     if (!p.waitForFinished(msecs))
         qDebug() << "Warning: Command took longer than" << msecs << "ms.";
@@ -618,7 +623,7 @@ bool MultiImageWriteThread::eraseMtdDevice(const QByteArray &mtddevice, QByteArr
     QStringList eraseargs;
     eraseargs << "--quiet" << mtddevice << "0" << "0";
 
-    return runCommand("/usr/sbin/flash_erase", eraseargs, output, -1);
+    return runCommand("/usr/sbin/flash_erase", eraseargs, output, nullptr, -1);
 }
 
 bool MultiImageWriteThread::eraseBlockDevice(const QByteArray &blockdevice, qint64 start, qint64 end, QByteArray &output)
@@ -633,7 +638,7 @@ bool MultiImageWriteThread::eraseBlockDevice(const QByteArray &blockdevice, qint
     args.append(blockdevice);
 
 
-    return runCommand("/usr/sbin/blkdiscard", args, output, -1);
+    return runCommand("/usr/sbin/blkdiscard", args, output, nullptr, -1);
 }
 
 bool MultiImageWriteThread::processUbiContent(ContentInfo *contentInfo, QString ubivoldev)
@@ -978,7 +983,7 @@ bool MultiImageWriteThread::mkfs(const QByteArray &device, const QByteArray &fst
 
     args << device;
     QByteArray output;
-    if (!runCommand(cmd, args, output, -1))
+    if (!runCommand(cmd, args, output, nullptr, -1))
     {
         emit error(tr("Error creating file system") + "\n" + output);
         return false;

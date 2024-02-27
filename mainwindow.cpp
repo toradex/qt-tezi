@@ -84,7 +84,7 @@ bool MainWindow::writeBootConfigurationBlock() {
     /* Start kobs verbose and let it write no boot loader (Tezi image will flash the bootloader later) */
     kobsngargs << "init" << "-v" << "-w" << "/dev/null";
 
-    if (MultiImageWriteThread::runCommand("kobs-ng", kobsngargs, output, 10000))
+    if (MultiImageWriteThread::runCommand("kobs-ng", kobsngargs, output, nullptr, 10000))
     {
         qDebug() << "Kobs-ng output:";
         qDebug() << output;
@@ -100,7 +100,7 @@ bool MainWindow::setAvahiHostname(const QString hostname) {
 
     avahiArgs << hostname;
 
-    if (MultiImageWriteThread::runCommand("/usr/bin/avahi-set-host-name", avahiArgs, output, 10000))
+    if (MultiImageWriteThread::runCommand("/usr/bin/avahi-set-host-name", avahiArgs, output, nullptr, 10000))
     {
         qDebug() << "avahi-set-host-name:";
         qDebug() << output;
