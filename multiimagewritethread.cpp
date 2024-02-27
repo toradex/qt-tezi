@@ -499,6 +499,9 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
 {
     /* Write partition table using sfdisk */
     QByteArray partitionTable;
+    QByteArray cmdOutput;
+    QStringList cmdArgs;
+
     for (int i = 1; i <= partitionMap.keys().last(); i++)
     {
         if (partitionMap.contains(i))
@@ -529,25 +532,16 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
     qDebug() << "New partition table:";
     qDebug() << partitionTable;
 
-    QString sfdiskcmd = "/usr/sbin/sfdisk";
-    QStringList sfdiskargs;
-    sfdiskargs << "-uS" << "--label" << tableType << QString(blockdevpath);
-    qDebug() << "Running Command: " << sfdiskcmd << sfdiskargs;
+    cmdArgs << "-uS" << "--label" << tableType << QString(blockdevpath);
 
-    /* Let sfdisk write a proper partition table */
-    QProcess proc;
-    proc.setProcessChannelMode(proc.MergedChannels);
-    proc.start(sfdiskcmd, sfdiskargs);
-    proc.write(partitionTable);
-    proc.closeWriteChannel();
-    proc.waitForFinished(-1);
-
-    QByteArray output = proc.readAll();
-    qDebug() << "sfdisk done, output:" << output;
-    if (proc.exitCode() != 0)
+    if (!runCommand("/usr/sbin/sfdisk", cmdArgs, cmdOutput, partitionTable, -1))
     {
-        emit error(tr("Error creating partition table") + "\n" + output);
+        emit error(tr("Error creating partition table") + "\n" + cmdOutput);
         return false;
+    }
+    else
+    {
+        qDebug() << "sfdisk done, output:" << cmdOutput;
     }
 
     for (int i = 1; i <= partitionMap.keys().last(); i++) {
