@@ -544,6 +544,15 @@ bool MultiImageWriteThread::writePartitionTable(const QByteArray &blockdevpath, 
         qDebug() << "sfdisk done, output:" << cmdOutput;
     }
 
+    /*
+     * Since udev can trigger partition table reread thus
+     * removing asynchronously for a while the partition devices
+     * we wait for all queued events to be processed.
+     */
+    cmdArgs.clear();
+    cmdArgs << "settle";
+    runCommand("/sbin/udevadm", cmdArgs, cmdOutput, nullptr, -1);
+
     for (int i = 1; i <= partitionMap.keys().last(); i++) {
         if (partitionMap.contains(i))
         {
