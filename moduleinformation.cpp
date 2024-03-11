@@ -191,7 +191,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             rebootWorks = false;
         } else if (socid == "i.MX8MM") {
             // i.MX 8M Mini
-            productIds << 55 << 57 << 59 << 60 << 68 << 86;
+            productIds << 55 << 57 << 59 << 60 << 68 << 86 << 87;
             storageClass = StorageClass::Block;
             rebootWorks = true;
         } else if (socid == "i.MX8MN") {
