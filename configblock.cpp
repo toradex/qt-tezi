@@ -98,6 +98,7 @@ const char* const toradex_modules[] = {
 	[84] = "0084 Apalis iMX6D 1GB IT",
 	[85] = "0085 Apalis iMX6Q 2GB IT",
 	[86] = "0086 Verdin iMX8M Mini DualLite 2GB IT",
+	[87] = "0087 Verdin iMX8M Mini Quad 2GB IT",
 };
 
 const char * const toradex_prototype_modules[] = {
