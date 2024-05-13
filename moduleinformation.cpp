@@ -208,7 +208,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
     }
 
     if (productIds.isEmpty()) {
-        // TI AM62 uses the family file instead
+        // TI K3 uses the family file instead
         QFile familyFile("/sys/bus/soc/devices/soc0/family");
         if (familyFile.exists()) {
             familyFile.open(QFile::ReadOnly);
@@ -218,6 +218,11 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             if (family.contains("AM62X")) {
                 socid = "AM62";
                 productIds << 69 << 71 << 72 << 73 << 74 << 75 << 76;
+                storageClass = StorageClass::Block;
+                rebootWorks = false;
+            } else if (family.contains("J784S4")) {
+                socid = "AM69";
+                productIds << 88;
                 storageClass = StorageClass::Block;
                 rebootWorks = false;
             }
