@@ -446,13 +446,9 @@ bool MultiImageWriteThread::processPartitions(BlockDevInfo *blockdev, QList<Bloc
 
         if (p == partitionList.last())
         {
-            /* Let last partition have any remaining space that we couldn't divide evenly */
-            int spaceleft = totalSectors - offset - partsizeSectors;
-
-            if (spaceleft > 0 && p->wantMaximised())
-            {
-                partsizeSectors += spaceleft;
-            }
+            /* Let last partition have any remaining space */
+            if (p->wantMaximised())
+                partsizeSectors = totalSectors - offset;
         }
         else
         {
