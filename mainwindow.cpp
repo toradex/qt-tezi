@@ -674,11 +674,7 @@ void MainWindow::discardOrEraseFinished()
 {
     DiscardThread *thread = qobject_cast<DiscardThread *>(sender());
 
-    /* In the eMMC case we have to restore config block... */
-    if (_toradexConfigBlock->needsWrite) {
-        _toradexConfigBlock->writeToBlockdev(_moduleInformation->configBlockPartition(), _moduleInformation->configBlockOffset());
-        _toradexConfigBlock->needsWrite = false;
-    }
+    _moduleInformation->writeConfigBlockIfNeeded(_toradexConfigBlock);
 
     if (_qpd)
         _qpd->hide();
