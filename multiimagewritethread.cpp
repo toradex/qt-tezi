@@ -113,7 +113,10 @@ void MultiImageWriteThread::run()
         }
     }
 
-    /* (Re)write config block in case auto erase was enabled */
+    /* Write config block if:
+     *  - migrating it from alternate to standard location
+     *  - writing a new config block that was not yet written previously
+     */
     _moduleInformation->writeConfigBlockIfNeeded(_configBlock);
 
     /* Set U-Boot environment */
@@ -285,7 +288,7 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
 
         /*
          * We are erasing the partition which contains the config block! Make sure the config block gets
-         * written at the end of the flashing process
+         * written at the end of the erase process
          */
         if (blockdev->name() == _moduleInformation->configBlockPartition())
                 _configBlock->needsWrite = true;
@@ -295,6 +298,8 @@ bool MultiImageWriteThread::processBlockDev(BlockDevInfo *blockdev)
             emit error(tr("Discarding content on device %1 failed").arg(blockdev->name()) + "\n" + output);
             return false;
         }
+
+        _moduleInformation->writeConfigBlockIfNeeded(_configBlock);
     }
 
     QList<BlockDevPartitionInfo *> *partitions = blockdev->partitions();
