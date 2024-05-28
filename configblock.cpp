@@ -99,6 +99,9 @@ const char* const toradex_modules[] = {
 	[85] = "0085 Apalis iMX6Q 2GB IT",
 	[86] = "0086 Verdin iMX8M Mini DualLite 2GB IT",
 	[87] = "0087 Verdin iMX8M Mini Quad 2GB IT",
+	[88] = "0088 UNKNOWN MODULE",  /* Aquila AM69 Octa 32GB WB IT" not supported by TEZI 5 */
+	[89] = "0089 UNKNOWN MODULE",  /* Verdin iMX95 Hexa 16GB WB IT" not supported by TEZI 5 */
+	[90] = "0090 Verdin iMX8M Mini Quad 4GB WB ET",
 };
 
 const char * const toradex_prototype_modules[] = {
