@@ -100,6 +100,8 @@ const char* const toradex_modules[] = {
 	[86] = "0086 Verdin iMX8M Mini DualLite 2GB IT",
 	[87] = "0087 Verdin iMX8M Mini Quad 2GB IT",
 	[88] = "0088 Aquila AM69 Octa 32GB WB IT",
+	[89] = "0089 UNKNOWN MODULE",
+	[90] = "0090 Verdin iMX8M Mini Quad 4GB WB ET",
 };
 
 const char * const toradex_prototype_modules[] = {
