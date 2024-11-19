@@ -15,7 +15,12 @@
 
 #define TAG_FLAG_VALID	0x1
 
-extern const char* const toradex_modules[];
+struct toradex_som {
+    quint16 prodid;
+    const char *name;
+};
+
+extern const struct toradex_som toradex_modules[];
 extern const char* const toradex_prototype_modules[];
 
 struct ConfigBlockTag {
@@ -54,6 +59,7 @@ public:
     QString getProductNumber();
     QString getBoardRev();
     QString getProductName();
+    int getToradexModuleIndex(quint16 prodid);
     static bool isTdxPrototypeProdid(quint16 prodid);
     QString getPID8();
 
