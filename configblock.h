@@ -6,7 +6,6 @@
 #include <QStringList>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-#define PROTOTYPE_RANGE_MIN 2600
 
 #define TAG_VALID	0xcf01
 #define TAG_MAC		0x0000
@@ -21,7 +20,6 @@ struct toradex_som {
 };
 
 extern const struct toradex_som toradex_modules[];
-extern const char* const toradex_prototype_modules[];
 
 struct ConfigBlockTag {
     quint32 len:14;
@@ -60,7 +58,6 @@ public:
     QString getBoardRev();
     QString getProductName();
     int getToradexModuleIndex(quint16 prodid);
-    static bool isTdxPrototypeProdid(quint16 prodid);
     QString getPID8();
 
     bool needsWrite;

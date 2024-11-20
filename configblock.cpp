@@ -102,10 +102,7 @@ const struct toradex_som toradex_modules[] = {
     {88, "0088 Aquila AM69 Octa 32GB WB IT"},
     {89, "0089 UNKNOWN MODULE"},
     {90, "0090 Verdin iMX8M Mini Quad 4GB WB ET"},
-};
-
-const char * const toradex_prototype_modules[] = {
-	[0] = "2600 Apalis iMX8QXP 2GB ECC WB IT PROTO",
+    {2600, "2600 Apalis iMX8QXP 2GB ECC WB IT PROTO"},
 };
 
 QList<quint32> toradex_ouis = {
@@ -220,13 +217,6 @@ QString ConfigBlock::getProductNumber()
     return QString::number(getProductId()).rightJustified(4, '0');
 }
 
-bool ConfigBlock::isTdxPrototypeProdid(quint16 prodid)
-{
-       int prototype_range_max = PROTOTYPE_RANGE_MIN + ARRAY_SIZE(toradex_prototype_modules);
-
-       return ((prodid >= PROTOTYPE_RANGE_MIN) && (prodid < prototype_range_max));
-}
-
 QString ConfigBlock::getBoardRev()
 {
     ConfigBlockHw *hw = (ConfigBlockHw *)_hw.data();
@@ -258,9 +248,7 @@ QString ConfigBlock::getProductName()
 {
     quint16 productId = getProductId();
     int idx = getToradexModuleIndex(productId);
-    if (!toradex_modules[idx].prodid && isTdxPrototypeProdid(productId)) {
-            return QString::fromLatin1(toradex_prototype_modules[productId]);
-    }
+
     return QString::fromLatin1(toradex_modules[idx].name);
 }
 

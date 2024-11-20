@@ -17,7 +17,6 @@ private slots:
     void cleanupTestCase();
     void testConfigBlockParsing();
     void testConfigBlockParsingExtendedRevisions();
-    void testConfigBlockPrototypeProdid();
     void testIsProductSupportedPid4();
     void testIsProductSupportedPid8();
     void testIsProductSupportedPid8Range();
@@ -41,13 +40,6 @@ void TestConfigBlock::initTestCase()
 void TestConfigBlock::cleanupTestCase()
 {
 
-}
-
-
-void TestConfigBlock::testConfigBlockPrototypeProdid()
-{
-    QVERIFY(ConfigBlock::isTdxPrototypeProdid(2600));
-    QVERIFY(!ConfigBlock::isTdxPrototypeProdid(39));
 }
 
 void TestConfigBlock::testConfigBlockParsing()

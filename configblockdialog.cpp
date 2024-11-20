@@ -17,12 +17,9 @@ ConfigBlockDialog::ConfigBlockDialog(QList<quint16> supportedModules, QWidget *p
     ui->moduleType->addItem(QString(toradex_modules[0].name), 0);
 
     foreach (quint16 productId, supportedModules) {
-        if (configBlock->isTdxPrototypeProdid(productId)) {
-            ui->moduleType->addItem(QString(toradex_prototype_modules[productId - PROTOTYPE_RANGE_MIN]), productId);
-        } else {
-            int idx = configBlock->getToradexModuleIndex(productId);
-            ui->moduleType->addItem(QString(toradex_modules[idx].name), productId);
-        }
+        int idx = configBlock->getToradexModuleIndex(productId);
+
+        ui->moduleType->addItem(QString(toradex_modules[idx].name), productId);
     }
 }
 
