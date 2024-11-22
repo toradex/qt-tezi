@@ -102,6 +102,11 @@ const struct toradex_som toradex_modules[] = {
     {88, "0088 Aquila AM69 Octa 32GB WB IT"},
     {89, "0089 UNKNOWN MODULE"},
     {90, "0090 Verdin iMX8M Mini Quad 4GB WB ET"},
+    {91, "0091 Apalis iMX8QM 4GB WB IT"},
+    {92, "0092 Apalis iMX8QM 4GB IT"},
+    {93, "0093 Apalis iMX8QP 2GB WB"},
+    {94, "0094 Apalis iMX8QP 2GB"},
+    {95, "0095 Apalis iMX8QM 8GB WB IT"},
     {2600, "2600 Apalis iMX8QXP 2GB ECC WB IT PROTO"},
 };
 
