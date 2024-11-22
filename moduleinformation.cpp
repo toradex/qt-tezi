@@ -181,7 +181,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             }
         } else if (socid == "i.MX8QM") {
             // i.MX 8QuadMax/QuadPlus
-            productIds << 37 << 47 << 48 << 49 << 67;
+            productIds << 37 << 47 << 48 << 49 << 67 << 91 << 92 << 93 << 94 << 95;
             storageClass = StorageClass::Block;
             rebootWorks = false;
         } else if (socid == "i.MX8QXP") {
