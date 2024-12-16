@@ -204,6 +204,11 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             productIds << 58 << 61 << 63 << 64 << 65 << 66 << 70;
             storageClass = StorageClass::Block;
             rebootWorks = true;
+        } else if (socid == "i.MX95") {
+            // i.MX 95
+            productIds << 96;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
         }
     }
 
