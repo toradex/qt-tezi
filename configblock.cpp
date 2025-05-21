@@ -119,6 +119,11 @@ const struct toradex_som toradex_modules[] = {
     {208, "0208 Toradex SMARC iMX8M Plus Quad 2GB IT"},
     {209, "0209 Toradex SMARC iMX8M Plus Quadlite 1GB WB ET"},
     {210, "0210 Toradex SMARC iMX8M Plus Quadlite 1GB ET"},
+    {211, "0211 Aquila AM69 Octa 32GB IT"},
+    {212, "0212 Aquila AM69 Octa 16GB WB IT"},
+    {213, "0213 Aquila AM69 Octa 16GB IT"},
+    {214, "0214 Aquila AM69 Octa 8GB WB IT"},
+    {215, "0215 Aquila AM69 Octa 8GB IT"},
     {2600, "2600 Apalis iMX8QXP 2GB ECC WB IT PROTO"},
 };
 

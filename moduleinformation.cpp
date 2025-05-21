@@ -232,7 +232,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
                 rebootWorks = true;
             } else if (family.contains("J784S4")) {
                 socid = "AM69";
-                productIds << 88;
+                productIds << 88 << 211 << 212 << 213 << 214 << 215;
                 storageClass = StorageClass::Block;
                 rebootWorks = false;
             }
