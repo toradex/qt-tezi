@@ -124,6 +124,7 @@ const struct toradex_som toradex_modules[] = {
     {213, "0213 Aquila AM69 Octa 16GB IT"},
     {214, "0214 Aquila AM69 Octa 8GB WB IT"},
     {215, "0215 Aquila AM69 Octa 8GB IT"},
+    {216, "0216 Verdin iMX8M Mini Quad 2GB WB IT"},
     {2600, "2600 Apalis iMX8QXP 2GB ECC WB IT PROTO"},
 };
 
