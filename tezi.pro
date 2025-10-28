@@ -53,7 +53,8 @@ SOURCES += main.cpp\
     imagelistdownload.cpp \
     feedsdialog.cpp \
     waitingspinnerwidget.cpp \
-    qlistimagewidgetitem.cpp
+    qlistimagewidgetitem.cpp \
+    udcpollthread.cpp
 
 HEADERS  += mainwindow.h \
     httpapi.h \
@@ -94,7 +95,8 @@ HEADERS  += mainwindow.h \
     feedserver.h \
     imagesource.h \
     waitingspinnerwidget.h \
-    qlistimagewidgetitem.h
+    qlistimagewidgetitem.h \
+    udcpollthread.h
 
 FORMS    += mainwindow.ui \
     languagedialog.ui \

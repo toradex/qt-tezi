@@ -21,6 +21,7 @@
 #include "feedserver.h"
 #include "imagelist.h"
 #include "httpapi.h"
+#include "udcpollthread.h"
 #include <QMainWindow>
 #include <QModelIndex>
 #include <QMessageBox>
@@ -113,6 +114,7 @@ protected:
     QVariantMap _imageEntry;
     UsbGadget *_usbGadget;
     MediaPollThread *_mediaPollThread;
+    UdcPollThread *_udcPollThread;
     MultiImageWriteThread *_imageWriteThread;
     int _internetHostLookupId;
     ZConfServiceBrowser *_browser;
@@ -161,6 +163,7 @@ protected slots:
     void errorMounting(const QString blockdev);
     void disableFeed(const QString feedname);
     void imageHostLookupResults(QHostInfo hostInfo);
+    void initUsbGadget();
 
     /* Events from ImageListDownload */
     void onImageListDownloadFinished();

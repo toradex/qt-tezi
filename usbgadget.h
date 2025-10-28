@@ -8,6 +8,7 @@ class UsbGadget : public QObject
     Q_OBJECT
 public:
     explicit UsbGadget(QObject *parent = 0);
+    void initialize();
     bool initMassStorage();
     void enableMassStorage(bool enable);
     bool isMassStorageSafeToRemove();

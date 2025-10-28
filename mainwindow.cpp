@@ -110,10 +110,33 @@ bool MainWindow::setAvahiHostname(const QString hostname) {
     return false;
 }
 
+void MainWindow::initUsbGadget() {
+    _usbGadget->initialize();
+
+    if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block) {
+        _usbGadget->setMassStorageDev(_moduleInformation->mainPartition());
+        if (_usbGadget->initMassStorage() &&
+            _usbGadget->setMassStorageAttrs(_serialNumber, _toradexProductName, _toradexProductId))
+            ui->actionUsbMassStorage->setEnabled(true);
+    }
+
+    if (_usbGadget->initNcm() &&
+        _usbGadget->setNcmAttrs(_serialNumber, _toradexProductName, _toradexProductId)) {
+        ui->actionUsbNcm->setEnabled(true);
+        ui->actionUsbNcm->trigger();
+    }
+}
+
 bool MainWindow::initialize() {
     _usbGadget = new UsbGadget();
-    _usbGadget->initNcm();
-    _usbGadget->enableNcm(true);
+
+    /* Disable NCM and Storage actions by default, enable if relevant in initUsbGadget */
+    ui->actionUsbNcm->setEnabled(false);
+
+    if (_moduleInformation->storageClass() != ModuleInformation::StorageClass::Block)
+        ui->mainToolBar->removeAction(ui->actionUsbMassStorage);
+    else
+        ui->actionUsbMassStorage->setEnabled(false);
 
     _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == nullptr) {
@@ -192,30 +215,11 @@ bool MainWindow::initialize() {
     _internetIcon = QIcon(":/icons/download_cloud.png");
 
     _mediaPollThread = new MediaPollThread(_moduleInformation, this);
+    _udcPollThread = new UdcPollThread(this);
 
     ui->list->setSelectionMode(QAbstractItemView::SingleSelection);
 
     _availableMB = static_cast<int>(_moduleInformation->getStorageSize() / (1024 * 1024));
-
-    if (_moduleInformation->storageClass() == ModuleInformation::StorageClass::Block) {
-        _usbGadget->setMassStorageDev(_moduleInformation->mainPartition());
-        if (_usbGadget->initMassStorage() &&
-            _usbGadget->setMassStorageAttrs(_serialNumber, _toradexProductName, _toradexProductId))
-            ui->actionUsbMassStorage->setEnabled(true);
-        else
-            ui->actionUsbMassStorage->setEnabled(false);
-    } else {
-        ui->mainToolBar->removeAction(ui->actionUsbMassStorage);
-    }
-
-    if (_usbGadget->initNcm() &&
-        _usbGadget->setNcmAttrs(_serialNumber, _toradexProductName, _toradexProductId)) {
-        ui->actionUsbNcm->setEnabled(true);
-        ui->actionUsbNcm->trigger();
-
-    } else {
-        ui->actionUsbNcm->setEnabled(false);
-    }
 
     // Add static server list
     FeedServer srv;
@@ -258,10 +262,13 @@ bool MainWindow::initialize() {
     connect(_browser, SIGNAL (serviceEntryAdded(QString)), this, SLOT (addService(QString)));
     connect(_browser, SIGNAL (serviceEntryRemoved(QString)), this, SLOT (removeService(QString)));
     connect(_httpApi, SIGNAL (newImageUrl(const QString)), this, SLOT (addNewImageUrl(const QString)));
+    // Initialize USB gadget once a USB Device Controller is available
+    connect(_udcPollThread, SIGNAL (finished()), this, SLOT (initUsbGadget()));
 
     _browser->browse("_tezi._tcp");
     _httpApi->start("8080",this);
     _mediaPollThread->start();
+    _udcPollThread->start();
 
     return true;
 }

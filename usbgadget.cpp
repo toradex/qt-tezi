@@ -10,6 +10,10 @@
 UsbGadget::UsbGadget(QObject *parent) : QObject(parent),
     _gadgetInitialized(false), _gadgetIsMassStorage(false)
 {
+}
+
+void UsbGadget::initialize()
+{
     if (usbgadget_init()) {
         qDebug() << "USB Gadget: Error initalizing:" << usbgadget_strerror();
         return;
