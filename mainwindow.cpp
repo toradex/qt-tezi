@@ -133,11 +133,6 @@ bool MainWindow::initialize() {
     /* Disable NCM and Storage actions by default, enable if relevant in initUsbGadget */
     ui->actionUsbNcm->setEnabled(false);
 
-    if (_moduleInformation->storageClass() != ModuleInformation::StorageClass::Block)
-        ui->mainToolBar->removeAction(ui->actionUsbMassStorage);
-    else
-        ui->actionUsbMassStorage->setEnabled(false);
-
     _moduleInformation = ModuleInformation::detectModule(this);
     if (_moduleInformation == nullptr) {
         QMessageBox::critical(nullptr, QObject::tr("Module Detection failed"),
@@ -152,6 +147,11 @@ bool MainWindow::initialize() {
                               QMessageBox::Close);
         return false;
     }
+
+    if (_moduleInformation->storageClass() != ModuleInformation::StorageClass::Block)
+        ui->mainToolBar->removeAction(ui->actionUsbMassStorage);
+    else
+        ui->actionUsbMassStorage->setEnabled(false);
 
 #ifdef __x86_64__
     _toradexConfigBlock = ConfigBlock::configBlockFromUserInput(27, "V1.1A", "01234567");
