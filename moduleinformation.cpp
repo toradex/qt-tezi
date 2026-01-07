@@ -204,6 +204,16 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             productIds << 58 << 61 << 63 << 64 << 65 << 66 << 70 << 97 << 206 << 207 << 208 << 209 << 210;
             storageClass = StorageClass::Block;
             rebootWorks = true;
+        } else if (socid == "i.MX91") {
+            // i.MX 91
+            productIds << 218 << 220;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
+        } else if (socid == "i.MX93") {
+            // i.MX 93
+            productIds << 217 << 219;
+            storageClass = StorageClass::Block;
+            rebootWorks = true;
         } else if (socid == "i.MX95") {
             // i.MX 95
             productIds << 89 << 96 << 98 << 201 << 202 << 203 << 204 << 205;
