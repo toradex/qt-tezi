@@ -1,5 +1,12 @@
 image: $CI_GITLAB_REGISTRY_BASE/rd/tezi/qt-tezi/qt-tezi-sdk:latest
 
+# Trigger this pipeline just in the scope of parent project 
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: always
+    - when: never
+
 stages:
   - arm
   - x86
