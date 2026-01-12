@@ -1,6 +1,4 @@
-# Image built locally using
-# docker build -t gitlab.int.toradex.com:4567/rd/tezi/qt-tezi/qt-tezi-sdk .
-image: gitlab.int.toradex.com:4567/rd/tezi/qt-tezi/qt-tezi-sdk:latest
+image: $CI_GITLAB_REGISTRY_BASE/rd/tezi/qt-tezi/qt-tezi-sdk:latest
 
 stages:
   - arm
