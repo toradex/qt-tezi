@@ -882,12 +882,26 @@ void MainWindow::addService(QString service)
     srv.source = SOURCE_NETWORK;
     srv.enabled = serviceEntry.TXTRecords.value("enabled", "1").toInt();
 
+    QHostInfo hostInfo = QHostInfo::fromName(serviceEntry.host);
+    if (hostInfo.error() == QHostInfo::NoError) {
+        foreach (QHostAddress hostAdd, hostInfo.addresses()) {
+            if (hostAdd.toString().contains(NCM_ADDRESS)) {
+                srv.source = SOURCE_NCM;
+                srv.url = protocol + hostAdd.toString() + port + serviceEntry.TXTRecords.value("path");
+                break;
+            }
+        }
+    }
+
     /* Only add the service once */
     int index = _networkFeedServerList.indexOf(srv);
     if (index < 0) {
         qDebug() << "Adding zeroconf feed" << service;
         _networkFeedServerList.append(srv);
-        _downloadNetwork = true;
+	if (srv.source == SOURCE_NCM)
+            _downloadNcm = true;
+	else
+            _downloadNetwork = true;
     }
 }
 
