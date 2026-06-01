@@ -12,7 +12,6 @@
 #include <rapidjson/document.h>
 
 #include <valijson/adapters/rapidjson_adapter.hpp>
-#include <valijson/utils/rapidjson_utils.hpp>
 #include <valijson/schema.hpp>
 #include <valijson/schema_parser.hpp>
 #include <valijson/validation_results.hpp>
@@ -127,14 +126,16 @@ bool Json::validate(const QByteArray &schemastr, const QByteArray &filestr, QStr
 {
     // Load the document containing the schema
     rapidjson::Document schemaDocument;
-    if (!valijson::utils::loadDocumentFromString(schemastr.constData(), schemaDocument)) {
+    schemaDocument.Parse(schemastr.constData());
+    if (schemaDocument.HasParseError()) {
         errortext = "Failed to load schema document.";
         return false;
     }
 
     // Load the document that is to be validated
     rapidjson::Document targetDocument;
-    if (!valijson::utils::loadDocumentFromString(filestr, targetDocument)) {
+    targetDocument.Parse(filestr.constData());
+    if (targetDocument.HasParseError()) {
         errortext = "Failed to load target document.";
         return false;
     }
