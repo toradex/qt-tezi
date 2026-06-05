@@ -14,7 +14,7 @@ stages:
 build-tezi:
   stage: arm
   script:
-    - source /usr/local/oecore-x86_64/environment-setup-armv7vet2hf-neon-oe-linux-gnueabi
+    - source /usr/local/oecore-x86_64/environment-setup-cortexa7t2hf-neon-oe-linux-gnueabi
     - qmake tezi.pro
     - make -j $(nproc || echo 4)
   artifacts:
