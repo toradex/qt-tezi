@@ -216,7 +216,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             rebootWorks = true;
         } else if (socid == "i.MX95") {
             // i.MX 95
-            productIds << 89 << 96 << 98 << 201 << 202 << 203 << 204 << 205 << 226 << 227 << 228;
+            productIds << 89 << 96 << 98 << 201 << 202 << 203 << 204 << 205 << 225 << 226 << 227 << 228;
             storageClass = StorageClass::Block;
             rebootWorks = true;
         }
