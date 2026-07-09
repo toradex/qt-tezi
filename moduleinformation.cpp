@@ -181,7 +181,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             }
         } else if (socid == "i.MX8QM") {
             // i.MX 8QuadMax/QuadPlus
-            productIds << 37 << 47 << 48 << 49 << 67 << 91 << 92 << 93 << 94 << 95;
+            productIds << 37 << 47 << 48 << 49 << 67 << 91 << 92 << 93 << 94 << 95 << 233 << 234 << 235;
             storageClass = StorageClass::Block;
             rebootWorks = false;
         } else if (socid == "i.MX8QXP") {
@@ -191,7 +191,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             rebootWorks = false;
         } else if (socid == "i.MX8MM") {
             // i.MX 8M Mini
-            productIds << 55 << 57 << 59 << 60 << 68 << 86 << 87 << 90 << 216;
+            productIds << 55 << 57 << 59 << 60 << 68 << 86 << 87 << 90 << 216 << 239;
             storageClass = StorageClass::Block;
             rebootWorks = true;
         } else if (socid == "i.MX8MN") {
@@ -201,7 +201,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             rebootWorks = true;
         } else if (socid == "i.MX8MP") {
             // i.MX 8M Plus
-            productIds << 58 << 61 << 63 << 64 << 65 << 66 << 70 << 97 << 206 << 207 << 208 << 209 << 210;
+            productIds << 58 << 61 << 63 << 64 << 65 << 66 << 70 << 97 << 206 << 207 << 208 << 209 << 210 << 236 << 237 << 238 << 240;
             storageClass = StorageClass::Block;
             rebootWorks = true;
         } else if (socid == "i.MX91") {
@@ -216,7 +216,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
             rebootWorks = true;
         } else if (socid == "i.MX95") {
             // i.MX 95
-            productIds << 89 << 96 << 98 << 201 << 202 << 203 << 204 << 205 << 225 << 226 << 227 << 228;
+            productIds << 89 << 96 << 98 << 201 << 202 << 203 << 204 << 205 << 225 << 226 << 227 << 228 << 229;
             storageClass = StorageClass::Block;
             rebootWorks = true;
         }
@@ -232,7 +232,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
 
             if (family.contains("AM62X")) {
                 socid = "AM62";
-                productIds << 69 << 71 << 72 << 73 << 74 << 75 << 76 << 221;
+                productIds << 69 << 71 << 72 << 73 << 74 << 75 << 76 << 221 << 242;
                 storageClass = StorageClass::Block;
                 rebootWorks = true;
             } else if (family.contains("AM62PX")) {
@@ -242,7 +242,7 @@ ModuleInformation *ModuleInformation::detectModule(QObject *parent)
                 rebootWorks = true;
             } else if (family.contains("J784S4")) {
                 socid = "AM69";
-                productIds << 88 << 211 << 212 << 213 << 214 << 215 << 223;
+                productIds << 88 << 211 << 212 << 213 << 214 << 215 << 223 << 230;
                 storageClass = StorageClass::Block;
                 rebootWorks = false;
             }

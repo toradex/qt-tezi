@@ -135,6 +135,17 @@ const struct toradex_som toradex_modules[] = {
     {226, "0226 Verdin iMX95 Hexa 4GB WB IT"},
     {227, "0227 Verdin iMX95 Hexa 4GB ET"},
     {228, "0228 Verdin iMX95 Hexa 16GB IT"},
+    {229, "0229 Toradex SMARC iMX95 Hexa 4GB IT"},
+    {230, "0230 Aquila TDA4 Octa 8GB IT"},
+    {233, "0233 Apalis iMX8QM 4GB WB IT"},
+    {234, "0234 Apalis iMX8QM 4GB IT"},
+    {235, "0235 Apalis iMX8QM 8GB WB IT"},
+    {236, "0236 Verdin iMX8M Plus Quad 4GB WB IT"},
+    {237, "0237 Verdin iMX8M Plus Quad 4GB IT"},
+    {238, "0238 Verdin iMX8M Plus Quad 8GB WB IT"},
+    {239, "0239 Verdin iMX8M Mini Quad 2GB WB IT"},
+    {240, "0240 Toradex SMARC iMX8M Plus Quad 4GB WB IT"},
+    {242, "0242 Verdin AM62 Dual 1GB WB ET"},
     {2600, "2600 Apalis iMX8QXP 2GB ECC WB IT PROTO"},
 };
 
