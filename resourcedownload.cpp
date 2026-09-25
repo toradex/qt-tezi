@@ -12,7 +12,7 @@
  *
  */
 ResourceDownload::ResourceDownload(QNetworkAccessManager *netaccess, const QString &urlstring, const QString &saveAs, int index, QObject *parent) : QObject(parent),
-  _netaccess(netaccess), _saveAs(saveAs), _index(index), _networkError(QNetworkReply::NoError)
+  _netaccess(netaccess), _saveAs(saveAs), _index(index), _networkError(QNetworkReply::NoError), _httpStatusCode(0)
 {
     downloadFile(urlstring);
 }

@@ -187,7 +187,7 @@ void ImageListDownload::downloadListJsonFailed()
     if (rd->networkError() != QNetworkReply::NoError) {
         emit error(tr("Error downloading image list: %1\nURL: %2\nPlease try again.").arg(rd->networkErrorString(), rd->urlString()));
     } else {
-        emit error(tr("Error downloading image list: HTTP status code %1\nURL: %2").arg(rd->httpStatusCode() + "", rd->urlString()));
+        emit error(tr("Error downloading image list: HTTP status code %1\nURL: %2").arg(rd->httpStatusCode()).arg(rd->urlString()));
     }
 }
 
