@@ -15,8 +15,8 @@
  * Initial author: Stefan Agner
  */
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource, int index,
-    QNetworkAccessManager *netaccess, QObject *parent) : QObject(parent),
-    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(index),
+    QNetworkAccessManager *netaccess, QObject *parent, const QString &temporaryRoot) : QObject(parent),
+    _imageListUrl(url), _temporaryRoot(temporaryRoot), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(index),
     _imageSource(imageSource), _calledFromTezictl(false)
 {
     qDebug() << "Downloading image list from " << url;
@@ -32,8 +32,8 @@ ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource
 
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource,
                                      QNetworkAccessManager *netaccess,
-                                     QObject *parent) : QObject(parent),
-    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(0),
+                                     QObject *parent, const QString &temporaryRoot) : QObject(parent),
+    _imageListUrl(url), _temporaryRoot(temporaryRoot), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(0),
     _imageSource(imageSource), _calledFromTezictl(true)
 {
     qDebug() << "Downloading single image description from " << url;
@@ -100,7 +100,7 @@ void ImageListDownload::downloadImageJsonCompleted()
     int index = rd->index();
     QString baseurl = getUrlPath(rd->urlString());
     QString filename = getUrlImageFileName(rd->urlString());
-    QTemporaryDir directory("/var/volatile/tezi-image-XXXXXX");
+    QTemporaryDir directory(QDir(_temporaryRoot).filePath("tezi-image-XXXXXX"));
     if (!directory.isValid()) {
         emit error(tr("Unable to create temporary image directory"));
         return;
