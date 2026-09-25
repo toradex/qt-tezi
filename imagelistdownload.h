@@ -14,8 +14,10 @@ class ImageListDownload : public QObject
 {
     Q_OBJECT
 public:
-    explicit ImageListDownload(const QString &url, ImageSource imageSource, int index, QNetworkAccessManager *netaccess, QObject *parent);
-    explicit ImageListDownload(const QString &url, ImageSource imageSource, QNetworkAccessManager *netaccess, QObject *parent);
+    explicit ImageListDownload(const QString &url, ImageSource imageSource, int index, QNetworkAccessManager *netaccess, QObject *parent,
+                               const QString &temporaryRoot = QStringLiteral("/var/volatile"));
+    explicit ImageListDownload(const QString &url, ImageSource imageSource, QNetworkAccessManager *netaccess, QObject *parent,
+                               const QString &temporaryRoot = QStringLiteral("/var/volatile"));
 
 signals:
     void newImagesToAdd(const QListVariantMap images);
@@ -39,6 +41,7 @@ protected slots:
 protected:
     static bool orderByIndex(const QVariantMap &m1, const QVariantMap &m2);
     const QString _imageListUrl;
+    const QString _temporaryRoot;
     QNetworkAccessManager *_netaccess;
     QObject *_parent;
     QList<QVariantMap> _netImages;
