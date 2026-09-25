@@ -7,7 +7,7 @@
 
 #include <QDir>
 #include <QDebug>
-#include <QMessageBox>
+#include <QTemporaryDir>
 
 /*
  * Downloads a complete image list file using multiple requests
@@ -99,13 +99,13 @@ void ImageListDownload::downloadImageJsonCompleted()
 
     int index = rd->index();
     QString baseurl = getUrlPath(rd->urlString());
-    QString basename = getUrlTopDir(baseurl);
     QString filename = getUrlImageFileName(rd->urlString());
-    QString folder = "/var/volatile/" + basename;
-    QDir d;
-    while (d.exists(folder))
-        folder += '_';
-    d.mkpath(folder);
+    QTemporaryDir directory("/var/volatile/tezi-image-XXXXXX");
+    if (!directory.isValid()) {
+        emit error(tr("Unable to create temporary image directory"));
+        return;
+    }
+    QString folder = directory.path();
     imagemap["folder"] = folder;
     imagemap["index"] = index;
 
@@ -113,9 +113,13 @@ void ImageListDownload::downloadImageJsonCompleted()
         imagemap["nominal_size"] = MediaPollThread::calculateNominalSize(imagemap);
 
     QFile imageinfo(folder + QDir::separator() + filename);
-    imageinfo.open(QIODevice::WriteOnly | QIODevice::Text);
-    imageinfo.write(json);
+    if (!imageinfo.open(QIODevice::WriteOnly | QIODevice::Text) ||
+        imageinfo.write(json) != json.size() || !imageinfo.flush()) {
+        qWarning() << tr("Unable to save image description: %1").arg(imageinfo.errorString());
+    }
     imageinfo.close();
+    // The image list owns these files after publication.
+    directory.setAutoRemove(false);
     imagemap["image_info"] = filename;
     imagemap["baseurl"] = baseurl;
     imagemap["source"] = _imageSource;
