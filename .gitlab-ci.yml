@@ -28,4 +28,10 @@ test-tezi:
     - qmake tezi-tests.pro
     - make -j $(nproc || echo 4)
     - ./tezi-tests
+    # Feed download regression tests, built out of tree
+    - mkdir -p build-feed-tests
+    - cd build-feed-tests
+    - qmake ../tests/imagelistdownload.pro
+    - make -j $(nproc || echo 4)
+    - ./tst_imagelistdownload
 
