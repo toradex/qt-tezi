@@ -93,6 +93,10 @@ void ImageListDownload::downloadImageJsonCompleted()
     QByteArray json = rd->data();
     QVariantMap imagemap = Json::parse(json).toMap();
 
+    if (imagemap.isEmpty()) {
+        qWarning() << "Invalid image JSON from" << rd->urlString();
+    }
+
     int index = rd->index();
     QString baseurl = getUrlPath(rd->urlString());
     QString basename = getUrlTopDir(baseurl);
