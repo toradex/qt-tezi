@@ -33,7 +33,7 @@ ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource
 ImageListDownload::ImageListDownload(const QString &url, ImageSource imageSource,
                                      QNetworkAccessManager *netaccess,
                                      QObject *parent) : QObject(parent),
-    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0),
+    _imageListUrl(url), _netaccess(netaccess), _parent(parent), _numDownloads(0), _feedindex(0),
     _imageSource(imageSource), _calledFromTezictl(true)
 {
     qDebug() << "Downloading single image description from " << url;
