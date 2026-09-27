@@ -5,6 +5,7 @@
 #include "configblock.h"
 #include "moduleinformation.h"
 #include <QThread>
+#include <QThreadPool>
 #include <QStringList>
 #include <QMultiMap>
 #include <QVariantList>
@@ -74,6 +75,12 @@ protected:
 
     int _extraSpacePerPartition, _sectorOffset;
     qint64 _bytesWritten;
+    /*
+     * Dedicated pool for pollpipeview(): it occupies its thread for the whole
+     * write command, and the global pool (a single thread on single-core SoCs)
+     * is also used by Qt internally, e.g. for QImage format conversions.
+     */
+    QThreadPool _pollPipeViewPool;
     QVariantList installed_os;
 
 signals:

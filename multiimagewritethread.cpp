@@ -1059,7 +1059,7 @@ bool MultiImageWriteThread::runwritecmd(const QString &cmd, bool checkmd5sum)
      * In this case, the process will block once stderr wrote 64KiB of data (pipe capacity)
      * if we do not read stderr data... Hence we cannot poll pipe view here...
      */
-    QFuture<bool> pvfuture = QtConcurrent::run( this, &MultiImageWriteThread::pollpipeview );
+    QFuture<bool> pvfuture = QtConcurrent::run( &_pollPipeViewPool, this, &MultiImageWriteThread::pollpipeview );
 
     p.waitForFinished(-1);
 
